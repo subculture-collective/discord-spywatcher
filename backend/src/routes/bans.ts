@@ -6,7 +6,7 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get('/', async (req, res) => {
+router.get('/banned', async (req, res) => {
     const list = await db.blockedIP.findMany({
         orderBy: { createdAt: 'desc' },
     });
