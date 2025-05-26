@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "PresenceEvent" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "clients" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

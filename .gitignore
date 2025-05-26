@@ -1,0 +1,90 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Diagnostic reports
+report.*.json
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Compiled binary addons
+build/
+build/Release/
+
+# Dependency directories
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# TypeScript build output
+*.tsbuildinfo
+
+# Cache
+.cache/
+.parcel-cache/
+.vitepress/
+.vitepress/dist/
+.vitepress/cache/
+.nyc_output/
+coverage/
+*.lcov
+
+# VSCode
+.vscode-test
+.tern-port
+.DS_Store
+
+# ESLint/Stylelint
+.eslintcache
+.stylelintcache
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+# Output of `npm pack`
+*.tgz
+
+# Yarn (v2+) and pnpm
+.yarn/
+.pnp.*
+.pnpm-debug.log*
+
+# Prisma (if using generated output)
+**/src/generated/prisma/
+
+# Framework-specific
+.next/
+out/
+.nuxt/
+dist/
+.vuepress/
+.docusaurus/
+
+# Gatsby
+.cache/
+# public/
+
+# Serverless
+.serverless/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# Local project folders
+frontend/dist/
+frontend/build/
+backend/logs/

@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+  BANNED
+}
+
+model PresenceEvent {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  username    String
+  clients     String    // comma-separated: "desktop,web"
+  createdAt   DateTime  @default(now())
+}
+
+model TypingEvent {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  username  String
+  channelId String
+  channel   String
+  guildId   String
+  createdAt DateTime @default(now())
+}
+
+model MessageEvent {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  username  String
+  channelId String
+  channel   String
+  guildId   String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model JoinEvent {
+  id             Int      @id @default(autoincrement())
+  userId         String
+  username       String
+  guildId        String
+  accountAgeDays Int
+  createdAt      DateTime @default(now())
+}
+
+model DeletedMessageEvent {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  username  String
+  channelId String
+  channel   String
+  guildId   String
+  createdAt DateTime @default(now())
+}
+
+model ReactionTime {
+  id           Int      @id @default(autoincrement())
+  observerId   String
+  observerName String
+  actorId      String
+  actorName    String
+  channelId    String
+  guildId      String
+  deltaMs      Int
+  createdAt    DateTime @default(now())
+}
+
+model RoleChangeEvent {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  username   String
+  guildId    String
+  addedRoles String   // comma-separated role IDs or names
+  createdAt  DateTime @default(now())
+}
+
+model BlockedIP {
+  id        Int      @id @default(autoincrement())
+  ip        String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model BannedUser {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique
+  username  String
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id                    String   @id @default(cuid())
+  discordId             String   @unique
+  username              String
+  discriminator         String
+  avatar                String?
+  email                 String?
+  locale                String?
+  verified              Boolean
+  ipAddress             String?
+  userAgent             String?
+  accessToken           String
+  refreshToken          String
+  refreshTokenIssuedAt  DateTime @default(now())
+  accessTokenExpiresAt  DateTime
+  lastSeenAt            DateTime
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // New role field
+  role                  Role     @default(USER)
+
+  guilds                Guild[]
+}
+
+model Guild {
+  id          String   @id @default(cuid())
+  guildId     String   @unique
+  name        String
+  icon        String?
+  owner       Boolean
+  permissions Int
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}

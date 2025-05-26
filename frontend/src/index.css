@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+Lots of classes hidden here to showcase the catppuccin color classes
+*/
+
+.App {
+    grid-template-rows: 1fr auto;
+}
+
+#card {
+    @apply w-auto md:w-2/4 2xl:w-1/4 bg-gradient-to-b p-6 rounded-3xl flex flex-col justify-center items-center outline outline-2 shadow-xl;
+}
+
+#card h1 {
+    @apply font-black text-5xl lg:text-6xl mb-4 bg-gradient-to-r bg-clip-text text-transparent;
+}
+
+#card p {
+    @apply font-bold mb-4 text-center;
+}
+
+#card button {
+    @apply text-ctp-base px-4 py-2 rounded-xl font-bold text-xl transition duration-300 ease-in-out;
+}
+
+#palette {
+    @apply grid justify-items-center auto-rows-auto grid-cols-7 my-8 gap-4;
+}
+
+#palette > * {
+    @apply w-6 h-6 rounded-full;
+}
+
+.navbutton-left {
+    @apply hover:bg-ctp-pink/50 active:bg-ctp-pink/80 py-2 pr-2 pl-4 rounded-l-xl outline outline-1 outline-ctp-overlay2/10;
+}
+
+.navbutton-center {
+    @apply hover:bg-ctp-pink/50 active:bg-ctp-pink/80 p-2 outline outline-1 outline-ctp-overlay2/10;
+}
+
+.navbutton-right {
+    @apply hover:bg-ctp-pink/50 active:bg-ctp-pink/80 py-2 pl-2 pr-4 rounded-r-xl outline outline-1 outline-ctp-overlay2/10;
+}
+
+@layer utilities {
+    /* Base Catppuccin Mocha Colors */
+    .text-ctp-base {
+        color: #1e1e2e;
+    }
+    .text-ctp-mantle {
+        color: #181825;
+    }
+    .text-ctp-crust {
+        color: #11111b;
+    }
+    .text-ctp-text {
+        color: #cdd6f4;
+    }
+    .text-ctp-subtext1 {
+        color: #bac2de;
+    }
+    .text-ctp-subtext0 {
+        color: #a6adc8;
+    }
+    .text-ctp-overlay2 {
+        color: #6c7086;
+    }
+    .text-ctp-overlay1 {
+        color: #7f849c;
+    }
+    .text-ctp-overlay0 {
+        color: #9399b2;
+    }
+
+    .bg-ctp-base {
+        background-color: #1e1e2e;
+    }
+    .bg-ctp-mantle {
+        background-color: #181825;
+    }
+    .bg-ctp-crust {
+        background-color: #11111b;
+    }
+    .bg-ctp-text {
+        background-color: #cdd6f4;
+    }
+    .bg-ctp-subtext1 {
+        background-color: #bac2de;
+    }
+    .bg-ctp-subtext0 {
+        background-color: #a6adc8;
+    }
+    .bg-ctp-surface2 {
+        background-color: #585b70;
+    }
+    .bg-ctp-surface1 {
+        background-color: #45475a;
+    }
+    .bg-ctp-surface0 {
+        background-color: #313244;
+    }
+    .bg-ctp-overlay2 {
+        background-color: #6c7086;
+    }
+    .bg-ctp-overlay1 {
+        background-color: #7f849c;
+    }
+    .bg-ctp-overlay0 {
+        background-color: #9399b2;
+    }
+
+    /* Accents */
+    .bg-ctp-blue {
+        background-color: #89b4fa;
+    }
+    .bg-ctp-lavender {
+        background-color: #b4befe;
+    }
+    .bg-ctp-flamingo {
+        background-color: #f2cdcd;
+    }
+    .bg-ctp-pink {
+        background-color: #f5c2e7;
+    }
+    .bg-ctp-rosewater {
+        background-color: #f5e0dc;
+    }
+    .bg-ctp-peach {
+        background-color: #fab387;
+    }
+    .bg-ctp-green {
+        background-color: #a6e3a1;
+    }
+    .bg-ctp-yellow {
+        background-color: #f9e2af;
+    }
+    .bg-ctp-red {
+        background-color: #f38ba8;
+    }
+    .bg-ctp-maroon {
+        background-color: #eba0ac;
+    }
+
+    .text-ctp-blue {
+        color: #89b4fa;
+    }
+    .text-ctp-lavender {
+        color: #b4befe;
+    }
+    .text-ctp-flamingo {
+        color: #f2cdcd;
+    }
+    .text-ctp-pink {
+        color: #f5c2e7;
+    }
+    .text-ctp-rosewater {
+        color: #f5e0dc;
+    }
+    .text-ctp-peach {
+        color: #fab387;
+    }
+    .text-ctp-green {
+        color: #a6e3a1;
+    }
+    .text-ctp-yellow {
+        color: #f9e2af;
+    }
+    .text-ctp-red {
+        color: #f38ba8;
+    }
+    .text-ctp-maroon {
+        color: #eba0ac;
+    }
+
+    /* Borders / outlines */
+    .border-ctp-surface2 {
+        border-color: #585b70;
+    }
+    .border-ctp-overlay2 {
+        border-color: #6c7086;
+    }
+    .outline-ctp-overlay2 {
+        outline-color: #6c7086;
+    }
+
+    /* Manual opacity classes (escaped /) */
+    .bg-ctp-pink\/50 {
+        background-color: rgba(245, 194, 231, 0.5);
+    }
+    .bg-ctp-pink\/80 {
+        background-color: rgba(245, 194, 231, 0.8);
+    }
+    .outline-ctp-overlay2\/10 {
+        outline-color: rgba(108, 112, 134, 0.1);
+    }
+}
