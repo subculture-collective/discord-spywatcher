@@ -33,6 +33,7 @@ cd backend
 npm install
 npx prisma migrate dev --name init
 npm run dev
+npm run dev:api
 ```
 
 ### Frontend
@@ -47,16 +48,61 @@ npm run dev
 
 Configure the `.env` file in `backend/`:
 
-- `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_BOT_TOKEN`
-- `DISCORD_REDIRECT_URI`, `PORT`, `JWT_SECRET`, `DATABASE_URL`
-- Optional: `BOT_GUILD_IDS` for multi-guild support
+```env
+ADMIN_DISCORD_IDS=your_admin_discord_ids
+BOT_GUILD_IDS=your_bot_guild_ids
+DISCORD_BOT_TOKEN=your_discord_bot_token
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+DISCORD_GUILD_ID=your_discord_guild_id
+DISCORD_REDIRECT_URI=your_discord_redirect_uri
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
+JWT_SECRET=your_jwt_secret
+NODE_ENV=your_node_env
+PORT=your_port
+```
+
+Configure the `.env` file in `frontend/`:
+
+```env
+VITE_DISCORD_CLIENT_ID=your_vite_discord_client_id
+```
 
 ## 🌐 Endpoints
 
 Available at `http://localhost:3001`
 
-- `GET /ghosts`, `/lurkers`, `/clients`, `/heatmap`, `/me`
-- Supports `guildId` query parameter for multi-guild setups
+### Analytics Routes
+
+- `GET` `/ghosts`
+- `GET` `/heatmap`
+- `GET` `/lurkers`
+- `GET` `/roles`
+- `GET` `/clients`
+- `GET` `/shifts`
+
+#### Auth Routes
+
+- `GET` `/discord`
+- `POST` `/refresh`
+- `POST` `/logout`
+- `GET` `/me`
+- `GET` `/settings`
+- `GET` `/admin/users`
+- `GET` `/debug/user/:discordId`
+
+#### Bans Routes
+
+- `GET` `/banned`
+- `POST` `/ban`
+- `POST` `/unban`
+- `GET` `/userbans`
+- `POST` `/userban`
+- `POST` `/userunban`
+
+#### Suspicion Routes
+
+- `GET` `/suspicion`
 
 ## 📊 Frontend Dashboard
 
