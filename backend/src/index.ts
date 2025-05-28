@@ -185,47 +185,55 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
 client.once('ready', async () => {
     console.log(`✅ Logged in as ${client.user?.tag}`);
-    const guildId = env.DISCORD_GUILD_ID!;
+    const guilds = client.guilds.cache.map((g) => g.id);
     const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7); // past 7d
 
-    const [heatmap, ghosts, logins, channelStats, scores] = await Promise.all([
-        getChannelHeatmap({ guildId, since }),
-        getGhostScores(guildId, since),
-        getMultiClientLoginCounts(guildId, since),
-        getChannelDiversity(guildId, since),
-        getSuspicionScores(guildId, since),
-    ]);
+    for (const guildId of guilds) {
+        if (!env.BOT_GUILD_IDS.includes(guildId)) continue;
 
-    console.log('🌡️ Heatmap:');
-    console.table(heatmap);
+        const [heatmap, ghosts, logins, channelStats, scores] =
+            await Promise.all([
+                getChannelHeatmap({ guildId, since }),
+                getGhostScores(guildId, since),
+                getMultiClientLoginCounts(guildId, since),
+                getChannelDiversity(guildId, since),
+                getSuspicionScores(guildId, since),
+            ]);
 
-    console.log('👻 Top Ghost Users:');
-    console.table(ghosts.slice(0, 10));
+        console.log(`\n📊 Guild: ${guildId}`);
+        console.log(`📅 Data since: ${since.toISOString()}`);
+        console.log('----------------------------------------');
 
-    console.log('📱 Top Multi-Client Users:');
-    console.table(logins.slice(0, 10));
+        console.log(`Total Users: ${heatmap.length}`);
+        console.log('🌡️ Heatmap:');
+        console.table(heatmap);
 
-    console.log('🛰️ Most Channel-Diverse Users:');
-    console.table(channelStats.slice(0, 10));
+        console.log('👻 Top Ghost Users:');
+        console.table(ghosts.slice(0, 10));
 
-    console.log('🔍 Suspicion Report (Top 10):');
-    console.table(
-        scores.slice(0, 10).map((s) => ({
-            ...s,
-            avgReactionTime: (s as any).avgReactionTime?.toFixed(0),
-            fastReactionCount: (s as any).fastReactionCount,
-            lurkerScore: s.lurkerScore,
-            presenceCount: s.presenceCount,
-            roleChangeCount: s.roleChangeCount,
-            oldClients: s.oldClients?.join(','),
-            newClients: s.newClients?.join(','),
-        }))
-    );
+        console.log('📱 Top Multi-Client Users:');
+        console.table(logins.slice(0, 10));
+
+        console.log('🛰️ Most Channel-Diverse Users:');
+        console.table(channelStats.slice(0, 10));
+
+        console.log('🔍 Suspicion Report (Top 10):');
+        console.table(
+            scores.slice(0, 10).map((s) => ({
+                ...s,
+                avgReactionTime: (s as any).avgReactionTime?.toFixed(0),
+                fastReactionCount: (s as any).fastReactionCount,
+                lurkerScore: s.lurkerScore,
+                presenceCount: s.presenceCount,
+                roleChangeCount: s.roleChangeCount,
+                oldClients: s.oldClients?.join(','),
+                newClients: s.newClients?.join(','),
+            }))
+        );
+    }
 });
 
 console.log('🔑 Logging in bot...');
-client.login(env.DISCORD_BOT_TOKEN);
-
 client.login(env.DISCORD_BOT_TOKEN);
 
 client.on('error', (err) => {
