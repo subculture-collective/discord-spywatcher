@@ -88,3 +88,5 @@ dist/
 frontend/dist/
 frontend/build/
 backend/logs/
+
+*.zip
