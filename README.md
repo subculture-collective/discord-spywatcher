@@ -119,9 +119,53 @@ npm run build
 
 Then serve using any static file host (e.g. Netlify, GitHub Pages)
 
+## 🎨 Code Quality
+
+This project uses comprehensive code quality tooling:
+
+- **ESLint**: TypeScript linting with security and accessibility rules
+- **Prettier**: Consistent code formatting
+- **Husky**: Git hooks for pre-commit and pre-push validation
+- **lint-staged**: Run linters on staged files only
+- **Commitlint**: Enforce conventional commit messages
+- **TypeScript**: Strict mode enabled with additional checks
+
+### Running Linters
+
+```bash
+# Lint backend
+cd backend && npm run lint
+
+# Lint frontend
+cd frontend && npm run lint
+
+# Lint both (from root)
+npm run lint
+
+# Auto-fix issues
+npm run lint:fix
+
+# Format code
+npm run format
+
+# Type check
+npm run type-check
+```
+
+### Git Hooks
+
+Git hooks are automatically installed when you run `npm install` in the root directory:
+
+- **Pre-commit**: Runs ESLint and Prettier on staged files
+- **Pre-push**: Runs TypeScript type checking
+- **Commit-msg**: Validates commit message format
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
 ## 👥 Contributions
 
-Currently private, but contributions may be supported in future releases.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on contributing to this project.
 
 ---
+
 Made with presence paranoia and healthy curiosity.
