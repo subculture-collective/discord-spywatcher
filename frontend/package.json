@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
-    "test": "echo 'No tests configured yet'"
+    "test": "echo 'No tests configured yet' && exit 0"
   },
   "dependencies": {
     "@catppuccin/palette": "^1.7.1",

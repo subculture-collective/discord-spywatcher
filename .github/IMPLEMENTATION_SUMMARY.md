@@ -109,8 +109,8 @@ This PR implements a comprehensive CI/CD pipeline for the Discord Spywatcher pro
 {
   "build": "tsc",
   "typecheck": "tsc --noEmit",
-  "lint": "echo 'No linting configured for backend yet'",
-  "test": "echo 'No tests configured yet'",
+  "lint": "echo 'No linting configured for backend yet' && exit 0",
+  "test": "echo 'No tests configured yet' && exit 0",
   "prisma:validate": "prisma validate",
   "prisma:generate": "prisma generate",
   "prisma:migrate": "prisma migrate deploy"
@@ -121,7 +121,7 @@ This PR implements a comprehensive CI/CD pipeline for the Discord Spywatcher pro
 ```json
 {
   "typecheck": "tsc -b --noEmit",
-  "test": "echo 'No tests configured yet'"
+  "test": "echo 'No tests configured yet' && exit 0"
 }
 ```
 
@@ -154,7 +154,7 @@ This PR implements a comprehensive CI/CD pipeline for the Discord Spywatcher pro
 
 ## Known Limitations
 
-1. **Frontend Pre-existing Issues**: The frontend has existing TypeScript and ESLint errors that are not introduced by this PR. CI jobs use `continue-on-error: true` to allow workflows to run.
+1. **Frontend Pre-existing Issues**: The frontend has existing TypeScript and ESLint errors that are not introduced by this PR. CI jobs use `continue-on-error: true` to allow workflows to run. **Action Required**: Create GitHub issues to track these problems and remove the `continue-on-error` flags once fixed to enforce proper quality gates.
 
 2. **Deployment Placeholders**: The deploy workflow includes placeholder steps for actual deployment. These need to be replaced with actual deployment logic based on the chosen hosting platform.
 
@@ -190,7 +190,7 @@ Approximate build times (will be confirmed on first run):
 - Security Scan: ~5-10 minutes
 - Full Deployment: ~5-8 minutes
 
-All within the success criteria of <5 minutes for backend and <3 minutes for frontend core builds.
+These estimates align with the issue requirements of build times under 5 minutes for backend and 3 minutes for frontend.
 
 ## Documentation
 

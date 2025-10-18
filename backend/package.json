@@ -8,8 +8,8 @@
         "dev:api": "nodemon --watch src --exec ts-node --files src/server.ts",
         "build": "tsc",
         "typecheck": "tsc --noEmit",
-        "lint": "echo 'No linting configured for backend yet'",
-        "test": "echo 'No tests configured yet'",
+        "lint": "echo 'No linting configured for backend yet' && exit 0",
+        "test": "echo 'No tests configured yet' && exit 0",
         "prisma:validate": "prisma validate",
         "prisma:generate": "prisma generate",
         "prisma:migrate": "prisma migrate deploy"
