@@ -1,16 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
+
 import { AuthPayload, verifyAccessToken } from '../utils/auth';
-import { env } from '../utils/env';
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Express {
         interface Request {
             user?: AuthPayload;
         }
     }
 }
-
-const ADMIN_DISCORD_IDS = env.ADMIN_DISCORD_IDS;
 
 export function requireAuth(
     req: Request,
