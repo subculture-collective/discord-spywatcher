@@ -1,11 +1,11 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 // @ts-ignore - import plugin doesn't have types
-import importPlugin from 'eslint-plugin-import'
+import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
     { ignores: ['dist', 'node_modules'] },
@@ -62,4 +62,4 @@ export default tseslint.config(
             'import/no-duplicates': 'error',
         },
     }
-)
+);
