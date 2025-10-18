@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+**/.vitepress/dist/
+
+# Generated files
+coverage/
+*.tsbuildinfo
+.vscode-test
+.eslintcache
+
+# Prisma generated
+**/src/generated/prisma/
+
+# Config files that don't need linting
+*.config.js
+*.config.ts
+.prettierrc.js

@@ -1,37 +1,39 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-// @ts-ignore - import plugin doesn't have types
-import importPlugin from 'eslint-plugin-import'
+// @ts-check
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import security from 'eslint-plugin-security';
+import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
-    { ignores: ['dist', 'node_modules'] },
     {
-        extends: [
-            js.configs.recommended,
-            ...tseslint.configs.recommended,
-            jsxA11y.flatConfigs.recommended,
+        ignores: [
+            'node_modules',
+            'dist',
+            'build',
+            'src/generated',
+            'eslint.config.mjs',
         ],
-        files: ['**/*.{ts,tsx}'],
+    },
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+    {
+        files: ['**/*.ts'],
         languageOptions: {
-            ecmaVersion: 2020,
-            globals: globals.browser,
+            parser: tseslint.parser,
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
         plugins: {
-            'react-hooks': reactHooks,
-            'react-refresh': reactRefresh,
+            '@typescript-eslint': tseslint.plugin,
+            security: security,
             import: importPlugin,
         },
         rules: {
-            ...reactHooks.configs.recommended.rules,
-            'react-refresh/only-export-components': [
-                'warn',
-                { allowConstantExport: true },
-            ],
+            ...security.configs.recommended.rules,
             '@typescript-eslint/no-explicit-any': 'error',
+            '@typescript-eslint/explicit-function-return-type': 'warn',
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {
@@ -62,4 +64,4 @@ export default tseslint.config(
             'import/no-duplicates': 'error',
         },
     }
-)
+);

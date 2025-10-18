@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { useAuth } from '../store/auth';
 
 const api = axios.create({

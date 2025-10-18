@@ -12,7 +12,11 @@ declare global {
 
 const ADMIN_DISCORD_IDS = env.ADMIN_DISCORD_IDS;
 
-export function requireAuth(req: Request, res: Response, next: NextFunction): void {
+export function requireAuth(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void {
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {

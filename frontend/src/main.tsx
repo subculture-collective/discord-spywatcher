@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
+
 import App from './App.tsx';
 import './index.css';
 
@@ -7,7 +8,7 @@ createRoot(document.getElementById('root')!).render(
     <>
         <App />
         <Toaster
-            position='top-right'
+            position="top-right"
             toastOptions={{
                 style: {
                     background: '#1e1e2e', // ctp.base
