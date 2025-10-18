@@ -1,0 +1,26 @@
+backend:
+  - changed-files:
+    - any-glob-to-any-file: 'backend/**'
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**'
+
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**'
+    - any-glob-to-any-file: '.github/dependabot.yml'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: '**/package.json'
+    - any-glob-to-any-file: '**/package-lock.json'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
+    - any-glob-to-any-file: 'docs/**'
+
+database:
+  - changed-files:
+    - any-glob-to-any-file: 'backend/prisma/**'

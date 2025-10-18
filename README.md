@@ -1,5 +1,9 @@
 # Spywatcher
 
+[![Backend CI](https://github.com/subculture-collective/discord-spywatcher/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/subculture-collective/discord-spywatcher/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/subculture-collective/discord-spywatcher/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/subculture-collective/discord-spywatcher/actions/workflows/frontend-ci.yml)
+[![Security Scan](https://github.com/subculture-collective/discord-spywatcher/actions/workflows/security.yml/badge.svg)](https://github.com/subculture-collective/discord-spywatcher/actions/workflows/security.yml)
+
 Spywatcher is a full-stack surveillance and analytics tool for Discord servers. It consists of a presence-monitoring Discord bot and a web-based dashboard powered by a REST API.
 
 ## 🧩 Features
@@ -22,7 +26,20 @@ Spywatcher is a full-stack surveillance and analytics tool for Discord servers. 
 ```bash
 backend/        # Discord bot + API server
 frontend/       # React + Vite frontend client
+.github/        # CI/CD workflows and automation
 ```
+
+## 🔄 CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **Backend CI**: TypeScript compilation, Prisma validation, and builds
+- **Frontend CI**: ESLint, TypeScript checks, and Vite builds
+- **Security Scanning**: CodeQL analysis, dependency scanning, and secret detection
+- **Automated Deployment**: Staging and production deployment workflows
+- **Dependabot**: Automated dependency updates
+
+See [CI/CD Documentation](.github/CI_CD_DOCUMENTATION.md) for more details.
 
 ## 🚀 Getting Started
 
