@@ -32,8 +32,8 @@ frontend/       # React + Vite frontend client
 cd backend
 npm install
 npx prisma migrate dev --name init
-npm run dev
-npm run dev:api
+npm run dev          # Start Discord bot
+npm run dev:api      # Start API server
 ```
 
 ### Frontend
@@ -43,6 +43,38 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## 🧪 Testing
+
+The project includes comprehensive unit, integration, and end-to-end tests.
+
+### Backend Tests
+
+```bash
+cd backend
+npm test                  # Run all tests
+npm run test:watch        # Run tests in watch mode
+npm run test:coverage     # Run tests with coverage report
+npm run test:unit         # Run only unit tests
+npm run test:integration  # Run only integration tests
+```
+
+### Frontend Tests
+
+```bash
+cd frontend
+npm test                  # Run unit/integration tests
+npm run test:watch        # Run tests in watch mode
+npm run test:coverage     # Run tests with coverage report
+npm run test:e2e          # Run E2E tests with Playwright
+npm run test:e2e:ui       # Run E2E tests with Playwright UI
+```
+
+**Test Coverage:**
+- Backend: >80% code coverage (31+ tests)
+- Frontend: >70% code coverage (12+ tests)
+
+For detailed testing documentation, see [TESTING.md](./TESTING.md).
 
 ## 🔐 Environment Variables
 

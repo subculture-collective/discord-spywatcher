@@ -1,179 +1,161 @@
-import { getLurkerScores } from '../../../src/analytics/lurkers';
+import { getLurkerFlags } from '../../../src/analytics/lurkers';
 import { db } from '../../../src/db';
 
 jest.mock('../../../src/db', () => ({
     db: {
-        messageEvent: {
-            groupBy: jest.fn(),
+        presenceEvent: {
+            findMany: jest.fn(),
         },
-        voiceEvent: {
-            groupBy: jest.fn(),
+        typingEvent: {
+            findMany: jest.fn(),
+        },
+        messageEvent: {
+            findMany: jest.fn(),
         },
     },
 }));
 
-describe('Analytics - Lurker Scores', () => {
+describe('Analytics - Lurker Flags', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    describe('getLurkerScores', () => {
-        it('should calculate lurker scores correctly', async () => {
+    describe('getLurkerFlags', () => {
+        it('should identify lurkers with presence but no activity', async () => {
+            const mockPresence = [
+                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
+                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
+                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
+                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
+                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
+                { userId: 'active1', username: 'Active User', createdAt: new Date() },
+            ];
+
+            const mockTyping = [
+                { userId: 'active1', username: 'Active User', guildId: 'guild1', createdAt: new Date() },
+            ];
+
             const mockMessages = [
-                {
-                    userId: 'user1',
-                    username: 'User One',
-                    _count: { userId: 2 },
-                },
-                {
-                    userId: 'user2',
-                    username: 'User Two',
-                    _count: { userId: 10 },
-                },
+                { userId: 'active1', guildId: 'guild1', createdAt: new Date() },
             ];
 
-            const mockVoiceEvents = [
-                {
-                    userId: 'user1',
-                    _sum: { durationMinutes: 100 },
-                },
-                {
-                    userId: 'user2',
-                    _sum: { durationMinutes: 20 },
-                },
-            ];
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(mockTyping);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessages);
 
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
-            (db.voiceEvent.groupBy as jest.Mock).mockResolvedValue(mockVoiceEvents);
-
-            const result = await getLurkerScores('test-guild-id');
-
-            expect(result).toHaveLength(2);
-            expect(result[0].userId).toBe('user1');
-            expect(result[0].voiceMinutes).toBe(100);
-            expect(result[0].messageCount).toBe(2);
-            expect(result[0].lurkerScore).toBeCloseTo(100 / 3);
-
-            expect(result[1].userId).toBe('user2');
-            expect(result[1].lurkerScore).toBeCloseTo(20 / 11);
-        });
-
-        it('should handle users with no messages', async () => {
-            const mockMessages: any[] = [];
-            const mockVoiceEvents = [
-                {
-                    userId: 'lurker1',
-                    _sum: { durationMinutes: 200 },
-                },
-            ];
-
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
-            (db.voiceEvent.groupBy as jest.Mock).mockResolvedValue(mockVoiceEvents);
-
-            const result = await getLurkerScores('test-guild-id');
+            const result = await getLurkerFlags('guild1');
 
             expect(result).toHaveLength(1);
             expect(result[0].userId).toBe('lurker1');
-            expect(result[0].messageCount).toBe(0);
-            expect(result[0].lurkerScore).toBe(200);
+            expect(result[0].username).toBe('Lurker One');
+            expect(result[0].lurkerScore).toBe(1); // >= 5 presence events
+            expect(result[0].presenceCount).toBe(5);
         });
 
-        it('should handle users with no voice time', async () => {
-            const mockMessages = [
-                {
-                    userId: 'active1',
-                    username: 'Active User',
-                    _count: { userId: 50 },
-                },
+        it('should not flag users with less than 5 presence events', async () => {
+            const mockPresence = [
+                { userId: 'user1', username: 'User One', createdAt: new Date() },
+                { userId: 'user1', username: 'User One', createdAt: new Date() },
             ];
-            const mockVoiceEvents: any[] = [];
 
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
-            (db.voiceEvent.groupBy as jest.Mock).mockResolvedValue(mockVoiceEvents);
+            const mockTyping: any[] = [];
+            const mockMessages: any[] = [];
 
-            const result = await getLurkerScores('test-guild-id');
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(mockTyping);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessages);
 
-            expect(result).toHaveLength(0);
+            const result = await getLurkerFlags('guild1');
+
+            expect(result).toHaveLength(1);
+            expect(result[0].lurkerScore).toBe(0); // < 5 presence events
+        });
+
+        it('should exclude active users from lurker list', async () => {
+            const mockPresence = [
+                { userId: 'active1', username: 'Active', createdAt: new Date() },
+                { userId: 'active1', username: 'Active', createdAt: new Date() },
+                { userId: 'active1', username: 'Active', createdAt: new Date() },
+                { userId: 'active1', username: 'Active', createdAt: new Date() },
+                { userId: 'active1', username: 'Active', createdAt: new Date() },
+                { userId: 'active1', username: 'Active', createdAt: new Date() },
+            ];
+
+            const mockTyping = [
+                { userId: 'active1', username: 'Active', guildId: 'guild1', createdAt: new Date() },
+            ];
+
+            const mockMessages: any[] = [];
+
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(mockTyping);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessages);
+
+            const result = await getLurkerFlags('guild1');
+
+            expect(result).toHaveLength(0); // Active in typing
         });
 
         it('should filter by date when provided', async () => {
-            const mockMessages: any[] = [];
-            const mockVoiceEvents: any[] = [];
             const since = new Date('2024-01-01');
+            
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue([]);
 
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
-            (db.voiceEvent.groupBy as jest.Mock).mockResolvedValue(mockVoiceEvents);
+            await getLurkerFlags('guild1', since);
 
-            await getLurkerScores('test-guild-id', since);
-
-            expect(db.voiceEvent.groupBy).toHaveBeenCalledWith({
-                by: ['userId'],
+            expect(db.presenceEvent.findMany).toHaveBeenCalledWith({
                 where: {
-                    guildId: 'test-guild-id',
                     createdAt: { gte: since },
                 },
-                _sum: {
-                    durationMinutes: true,
+            });
+
+            expect(db.typingEvent.findMany).toHaveBeenCalledWith({
+                where: {
+                    guildId: 'guild1',
+                    createdAt: { gte: since },
                 },
             });
         });
 
-        it('should sort by lurker score descending', async () => {
-            const mockMessages = [
-                {
-                    userId: 'user1',
-                    username: 'Low Lurker',
-                    _count: { userId: 20 },
-                },
-                {
-                    userId: 'user2',
-                    username: 'High Lurker',
-                    _count: { userId: 2 },
-                },
-            ];
+        it('should return empty array when no lurkers', async () => {
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue([]);
 
-            const mockVoiceEvents = [
-                {
-                    userId: 'user1',
-                    _sum: { durationMinutes: 50 },
-                },
-                {
-                    userId: 'user2',
-                    _sum: { durationMinutes: 100 },
-                },
-            ];
+            const result = await getLurkerFlags('guild1');
 
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
-            (db.voiceEvent.groupBy as jest.Mock).mockResolvedValue(mockVoiceEvents);
-
-            const result = await getLurkerScores('test-guild-id');
-
-            expect(result[0].userId).toBe('user2'); // Higher lurker score
-            expect(result[1].userId).toBe('user1'); // Lower lurker score
+            expect(result).toEqual([]);
         });
 
-        it('should handle null voice duration', async () => {
-            const mockMessages = [
-                {
-                    userId: 'user1',
-                    username: 'Test User',
-                    _count: { userId: 5 },
-                },
+        it('should aggregate presence count per user', async () => {
+            const mockPresence = [
+                { userId: 'user1', username: 'User', createdAt: new Date() },
+                { userId: 'user1', username: 'User', createdAt: new Date() },
+                { userId: 'user1', username: 'User', createdAt: new Date() },
+                { userId: 'user2', username: 'User Two', createdAt: new Date() },
+                { userId: 'user2', username: 'User Two', createdAt: new Date() },
+                { userId: 'user2', username: 'User Two', createdAt: new Date() },
+                { userId: 'user2', username: 'User Two', createdAt: new Date() },
+                { userId: 'user2', username: 'User Two', createdAt: new Date() },
+                { userId: 'user2', username: 'User Two', createdAt: new Date() },
             ];
 
-            const mockVoiceEvents = [
-                {
-                    userId: 'user1',
-                    _sum: { durationMinutes: null },
-                },
-            ];
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue([]);
 
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
-            (db.voiceEvent.groupBy as jest.Mock).mockResolvedValue(mockVoiceEvents);
+            const result = await getLurkerFlags('guild1');
 
-            const result = await getLurkerScores('test-guild-id');
-
-            expect(result).toHaveLength(0);
+            expect(result).toHaveLength(2);
+            
+            const user1 = result.find(u => u.userId === 'user1');
+            const user2 = result.find(u => u.userId === 'user2');
+            
+            expect(user1?.presenceCount).toBe(3);
+            expect(user2?.presenceCount).toBe(6);
+            expect(user2?.lurkerScore).toBe(1); // >= 5
         });
     });
 });
