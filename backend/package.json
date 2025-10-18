@@ -5,7 +5,14 @@
     "main": "src/index.ts",
     "scripts": {
         "dev": "nodemon --watch src --exec ts-node src/index.ts",
-        "dev:api": "nodemon --watch src --exec ts-node --files src/server.ts"
+        "dev:api": "nodemon --watch src --exec ts-node --files src/server.ts",
+        "build": "tsc",
+        "typecheck": "tsc --noEmit",
+        "lint": "echo 'No linting configured for backend yet'",
+        "test": "echo 'No tests configured yet'",
+        "prisma:validate": "prisma validate",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate deploy"
     },
     "keywords": [],
     "author": "",

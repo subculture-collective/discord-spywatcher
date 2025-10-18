@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "typecheck": "tsc -b --noEmit",
+    "preview": "vite preview",
+    "test": "echo 'No tests configured yet'"
   },
   "dependencies": {
     "@catppuccin/palette": "^1.7.1",
