@@ -1,0 +1,35 @@
+{
+    "name": "discord-spywatcher",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Discord Spywatcher - Backend and Frontend monorepo",
+    "scripts": {
+        "prepare": "husky",
+        "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+        "lint:fix": "npm run lint:fix --prefix backend && npm run lint:fix --prefix frontend",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "type-check": "npm run type-check --prefix backend && npm run type-check --prefix frontend"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^19.0.0",
+        "@commitlint/config-conventional": "^19.0.0",
+        "eslint": "^9.38.0",
+        "husky": "^9.0.0",
+        "lint-staged": "^15.0.0",
+        "prettier": "^3.6.2"
+    },
+    "lint-staged": {
+        "backend/**/*.ts": [
+            "eslint --fix --config backend/eslint.config.mjs",
+            "prettier --write"
+        ],
+        "frontend/**/*.{ts,tsx}": [
+            "eslint --fix --config frontend/eslint.config.js",
+            "prettier --write"
+        ],
+        "*.{json,md}": [
+            "prettier --write"
+        ]
+    }
+}
