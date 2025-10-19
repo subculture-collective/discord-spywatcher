@@ -1,4 +1,5 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
+
 import { env } from './env';
 
 const JWT_SECRET = env.JWT_SECRET;

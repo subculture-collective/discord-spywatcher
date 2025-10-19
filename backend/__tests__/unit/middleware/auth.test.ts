@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+
 import { requireAuth, requireAdmin } from '../../../src/middleware/auth';
 import { generateAccessToken } from '../../../src/utils/auth';
 

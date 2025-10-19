@@ -1,22 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-
 // Note: This is a basic test structure for rate limiter
 // In a real scenario, we'd need to properly mock express-rate-limit
 describe('Middleware - Rate Limiter', () => {
-    let mockRequest: Partial<Request>;
-    let mockResponse: Partial<Response>;
-    let mockNext: NextFunction;
-
     beforeEach(() => {
-        mockRequest = {
-            ip: '127.0.0.1',
-            headers: {},
-        };
-        mockResponse = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn().mockReturnThis(),
-        };
-        mockNext = jest.fn();
+        // Setup would go here when implementing real tests
     });
 
     it('should allow requests within rate limit', () => {

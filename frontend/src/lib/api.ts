@@ -27,19 +27,17 @@ api.interceptors.response.use(
                 originalRequest._retry = true;
 
                 try {
-                    console.log('🔄 Attempting to refresh token...');
                     const res = await axios.post(
                         `${config.apiUrl}/auth/refresh`,
                         {},
                         { withCredentials: true }
                     );
                     const newToken = res.data.accessToken;
-                    console.log('✅ Refresh succeeded, new token:', newToken);
                     useAuth.getState().setToken(newToken);
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
                     return api(originalRequest);
                 } catch (refreshErr) {
-                    console.warn('❌ Refresh failed. Logging out.');
+                    // Refresh failed; logging out
                     useAuth.getState().logout();
                     return Promise.reject(refreshErr);
                 }

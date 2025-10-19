@@ -1,4 +1,5 @@
 import { Response } from 'express';
+
 import { env } from './env';
 
 export function setRefreshTokenCookie(res: Response, token: string) {

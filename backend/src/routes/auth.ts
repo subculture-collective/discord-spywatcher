@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import express from 'express';
+
 import { db } from '../db';
 import { requireAdmin, requireAuth } from '../middleware/auth';
 import {
@@ -32,11 +34,11 @@ router.get('/discord', async (req, res): Promise<void> => {
         const tokenRes = await axios.post(
             'https://discord.com/api/oauth2/token',
             new URLSearchParams({
-                client_id: env.DISCORD_CLIENT_ID!,
-                client_secret: env.DISCORD_CLIENT_SECRET!,
+                client_id: env.DISCORD_CLIENT_ID,
+                client_secret: env.DISCORD_CLIENT_SECRET,
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: env.DISCORD_REDIRECT_URI!,
+                redirect_uri: env.DISCORD_REDIRECT_URI,
             }),
             { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         );
@@ -220,7 +222,7 @@ router.post('/refresh', async (req, res): Promise<void> => {
 
         console.log('✅ Refresh route hit. Sending new access token.');
         res.json({ accessToken: newAccessToken });
-    } catch (err) {
+    } catch (_err) {
         res.status(401).json({ error: 'Invalid refresh token' });
     }
 });

@@ -23,25 +23,60 @@ describe('Analytics - Lurker Flags', () => {
     describe('getLurkerFlags', () => {
         it('should identify lurkers with presence but no activity', async () => {
             const mockPresence = [
-                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
-                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
-                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
-                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
-                { userId: 'lurker1', username: 'Lurker One', createdAt: new Date() },
-                { userId: 'active1', username: 'Active User', createdAt: new Date() },
+                {
+                    userId: 'lurker1',
+                    username: 'Lurker One',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'lurker1',
+                    username: 'Lurker One',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'lurker1',
+                    username: 'Lurker One',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'lurker1',
+                    username: 'Lurker One',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'lurker1',
+                    username: 'Lurker One',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'active1',
+                    username: 'Active User',
+                    createdAt: new Date(),
+                },
             ];
 
             const mockTyping = [
-                { userId: 'active1', username: 'Active User', guildId: 'guild1', createdAt: new Date() },
+                {
+                    userId: 'active1',
+                    username: 'Active User',
+                    guildId: 'guild1',
+                    createdAt: new Date(),
+                },
             ];
 
             const mockMessages = [
                 { userId: 'active1', guildId: 'guild1', createdAt: new Date() },
             ];
 
-            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
-            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(mockTyping);
-            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessages);
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(
+                mockPresence
+            );
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(
+                mockTyping
+            );
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             const result = await getLurkerFlags('guild1');
 
@@ -54,16 +89,30 @@ describe('Analytics - Lurker Flags', () => {
 
         it('should not flag users with less than 5 presence events', async () => {
             const mockPresence = [
-                { userId: 'user1', username: 'User One', createdAt: new Date() },
-                { userId: 'user1', username: 'User One', createdAt: new Date() },
+                {
+                    userId: 'user1',
+                    username: 'User One',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'user1',
+                    username: 'User One',
+                    createdAt: new Date(),
+                },
             ];
 
             const mockTyping: any[] = [];
             const mockMessages: any[] = [];
 
-            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
-            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(mockTyping);
-            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessages);
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(
+                mockPresence
+            );
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(
+                mockTyping
+            );
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             const result = await getLurkerFlags('guild1');
 
@@ -73,23 +122,58 @@ describe('Analytics - Lurker Flags', () => {
 
         it('should exclude active users from lurker list', async () => {
             const mockPresence = [
-                { userId: 'active1', username: 'Active', createdAt: new Date() },
-                { userId: 'active1', username: 'Active', createdAt: new Date() },
-                { userId: 'active1', username: 'Active', createdAt: new Date() },
-                { userId: 'active1', username: 'Active', createdAt: new Date() },
-                { userId: 'active1', username: 'Active', createdAt: new Date() },
-                { userId: 'active1', username: 'Active', createdAt: new Date() },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    createdAt: new Date(),
+                },
             ];
 
             const mockTyping = [
-                { userId: 'active1', username: 'Active', guildId: 'guild1', createdAt: new Date() },
+                {
+                    userId: 'active1',
+                    username: 'Active',
+                    guildId: 'guild1',
+                    createdAt: new Date(),
+                },
             ];
 
             const mockMessages: any[] = [];
 
-            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
-            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(mockTyping);
-            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessages);
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(
+                mockPresence
+            );
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue(
+                mockTyping
+            );
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             const result = await getLurkerFlags('guild1');
 
@@ -98,7 +182,7 @@ describe('Analytics - Lurker Flags', () => {
 
         it('should filter by date when provided', async () => {
             const since = new Date('2024-01-01');
-            
+
             (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
             (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
             (db.messageEvent.findMany as jest.Mock).mockResolvedValue([]);
@@ -134,25 +218,51 @@ describe('Analytics - Lurker Flags', () => {
                 { userId: 'user1', username: 'User', createdAt: new Date() },
                 { userId: 'user1', username: 'User', createdAt: new Date() },
                 { userId: 'user1', username: 'User', createdAt: new Date() },
-                { userId: 'user2', username: 'User Two', createdAt: new Date() },
-                { userId: 'user2', username: 'User Two', createdAt: new Date() },
-                { userId: 'user2', username: 'User Two', createdAt: new Date() },
-                { userId: 'user2', username: 'User Two', createdAt: new Date() },
-                { userId: 'user2', username: 'User Two', createdAt: new Date() },
-                { userId: 'user2', username: 'User Two', createdAt: new Date() },
+                {
+                    userId: 'user2',
+                    username: 'User Two',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'user2',
+                    username: 'User Two',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'user2',
+                    username: 'User Two',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'user2',
+                    username: 'User Two',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'user2',
+                    username: 'User Two',
+                    createdAt: new Date(),
+                },
+                {
+                    userId: 'user2',
+                    username: 'User Two',
+                    createdAt: new Date(),
+                },
             ];
 
-            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(mockPresence);
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue(
+                mockPresence
+            );
             (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
             (db.messageEvent.findMany as jest.Mock).mockResolvedValue([]);
 
             const result = await getLurkerFlags('guild1');
 
             expect(result).toHaveLength(2);
-            
-            const user1 = result.find(u => u.userId === 'user1');
-            const user2 = result.find(u => u.userId === 'user2');
-            
+
+            const user1 = result.find((u) => u.userId === 'user1');
+            const user2 = result.find((u) => u.userId === 'user2');
+
             expect(user1?.presenceCount).toBe(3);
             expect(user2?.presenceCount).toBe(6);
             expect(user2?.lurkerScore).toBe(1); // >= 5
