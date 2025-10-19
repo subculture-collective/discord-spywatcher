@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
+
 import api from '../lib/api';
+
+type Guild = {
+    id: string;
+    name: string;
+    icon?: string;
+    owner?: boolean;
+    permissions?: string;
+};
 
 type Session = {
     discordId: string;
@@ -9,7 +18,7 @@ type Session = {
     locale?: string;
     verified?: boolean;
     role: 'ADMIN' | 'USER' | 'MODERATOR' | 'BANNED';
-    guilds?: any[];
+    guilds?: Guild[];
 };
 
 export function useSession() {

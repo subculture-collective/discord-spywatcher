@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import api from '../lib/api';
 
 type UserEntry = {
@@ -14,16 +14,21 @@ type UserEntry = {
     fastReactionCount?: number;
 };
 
+type BannedUser = {
+    userId: string;
+};
+
 function Dashboard() {
     const [data, setData] = useState<UserEntry[]>([]);
     const [bannedUsers, setBannedUsers] = useState<Set<string>>(new Set());
     const [filterBanned, setFilterBanned] = useState(false);
-    const navigate = useNavigate();
 
     useEffect(() => {
         api.get('/suspicion').then((res) => setData(res.data));
         api.get('/userbans').then((res) => {
-            const ids = new Set(res.data.map((u: any) => u.userId));
+            const ids = new Set<string>(
+                res.data.map((u: BannedUser) => u.userId)
+            );
             setBannedUsers(ids);
         });
     }, []);
@@ -33,21 +38,21 @@ function Dashboard() {
         : data;
 
     return (
-        <div className='p-6'>
-            <h1 className='text-2xl font-bold mb-4'>Suspicion Dashboard</h1>
-            <label className='flex items-center gap-2 mb-4'>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">Suspicion Dashboard</h1>
+            <label className="flex items-center gap-2 mb-4">
                 <input
-                    type='checkbox'
+                    type="checkbox"
                     checked={filterBanned}
                     onChange={(e) => setFilterBanned(e.target.checked)}
                 />
                 Hide banned users
             </label>
 
-            <table className='min-w-full border'>
-                <thead className='bg-gray-100'>
+            <table className="min-w-full border">
+                <thead className="bg-gray-100">
                     <tr>
-                        <th className='text-left px-2 py-1'>Username</th>
+                        <th className="text-left px-2 py-1">Username</th>
                         <th>Score</th>
                         <th>Ghost</th>
                         <th>Clients</th>
@@ -67,29 +72,29 @@ function Dashboard() {
                                     isBanned ? 'bg-red-100 text-red-900' : ''
                                 }
                             >
-                                <td className='px-2 py-1'>{user.username}</td>
-                                <td className='text-center'>
+                                <td className="px-2 py-1">{user.username}</td>
+                                <td className="text-center">
                                     {user.suspicionScore}
                                 </td>
-                                <td className='text-center'>
+                                <td className="text-center">
                                     {user.ghostScore}
                                 </td>
-                                <td className='text-center'>
+                                <td className="text-center">
                                     {user.multiClientCount}
                                 </td>
-                                <td className='text-center'>
+                                <td className="text-center">
                                     {user.channelCount}
                                 </td>
-                                <td className='text-center'>
+                                <td className="text-center">
                                     {user.fastReactionCount ?? 0}
                                 </td>
-                                <td className='text-center'>
+                                <td className="text-center">
                                     {user.accountAgeDays}
                                 </td>
-                                <td className='text-center'>
+                                <td className="text-center">
                                     {isBanned ? (
                                         <button
-                                            className='text-sm text-blue-700 underline'
+                                            className="text-sm text-blue-700 underline"
                                             onClick={() =>
                                                 api
                                                     .post('/userunban', {
@@ -115,7 +120,7 @@ function Dashboard() {
                                         </button>
                                     ) : (
                                         <button
-                                            className='text-sm text-red-700 underline'
+                                            className="text-sm text-red-700 underline"
                                             onClick={() =>
                                                 api
                                                     .post('/userban', {

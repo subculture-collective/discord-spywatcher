@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+
 import api from '../lib/api';
 import { useAuth } from '../store/auth';
-import toast from 'react-hot-toast';
 
 export default function AuthCallback() {
     const navigate = useNavigate();
@@ -31,5 +32,5 @@ export default function AuthCallback() {
             });
     }, [navigate, setToken]);
 
-    return <p className='text-center mt-20'>Logging in with Discord...</p>;
+    return <p className="text-center mt-20">Logging in with Discord...</p>;
 }
