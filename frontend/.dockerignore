@@ -4,14 +4,14 @@ npm-debug.log*
 
 # Testing
 coverage
-*.test.ts
-*.test.tsx
-*.spec.ts
-*.spec.tsx
-__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
 e2e
-vitest.config.ts
 playwright.config.ts
+src/__tests__
 
 # Build artifacts
 dist
@@ -25,8 +25,6 @@ build
 # Development files
 .eslintrc*
 .prettierrc*
-tsconfig.json
-tsconfig.*.json
 
 # Logs
 logs
@@ -44,6 +42,3 @@ logs
 # Documentation
 *.md
 !README.md
-
-# Vite
-vite.config.ts

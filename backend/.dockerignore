@@ -21,7 +21,6 @@ dist
 nodemon.json
 .eslintrc*
 .prettierrc*
-tsconfig.json
 
 # Logs
 logs
