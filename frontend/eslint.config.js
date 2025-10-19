@@ -4,17 +4,15 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
-// @ts-ignore - import plugin doesn't have types
+// @ts-expect-error - import plugin doesn't have types
 import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
-    { ignores: ['dist', 'node_modules'] },
+    { ignores: ['dist', 'node_modules', '*.config.js'] },
+    js.configs.recommended,
+    ...tseslint.configs.recommended,
+    jsxA11y.flatConfigs.recommended,
     {
-        extends: [
-            js.configs.recommended,
-            ...tseslint.configs.recommended,
-            jsxA11y.flatConfigs.recommended,
-        ],
         files: ['**/*.{ts,tsx}'],
         languageOptions: {
             ecmaVersion: 2020,

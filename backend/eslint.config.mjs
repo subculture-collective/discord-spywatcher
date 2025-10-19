@@ -1,8 +1,14 @@
 // @ts-check
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import security from 'eslint-plugin-security';
 import importPlugin from 'eslint-plugin-import';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default tseslint.config(
     {
@@ -22,7 +28,7 @@ export default tseslint.config(
             parser: tseslint.parser,
             parserOptions: {
                 projectService: true,
-                tsconfigRootDir: import.meta.dirname,
+                tsconfigRootDir: __dirname,
             },
         },
         plugins: {
