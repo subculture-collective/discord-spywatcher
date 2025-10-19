@@ -49,9 +49,9 @@ export default tseslint.config(
         },
     },
     // TypeScript files - with type checking
+    ...tseslint.configs.recommendedTypeChecked,
     {
         files: ['**/*.ts'],
-        extends: [...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
