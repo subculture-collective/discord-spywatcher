@@ -11,7 +11,7 @@
         "test": "echo 'No tests configured yet' && exit 0",
         "prisma:validate": "prisma validate",
         "prisma:generate": "prisma generate",
-        "prisma:migrate": "prisma migrate deploy"
+        "prisma:migrate": "prisma migrate deploy",
         "lint": "eslint . --ext .ts",
         "lint:fix": "eslint . --ext .ts --fix",
         "format": "prettier --write \"src/**/*.ts\"",
