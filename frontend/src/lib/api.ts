@@ -1,9 +1,10 @@
 import axios from 'axios';
 
+import { config } from '../config/env';
 import { useAuth } from '../store/auth';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3001/api',
+    baseURL: config.apiUrl,
     withCredentials: true, // ✅ needed for refresh cookie
 });
 
@@ -27,7 +28,7 @@ api.interceptors.response.use(
 
                 try {
                     const res = await axios.post(
-                        'http://localhost:3001/api/auth/refresh',
+                        `${config.apiUrl}/auth/refresh`,
                         {},
                         { withCredentials: true }
                     );

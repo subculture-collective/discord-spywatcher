@@ -1,10 +1,11 @@
+import { config } from '../config/env';
+
 function Login() {
-    const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID;
     const REDIRECT_URI = encodeURIComponent(
-        'http://localhost:5173/auth/callback'
+        `${window.location.origin}/auth/callback`
     );
 
-    const discordLoginUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify+guilds`;
+    const discordLoginUrl = `https://discord.com/oauth2/authorize?client_id=${config.discordClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify+guilds`;
 
     return (
         <div className="flex items-center justify-center h-screen">
