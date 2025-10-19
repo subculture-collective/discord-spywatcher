@@ -96,26 +96,82 @@ For detailed testing documentation, see [TESTING.md](./TESTING.md).
 
 ## 🔐 Environment Variables
 
-Configure the `.env` file in `backend/`:
+Spywatcher uses environment variables for configuration with strict validation to ensure security and proper setup.
 
-```env
-ADMIN_DISCORD_IDS=your_admin_discord_ids
-BOT_GUILD_IDS=your_bot_guild_ids
-DISCORD_BOT_TOKEN=your_discord_bot_token
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
-DISCORD_GUILD_ID=your_discord_guild_id
-DISCORD_REDIRECT_URI=your_discord_redirect_uri
-JWT_REFRESH_SECRET=your_jwt_refresh_secret
-JWT_SECRET=your_jwt_secret
-NODE_ENV=your_node_env
-PORT=your_port
+### Backend Configuration
+
+Copy `backend/.env.example` to `backend/.env` and configure the following variables:
+
+#### Required Variables
+
+| Variable | Description | Example | Validation |
+|----------|-------------|---------|------------|
+| `DISCORD_BOT_TOKEN` | Discord bot token from Developer Portal | `MTk...` | Min 50 characters |
+| `DISCORD_CLIENT_ID` | OAuth2 client ID | `123456789` | Min 10 characters |
+| `DISCORD_CLIENT_SECRET` | OAuth2 client secret | `abc123...` | Min 20 characters |
+| `DISCORD_REDIRECT_URI` | OAuth2 redirect URI | `http://localhost:5173/auth/callback` | Valid URL |
+| `JWT_SECRET` | Secret for signing access tokens | `random-32-char-string` | Min 32 characters |
+| `JWT_REFRESH_SECRET` | Secret for signing refresh tokens | `another-32-char-string` | Min 32 characters |
+
+#### Optional Variables
+
+| Variable | Description | Default | Validation |
+|----------|-------------|---------|------------|
+| `NODE_ENV` | Environment mode | `development` | `development`, `staging`, `production`, `test` |
+| `PORT` | Server port | `3001` | Positive integer |
+| `DATABASE_URL` | PostgreSQL connection string | - | Valid URL |
+| `DISCORD_GUILD_ID` | Optional specific guild ID | - | String |
+| `BOT_GUILD_IDS` | Comma-separated guild IDs to monitor | - | Comma-separated list |
+| `ADMIN_DISCORD_IDS` | Comma-separated admin user IDs | - | Comma-separated list |
+| `CORS_ORIGINS` | Comma-separated allowed origins | `http://localhost:5173` | Comma-separated URLs |
+| `JWT_ACCESS_EXPIRES_IN` | Access token expiration | `15m` | Time string |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `7d` | Time string |
+| `ENABLE_RATE_LIMITING` | Enable rate limiting | `true` | `true` or `false` |
+| `ENABLE_IP_BLOCKING` | Enable IP blocking | `true` | `true` or `false` |
+| `LOG_LEVEL` | Logging level | `info` | `error`, `warn`, `info`, `debug` |
+| `FRONTEND_URL` | Frontend URL for redirects | - | Valid URL |
+
+**Generate secure secrets:**
+```bash
+# Generate JWT secrets
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Configure the `.env` file in `frontend/`:
+### Frontend Configuration
 
-```env
-VITE_DISCORD_CLIENT_ID=your_vite_discord_client_id
+Copy `frontend/frontend.env.example` to `frontend/.env` and configure:
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `VITE_API_URL` | Backend API base URL | `http://localhost:3001/api` | Yes |
+| `VITE_DISCORD_CLIENT_ID` | Discord OAuth2 client ID | `123456789` | Yes |
+| `VITE_ENVIRONMENT` | Environment mode | `development` | No (default: `development`) |
+| `VITE_ENABLE_ANALYTICS` | Enable analytics tracking | `false` | No (default: `false`) |
+| `VITE_ANALYTICS_TRACKING_ID` | Analytics tracking ID | - | No |
+
+**Important Notes:**
+- All frontend variables must be prefixed with `VITE_` to be exposed to the browser
+- Never include secrets in frontend environment variables
+- Frontend variables are embedded in the build and publicly accessible
+- The application will fail to start if required variables are missing or invalid
+
+### Environment Validation
+
+The backend uses [Zod](https://zod.dev/) for runtime environment validation:
+- All required variables are validated on startup
+- Type safety is enforced (strings, numbers, URLs, enums)
+- Clear error messages for missing or invalid configuration
+- Application exits with code 1 if validation fails
+
+Example validation error:
+```
+❌ Invalid environment configuration:
+
+  - DISCORD_BOT_TOKEN: Discord bot token must be at least 50 characters
+  - JWT_SECRET: JWT secret must be at least 32 characters
+  - DISCORD_REDIRECT_URI: Discord redirect URI must be a valid URL
+
+💡 Check your .env file and ensure all required variables are set correctly.
 ```
 
 ## 🌐 Endpoints
