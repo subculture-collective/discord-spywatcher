@@ -38,7 +38,7 @@
         "jsonwebtoken": "^9.0.2",
         "morgan": "^1.10.0",
         "prisma": "^6.8.2",
-        "uuid": "^11.1.0",
+        "uuid": "^13.0.0",
         "winston": "^3.17.0"
     },
     "devDependencies": {
