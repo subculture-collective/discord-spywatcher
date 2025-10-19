@@ -35,7 +35,9 @@ describe('Analytics - Channel Heatmap', () => {
 
             (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockData);
 
-            const result = await getChannelHeatmap({ guildId: 'test-guild-id' });
+            const result = await getChannelHeatmap({
+                guildId: 'test-guild-id',
+            });
 
             expect(result).toHaveLength(2);
             expect(result[0]).toEqual({
@@ -73,7 +75,9 @@ describe('Analytics - Channel Heatmap', () => {
         it('should return empty array when no data', async () => {
             (db.typingEvent.groupBy as jest.Mock).mockResolvedValue([]);
 
-            const result = await getChannelHeatmap({ guildId: 'test-guild-id' });
+            const result = await getChannelHeatmap({
+                guildId: 'test-guild-id',
+            });
 
             expect(result).toEqual([]);
         });
@@ -98,7 +102,9 @@ describe('Analytics - Channel Heatmap', () => {
 
             (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockData);
 
-            const result = await getChannelHeatmap({ guildId: 'test-guild-id' });
+            const result = await getChannelHeatmap({
+                guildId: 'test-guild-id',
+            });
 
             expect(result[0].count).toBeGreaterThan(result[1].count);
         });
@@ -123,7 +129,9 @@ describe('Analytics - Channel Heatmap', () => {
 
             (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockData);
 
-            const result = await getChannelHeatmap({ guildId: 'test-guild-id' });
+            const result = await getChannelHeatmap({
+                guildId: 'test-guild-id',
+            });
 
             expect(result).toHaveLength(2);
             expect(result[0].channelId).toBe('channel1');

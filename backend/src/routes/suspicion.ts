@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import { getSuspicionScores } from '../analytics';
 import { excludeBannedUsers, requireAuth, validateGuild } from '../middleware';
 import { env } from '../utils/env';

@@ -44,8 +44,12 @@ describe('Analytics - Ghost Scores', () => {
                 },
             ];
 
-            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockTypings);
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
+            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockTypings
+            );
+            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             const result = await getGhostScores('test-guild-id');
 
@@ -71,8 +75,12 @@ describe('Analytics - Ghost Scores', () => {
 
             const mockMessages: any[] = [];
 
-            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockTypings);
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
+            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockTypings
+            );
+            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             const result = await getGhostScores('test-guild-id');
 
@@ -87,8 +95,12 @@ describe('Analytics - Ghost Scores', () => {
             const mockMessages: any[] = [];
             const since = new Date('2024-01-01');
 
-            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockTypings);
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
+            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockTypings
+            );
+            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             await getGhostScores('test-guild-id', since);
 
@@ -138,8 +150,12 @@ describe('Analytics - Ghost Scores', () => {
                 },
             ];
 
-            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockTypings);
-            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
+            (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockTypings
+            );
+            (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(
+                mockMessages
+            );
 
             const result = await getGhostScores('test-guild-id');
 

@@ -1,5 +1,11 @@
-import request from 'supertest';
 import express, { Application } from 'express';
+import request from 'supertest';
+
+import {
+    getGhostScores,
+    getChannelHeatmap,
+    getLurkerFlags,
+} from '../../../src/analytics';
 import analyticsRouter from '../../../src/routes/analytics';
 import { generateAccessToken } from '../../../src/utils/auth';
 
@@ -19,12 +25,6 @@ jest.mock('../../../src/middleware', () => ({
     validateGuild: jest.fn((req, res, next) => next()),
     excludeBannedUsers: jest.fn((data) => Promise.resolve(data)),
 }));
-
-import {
-    getGhostScores,
-    getChannelHeatmap,
-    getLurkerFlags,
-} from '../../../src/analytics';
 
 describe('Integration - Analytics Routes', () => {
     let app: Application;

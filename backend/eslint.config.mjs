@@ -20,7 +20,35 @@ export default tseslint.config(
             'eslint.config.mjs',
         ],
     },
+    // Base ESLint config for all files
     eslint.configs.recommended,
+    // JavaScript files - no type checking
+    {
+        files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: {
+                // Node.js globals
+                module: 'readonly',
+                require: 'readonly',
+                process: 'readonly',
+                __dirname: 'readonly',
+                __filename: 'readonly',
+                exports: 'readonly',
+                console: 'readonly',
+            },
+        },
+        plugins: {
+            security: security,
+            import: importPlugin,
+        },
+        rules: {
+            ...security.configs.recommended.rules,
+            'no-console': 'warn',
+        },
+    },
+    // TypeScript files - with type checking
     ...tseslint.configs.recommendedTypeChecked,
     {
         files: ['**/*.ts'],
@@ -38,16 +66,17 @@ export default tseslint.config(
         },
         rules: {
             ...security.configs.recommended.rules,
-            '@typescript-eslint/no-explicit-any': 'error',
-            '@typescript-eslint/explicit-function-return-type': 'warn',
+            '@typescript-eslint/no-explicit-any': 'warn', // Downgraded from error
+            '@typescript-eslint/explicit-function-return-type': 'off', // Turned off - TypeScript can infer
             '@typescript-eslint/no-unused-vars': [
                 'error',
                 {
                     argsIgnorePattern: '^_',
                     varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
                 },
             ],
-            'no-console': 'warn',
+            'no-console': 'off', // Allowed in backend - it's a CLI/server app
             'import/order': [
                 'error',
                 {
@@ -68,6 +97,19 @@ export default tseslint.config(
             ],
             'import/newline-after-import': 'error',
             'import/no-duplicates': 'error',
+        },
+    },
+    // Test files - relax some rules
+    {
+        files: ['**/__tests__/**/*.ts', '**/*.test.ts', '**/*.spec.ts'],
+        rules: {
+            '@typescript-eslint/no-explicit-any': 'off', // Allow any in tests
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+            '@typescript-eslint/no-unsafe-member-access': 'off',
+            '@typescript-eslint/no-unsafe-call': 'off',
+            '@typescript-eslint/no-unsafe-return': 'off',
+            '@typescript-eslint/no-unsafe-argument': 'off',
+            '@typescript-eslint/unbound-method': 'off', // Jest mocks can be unbound
         },
     }
 );

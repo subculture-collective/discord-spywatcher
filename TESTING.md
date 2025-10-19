@@ -24,11 +24,13 @@ The Discord Spywatcher project uses a comprehensive testing strategy including:
 ### Testing Stack
 
 **Backend:**
+
 - Jest - Test framework
 - ts-jest - TypeScript support for Jest
 - Supertest - HTTP assertion library
 
 **Frontend:**
+
 - Vitest - Fast unit test framework
 - React Testing Library - React component testing
 - Playwright - End-to-end testing
@@ -92,14 +94,18 @@ jest.mock('../../../src/db');
 
 describe('Analytics - Ghost Scores', () => {
     it('should calculate ghost scores correctly', async () => {
-        const mockTypings = [/* mock data */];
-        const mockMessages = [/* mock data */];
-        
+        const mockTypings = [
+            /* mock data */
+        ];
+        const mockMessages = [
+            /* mock data */
+        ];
+
         (db.typingEvent.groupBy as jest.Mock).mockResolvedValue(mockTypings);
         (db.messageEvent.groupBy as jest.Mock).mockResolvedValue(mockMessages);
 
         const result = await getGhostScores('test-guild-id');
-        
+
         expect(result).toHaveLength(2);
         expect(result[0].ghostScore).toBeCloseTo(3.33);
     });
@@ -215,11 +221,11 @@ import { useSession } from '../../hooks/useSession';
 describe('useSession hook', () => {
     it('should fetch session data', async () => {
         const { result } = renderHook(() => useSession());
-        
+
         await waitFor(() => {
             expect(result.current.loading).toBe(false);
         });
-        
+
         expect(result.current.session).toBeDefined();
     });
 });
@@ -267,9 +273,9 @@ import { test, expect } from '@playwright/test';
 test('should login with Discord', async ({ page }) => {
     await page.goto('/');
     await page.click('text=Login with Discord');
-    
+
     // ... test authentication flow
-    
+
     await expect(page).toHaveURL('/dashboard');
 });
 ```
@@ -299,6 +305,7 @@ npm run test:coverage
 ### Coverage Configuration
 
 Coverage thresholds are configured in:
+
 - Backend: `jest.config.js`
 - Frontend: `vite.config.ts`
 
@@ -307,26 +314,26 @@ Coverage thresholds are configured in:
 ### Best Practices
 
 1. **Test Behavior, Not Implementation**
-   - Focus on what the code does, not how it does it
-   - Test user-facing behavior and API contracts
+    - Focus on what the code does, not how it does it
+    - Test user-facing behavior and API contracts
 
 2. **Keep Tests Simple and Focused**
-   - One test should test one thing
-   - Use descriptive test names
+    - One test should test one thing
+    - Use descriptive test names
 
 3. **Use Proper Mocking**
-   - Mock external dependencies (API calls, database)
-   - Don't mock the code you're testing
+    - Mock external dependencies (API calls, database)
+    - Don't mock the code you're testing
 
 4. **Test Edge Cases**
-   - Empty arrays/objects
-   - Null/undefined values
-   - Error conditions
-   - Boundary values
+    - Empty arrays/objects
+    - Null/undefined values
+    - Error conditions
+    - Boundary values
 
 5. **Maintain Test Data**
-   - Use factories or fixtures for test data
-   - Keep test data minimal but realistic
+    - Use factories or fixtures for test data
+    - Keep test data minimal but realistic
 
 ### Test Naming Convention
 
@@ -368,6 +375,7 @@ describe('Component', () => {
 ### GitHub Actions
 
 Tests run automatically on:
+
 - Pull requests
 - Pushes to main branch
 - Manual workflow dispatch
@@ -375,6 +383,7 @@ Tests run automatically on:
 ### Required Checks
 
 Before merging:
+
 - All unit tests must pass
 - All integration tests must pass
 - Code coverage must meet thresholds

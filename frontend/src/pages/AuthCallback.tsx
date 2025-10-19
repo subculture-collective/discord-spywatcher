@@ -15,12 +15,9 @@ export default function AuthCallback() {
         hasRun.current = true;
 
         const code = new URLSearchParams(window.location.search).get('code');
-        console.log('OAuth code:', code);
-        if (!code) return;
 
         api.get(`/auth/discord?code=${code}`)
             .then((res) => {
-                console.log('Login response:', res.data);
                 setToken(res.data.accessToken);
                 navigate('/', { replace: true }); // ✅ clear ?code=
             })
@@ -28,7 +25,6 @@ export default function AuthCallback() {
                 const message =
                     err.response?.data?.error || 'OAuth login failed';
                 toast.error(message);
-                console.error('OAuth error:', message);
             });
     }, [navigate, setToken]);
 

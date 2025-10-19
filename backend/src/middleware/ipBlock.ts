@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+
 import { db } from '../db';
 
 export async function blockKnownBadIPs(
@@ -31,7 +32,7 @@ export async function banIP(ip: string, reason?: string) {
 export async function unbanIP(ip: string) {
     try {
         await db.blockedIP.delete({ where: { ip } });
-    } catch (err) {
+    } catch (_err) {
         console.warn(`Attempted to unban IP ${ip}, but it wasn't found.`);
     }
 }
