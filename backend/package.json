@@ -8,11 +8,14 @@
         "dev:api": "nodemon --watch src --exec ts-node --files src/server.ts",
         "build": "tsc",
         "typecheck": "tsc --noEmit",
-        "lint": "echo 'No linting configured for backend yet' && exit 0",
         "test": "echo 'No tests configured yet' && exit 0",
         "prisma:validate": "prisma validate",
         "prisma:generate": "prisma generate",
         "prisma:migrate": "prisma migrate deploy"
+        "lint": "eslint . --ext .ts",
+        "lint:fix": "eslint . --ext .ts --fix",
+        "format": "prettier --write \"src/**/*.ts\"",
+        "format:check": "prettier --check \"src/**/*.ts\""
     },
     "keywords": [],
     "author": "",
@@ -34,6 +37,7 @@
         "winston": "^3.17.0"
     },
     "devDependencies": {
+        "@eslint/js": "^9.38.0",
         "@types/cookie-parser": "^1.4.8",
         "@types/cors": "^2.8.18",
         "@types/express": "^5.0.2",
@@ -42,8 +46,16 @@
         "@types/morgan": "^1.9.9",
         "@types/node": "^22.15.21",
         "@types/uuid": "^10.0.0",
+        "@typescript-eslint/eslint-plugin": "^8.46.1",
+        "@typescript-eslint/parser": "^8.46.1",
+        "eslint": "^9.38.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-security": "^3.0.1",
         "nodemon": "^3.1.10",
+        "prettier": "^3.6.2",
         "ts-node": "^10.9.2",
-        "typescript": "^5.8.3"
+        "typescript": "^5.8.3",
+        "typescript-eslint": "^8.46.1"
     }
 }
