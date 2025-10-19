@@ -1,0 +1,115 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: spywatcher-postgres-prod
+    environment:
+      POSTGRES_DB: spywatcher
+      POSTGRES_USER: spywatcher
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spywatcher"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spywatcher-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spywatcher-backend-prod
+    environment:
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
+      NODE_ENV: production
+      PORT: 3001
+      ADMIN_DISCORD_IDS: ${ADMIN_DISCORD_IDS}
+      BOT_GUILD_IDS: ${BOT_GUILD_IDS}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spywatcher-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    command: sh -c "node dist/server.js"
+
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spywatcher-migrate-prod
+    environment:
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spywatcher-network
+    command: sh -c "npx prisma migrate deploy"
+    restart: "no"
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: spywatcher-frontend-prod
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+      VITE_DISCORD_CLIENT_ID: ${VITE_DISCORD_CLIENT_ID}
+    depends_on:
+      - backend
+    networks:
+      - spywatcher-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  nginx:
+    image: nginx:alpine
+    container_name: spywatcher-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - spywatcher-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+volumes:
+  postgres-data:
+
+networks:
+  spywatcher-network:
+    driver: bridge

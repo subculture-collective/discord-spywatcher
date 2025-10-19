@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Testing
+coverage
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
+e2e
+playwright.config.ts
+src/__tests__
+
+# Build artifacts
+dist
+build
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Development files
+.eslintrc*
+.prettierrc*
+
+# Logs
+logs
+*.log
+
+# OS files
+.DS_Store
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md

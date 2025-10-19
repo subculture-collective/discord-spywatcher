@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: spywatcher-postgres-dev
+    environment:
+      POSTGRES_DB: spywatcher
+      POSTGRES_USER: spywatcher
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-spywatcher_dev_password}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spywatcher"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spywatcher-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: spywatcher-backend-dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
+    environment:
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD:-spywatcher_dev_password}@postgres:5432/spywatcher
+      NODE_ENV: development
+      PORT: 3001
+      ADMIN_DISCORD_IDS: ${ADMIN_DISCORD_IDS}
+      BOT_GUILD_IDS: ${BOT_GUILD_IDS}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI:-http://localhost:5173/auth/callback}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_jwt_refresh_secret}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spywatcher-network
+    command: sh -c "npx prisma migrate dev && npm run dev:api"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: spywatcher-frontend-dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3001
+      VITE_DISCORD_CLIENT_ID: ${VITE_DISCORD_CLIENT_ID}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - spywatcher-network
+
+volumes:
+  postgres-data:
+
+networks:
+  spywatcher-network:
+    driver: bridge

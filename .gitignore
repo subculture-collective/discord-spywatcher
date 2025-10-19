@@ -89,4 +89,7 @@ frontend/dist/
 frontend/build/
 backend/logs/
 
+# Nginx SSL certificates
+nginx/ssl/
+
 *.zip

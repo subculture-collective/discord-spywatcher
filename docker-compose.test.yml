@@ -1,0 +1,53 @@
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: spywatcher-postgres-test
+    environment:
+      POSTGRES_DB: spywatcher_test
+      POSTGRES_USER: spywatcher_test
+      POSTGRES_PASSWORD: test_password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spywatcher_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - spywatcher-test-network
+
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: spywatcher-backend-test
+    environment:
+      DATABASE_URL: postgresql://spywatcher_test:test_password@postgres-test:5432/spywatcher_test
+      NODE_ENV: test
+      PORT: 3001
+      JWT_SECRET: test_jwt_secret
+      JWT_REFRESH_SECRET: test_jwt_refresh_secret
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - spywatcher-test-network
+    command: sh -c "npx prisma migrate deploy && npm test"
+
+  frontend-test:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: spywatcher-frontend-test
+    environment:
+      VITE_API_URL: http://backend-test:3001
+      VITE_DISCORD_CLIENT_ID: test_client_id
+    depends_on:
+      - backend-test
+    networks:
+      - spywatcher-test-network
+    command: npm test
+
+networks:
+  spywatcher-test-network:
+    driver: bridge
