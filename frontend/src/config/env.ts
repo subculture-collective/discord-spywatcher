@@ -56,6 +56,13 @@ const getEnumEnvVar = <T extends string>(
     return value as T;
 };
 
+// Validate environment once to avoid redundant validation
+const environment = getEnumEnvVar(
+    'VITE_ENVIRONMENT',
+    ['development', 'staging', 'production'] as const,
+    'development'
+);
+
 /**
  * Application configuration object
  * All values are validated and type-safe
@@ -68,21 +75,9 @@ export const config = {
     discordClientId: getEnvVar('VITE_DISCORD_CLIENT_ID'),
 
     // Environment
-    environment: getEnumEnvVar(
-        'VITE_ENVIRONMENT',
-        ['development', 'staging', 'production'] as const,
-        'development'
-    ),
-    isDevelopment: getEnumEnvVar(
-        'VITE_ENVIRONMENT',
-        ['development', 'staging', 'production'] as const,
-        'development'
-    ) === 'development',
-    isProduction: getEnumEnvVar(
-        'VITE_ENVIRONMENT',
-        ['development', 'staging', 'production'] as const,
-        'development'
-    ) === 'production',
+    environment,
+    isDevelopment: environment === 'development',
+    isProduction: environment === 'production',
 
     // Feature Flags
     enableAnalytics: getBooleanEnvVar('VITE_ENABLE_ANALYTICS', false),
