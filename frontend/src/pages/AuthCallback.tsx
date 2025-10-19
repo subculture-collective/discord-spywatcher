@@ -16,8 +16,6 @@ export default function AuthCallback() {
 
         const code = new URLSearchParams(window.location.search).get('code');
 
-        return;
-
         api.get(`/auth/discord?code=${code}`)
             .then((res) => {
                 setToken(res.data.accessToken);
