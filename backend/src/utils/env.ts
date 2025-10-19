@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const required = [
@@ -10,6 +11,7 @@ const required = [
     'DISCORD_BOT_TOKEN',
 ];
 
+// eslint-disable-next-line security/detect-object-injection
 const missing = required.filter((key) => !process.env[key]);
 
 if (missing.length > 0) {

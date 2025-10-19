@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import path from 'path';
+
 import { createLogger, format, transports } from 'winston';
 
 const logFormat = format.printf(({ level, message, timestamp }) => {

@@ -1,6 +1,6 @@
 import { db } from '../db';
 
-export async function getBehaviorShiftFlags(guildId: string, since?: Date) {
+export async function getBehaviorShiftFlags(guildId: string, _since?: Date) {
     const now = Date.now();
     const oneWeek = 1000 * 60 * 60 * 24 * 7;
     const twoWeeksAgo = new Date(now - oneWeek * 2);
@@ -57,6 +57,7 @@ export async function getBehaviorShiftFlags(guildId: string, since?: Date) {
             oldTyping: 0,
             newTyping: 0,
         };
+        // eslint-disable-next-line security/detect-object-injection
         existing[type]++;
         userStats.set(userId, existing);
     };

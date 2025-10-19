@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
 import { db } from '../db';
 import { SuspicionEntry } from '../types/analytics';
+
 import { getChannelDiversity } from './channels';
 import { getClientDriftFlags } from './clients';
 import { getGhostScores } from './ghosts';

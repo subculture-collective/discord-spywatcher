@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-misused-promises, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-floating-promises */
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
+
 import {
     getChannelDiversity,
     getChannelHeatmap,
@@ -7,10 +9,10 @@ import {
     getMultiClientLoginCounts,
     getSuspicionScores,
 } from './analytics';
-import { env } from './utils/env';
-dotenv.config();
-
 import { db } from './db';
+import { env } from './utils/env';
+
+dotenv.config();
 
 const client = new Client({
     intents: [

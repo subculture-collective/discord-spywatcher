@@ -1,6 +1,6 @@
 import { db } from '../db';
 
-export async function getClientDriftFlags(guildId: string, since?: Date) {
+export async function getClientDriftFlags(_guildId: string, _since?: Date) {
     const now = Date.now();
     const oneWeek = 1000 * 60 * 60 * 24 * 7;
     const twoWeeksAgo = new Date(now - oneWeek * 2);

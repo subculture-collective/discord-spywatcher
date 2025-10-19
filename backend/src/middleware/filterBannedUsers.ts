@@ -1,4 +1,5 @@
 import { BannedUser } from '@prisma/client';
+
 import { db } from '../db';
 
 export async function getBannedUserIds(): Promise<Set<string>> {

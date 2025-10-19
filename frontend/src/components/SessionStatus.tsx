@@ -14,8 +14,10 @@ export default function SessionStatus() {
             logout();
             toast.success('Logged out');
             window.location.href = '/'; // or navigate('/')
-        } catch (err) {
-            console.error('Logout failed:', err);
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error ? err.message : 'Unknown error';
+            toast.error(`Logout failed: ${message}`);
         }
     };
 

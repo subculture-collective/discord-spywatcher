@@ -1,5 +1,9 @@
 import { Response } from 'express';
-import { setRefreshTokenCookie, clearRefreshTokenCookie } from '../../../src/utils/cookies';
+
+import {
+    setRefreshTokenCookie,
+    clearRefreshTokenCookie,
+} from '../../../src/utils/cookies';
 
 describe('Utils - Cookies', () => {
     let mockResponse: Partial<Response>;
@@ -14,9 +18,9 @@ describe('Utils - Cookies', () => {
     describe('setRefreshTokenCookie', () => {
         it('should set refresh token cookie with correct options', () => {
             const token = 'test-refresh-token';
-            
+
             setRefreshTokenCookie(mockResponse as Response, token);
-            
+
             expect(mockResponse.cookie).toHaveBeenCalledWith(
                 'refreshToken',
                 token,
@@ -32,7 +36,7 @@ describe('Utils - Cookies', () => {
     describe('clearRefreshTokenCookie', () => {
         it('should clear refresh token cookie', () => {
             clearRefreshTokenCookie(mockResponse as Response);
-            
+
             expect(mockResponse.clearCookie).toHaveBeenCalledWith(
                 'refreshToken',
                 expect.any(Object)
