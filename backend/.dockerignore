@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Testing
+coverage
+*.test.ts
+*.spec.ts
+__tests__
+jest.config.js
+
+# Build artifacts
+dist
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Development files
+nodemon.json
+.eslintrc*
+.prettierrc*
+tsconfig.json
+
+# Logs
+logs
+*.log
+
+# OS files
+.DS_Store
+.vscode
+.idea
+
+# Prisma development database
+prisma/dev.db
+prisma/dev.db-journal
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md

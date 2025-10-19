@@ -43,7 +43,29 @@ See [CI/CD Documentation](.github/CI_CD_DOCUMENTATION.md) for more details.
 
 ## 🚀 Getting Started
 
-### Backend
+### Using Docker (Recommended)
+
+The easiest way to run the application is using Docker:
+
+```bash
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your Discord credentials
+
+# Start development environment
+docker-compose -f docker-compose.dev.yml up
+```
+
+Access the application:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3001
+- PostgreSQL: localhost:5432
+
+See [DOCKER.md](./DOCKER.md) for detailed Docker setup and usage.
+
+### Manual Setup
+
+#### Backend
 
 ```bash
 cd backend
@@ -53,7 +75,7 @@ npm run dev          # Start Discord bot
 npm run dev:api      # Start API server
 ```
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
