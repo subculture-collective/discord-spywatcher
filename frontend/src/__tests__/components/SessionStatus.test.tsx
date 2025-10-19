@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import SessionStatus from '../../components/SessionStatus';
 import { useSession } from '../../hooks/useSession';
 
@@ -14,10 +15,14 @@ vi.mock('../../store/auth', () => ({
 }));
 
 // Mock toast (if used, seems to be missing import in actual component)
-global.toast = {
+(
+    global as typeof global & {
+        toast: { success: () => void; error: () => void };
+    }
+).toast = {
     success: vi.fn(),
     error: vi.fn(),
-} as any;
+};
 
 describe('SessionStatus Component', () => {
     beforeEach(() => {
@@ -43,7 +48,9 @@ describe('SessionStatus Component', () => {
         });
 
         render(<SessionStatus />);
-        expect(screen.getByText(/Error: Failed to load session/)).toBeInTheDocument();
+        expect(
+            screen.getByText(/Error: Failed to load session/)
+        ).toBeInTheDocument();
     });
 
     it('should display not logged in state', () => {
@@ -73,7 +80,7 @@ describe('SessionStatus Component', () => {
         });
 
         render(<SessionStatus />);
-        
+
         expect(screen.getByText('TestUser')).toBeInTheDocument();
         expect(screen.getByText('test@example.com')).toBeInTheDocument();
         expect(screen.getByText('USER')).toBeInTheDocument();
@@ -95,7 +102,7 @@ describe('SessionStatus Component', () => {
         });
 
         render(<SessionStatus />);
-        
+
         const logoutButton = screen.getByRole('button', { name: /logout/i });
         expect(logoutButton).toBeInTheDocument();
     });
@@ -116,7 +123,7 @@ describe('SessionStatus Component', () => {
         });
 
         render(<SessionStatus />);
-        
+
         const avatar = screen.getByAltText('Avatar');
         expect(avatar).toBeInTheDocument();
         expect(avatar).toHaveAttribute(
