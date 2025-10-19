@@ -1,37 +1,81 @@
 import dotenv from 'dotenv';
+import { z } from 'zod';
+
 dotenv.config();
 
-const required = [
-    'JWT_SECRET',
-    'JWT_REFRESH_SECRET',
-    'DISCORD_CLIENT_ID',
-    'DISCORD_CLIENT_SECRET',
-    'DISCORD_REDIRECT_URI',
-    'DISCORD_BOT_TOKEN',
-];
+// Define the schema for environment variables
+const envSchema = z.object({
+    // Environment
+    NODE_ENV: z
+        .enum(['development', 'staging', 'production', 'test'])
+        .default('development'),
 
-const missing = required.filter((key) => !process.env[key]);
+    // Server
+    PORT: z.coerce.number().int().positive().default(3001),
 
-if (missing.length > 0) {
-    console.error('❌ Missing required environment variables:\n');
-    missing.forEach((key) => console.error(`- ${key}`));
-    console.error('\n💡 Check your .env file.');
-    process.exit(1);
+    // Database
+    DATABASE_URL: z.string().url().optional(),
+
+    // Discord
+    DISCORD_BOT_TOKEN: z.string().min(50, 'Discord bot token must be at least 50 characters'),
+    DISCORD_CLIENT_ID: z.string().min(10, 'Discord client ID must be at least 10 characters'),
+    DISCORD_CLIENT_SECRET: z.string().min(20, 'Discord client secret must be at least 20 characters'),
+    DISCORD_GUILD_ID: z.string().optional(),
+    DISCORD_REDIRECT_URI: z.string().url('Discord redirect URI must be a valid URL'),
+    BOT_GUILD_IDS: z
+        .string()
+        .default('')
+        .transform((s) => s.split(',').filter(Boolean)),
+    ADMIN_DISCORD_IDS: z
+        .string()
+        .default('')
+        .transform((s) => s.split(',').filter(Boolean)),
+
+    // JWT
+    JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters'),
+    JWT_REFRESH_SECRET: z.string().min(32, 'JWT refresh secret must be at least 32 characters'),
+    JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+    JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+
+    // CORS
+    CORS_ORIGINS: z
+        .string()
+        .default('http://localhost:5173')
+        .transform((s) => s.split(',').map((origin) => origin.trim())),
+
+    // Features
+    ENABLE_RATE_LIMITING: z
+        .string()
+        .default('true')
+        .transform((val) => val === 'true' || val === '1'),
+    ENABLE_IP_BLOCKING: z
+        .string()
+        .default('true')
+        .transform((val) => val === 'true' || val === '1'),
+    LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
+
+    // Optional Frontend URL
+    FRONTEND_URL: z.string().url().optional(),
+});
+
+// Export the inferred type
+export type Env = z.infer<typeof envSchema>;
+
+// Parse and validate environment variables
+let env: Env;
+
+try {
+    env = envSchema.parse(process.env);
+} catch (error) {
+    if (error instanceof z.ZodError) {
+        console.error('❌ Invalid environment configuration:\n');
+        error.issues.forEach((err) => {
+            console.error(`  - ${err.path.join('.')}: ${err.message}`);
+        });
+        console.error('\n💡 Check your .env file and ensure all required variables are set correctly.');
+        process.exit(1);
+    }
+    throw error;
 }
 
-// Export validated and typed env values
-export const env = {
-    JWT_SECRET: process.env.JWT_SECRET!,
-    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
-    DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID!,
-    DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET!,
-    DISCORD_REDIRECT_URI: process.env.DISCORD_REDIRECT_URI!,
-    DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN!,
-    DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID || '',
-    ADMIN_DISCORD_IDS: (process.env.ADMIN_DISCORD_IDS || '')
-        .split(',')
-        .filter(Boolean),
-    BOT_GUILD_IDS: (process.env.BOT_GUILD_IDS || '').split(',').filter(Boolean),
-    PORT: parseInt(process.env.PORT || '3001', 10),
-    NODE_ENV: process.env.NODE_ENV || 'development',
-};
+export { env };
