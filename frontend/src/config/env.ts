@@ -35,6 +35,35 @@ const getBooleanEnvVar = (key: string, defaultValue: boolean): boolean => {
 };
 
 /**
+ * Get an enum environment variable with validation
+ * @param key - The environment variable key
+ * @param allowedValues - Array of allowed values
+ * @param defaultValue - Default value (must be one of allowedValues)
+ * @returns The validated environment variable value
+ * @throws Error if the value is not in allowedValues
+ */
+const getEnumEnvVar = <T extends string>(
+    key: string,
+    allowedValues: readonly T[],
+    defaultValue: T
+): T => {
+    const value = import.meta.env[key] || defaultValue;
+    if (!allowedValues.includes(value as T)) {
+        throw new Error(
+            `Invalid value for ${key}: "${value}". Must be one of: ${allowedValues.join(', ')}`
+        );
+    }
+    return value as T;
+};
+
+// Validate environment once to avoid redundant validation
+const environment = getEnumEnvVar(
+    'VITE_ENVIRONMENT',
+    ['development', 'staging', 'production'] as const,
+    'development'
+);
+
+/**
  * Application configuration object
  * All values are validated and type-safe
  */
@@ -46,9 +75,9 @@ export const config = {
     discordClientId: getEnvVar('VITE_DISCORD_CLIENT_ID'),
 
     // Environment
-    environment: getEnvVar('VITE_ENVIRONMENT', 'development') as 'development' | 'staging' | 'production',
-    isDevelopment: getEnvVar('VITE_ENVIRONMENT', 'development') === 'development',
-    isProduction: getEnvVar('VITE_ENVIRONMENT', 'development') === 'production',
+    environment,
+    isDevelopment: environment === 'development',
+    isProduction: environment === 'production',
 
     // Feature Flags
     enableAnalytics: getBooleanEnvVar('VITE_ENABLE_ANALYTICS', false),
