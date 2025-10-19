@@ -71,8 +71,8 @@ npm run test:e2e:ui       # Run E2E tests with Playwright UI
 ```
 
 **Test Coverage:**
-- Backend: >80% code coverage (31+ tests)
-- Frontend: >70% code coverage (12+ tests)
+- Backend: >80% code coverage (55 tests)
+- Frontend: >70% code coverage (19 tests)
 
 For detailed testing documentation, see [TESTING.md](./TESTING.md).
 
