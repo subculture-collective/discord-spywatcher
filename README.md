@@ -139,7 +139,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ### Frontend Configuration
 
-Copy `frontend/frontend.env.example` to `frontend/.env` and configure:
+Copy `frontend/.env.example` to `frontend/.env` and configure:
 
 | Variable | Description | Example | Required |
 |----------|-------------|---------|----------|
