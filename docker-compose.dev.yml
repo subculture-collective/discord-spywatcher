@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     networks:
       - spywatcher-network
-    command: sh -c "npx prisma migrate deploy && npm run dev:api"
+    command: sh -c "npx prisma migrate dev && npm run dev:api"
 
   frontend:
     build:
