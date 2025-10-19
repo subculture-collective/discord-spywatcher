@@ -51,8 +51,22 @@ services:
         limits:
           cpus: '1'
           memory: 512M
-    command: sh -c "npx prisma migrate deploy && node dist/server.js"
+    command: sh -c "node dist/server.js"
 
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spywatcher-migrate-prod
+    environment:
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spywatcher-network
+    command: sh -c "npx prisma migrate deploy"
+    restart: "no"
   frontend:
     build:
       context: ./frontend
