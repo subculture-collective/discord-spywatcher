@@ -407,28 +407,38 @@ docker buildx build --platform linux/amd64,linux/arm64 -t your-registry/spywatch
 
 ### GitHub Actions
 
-Example workflow for building and pushing images:
+The repository includes a comprehensive Docker build workflow (`.github/workflows/docker-build.yml`) that:
 
-```yaml
-name: Build Docker Images
+1. **Builds Docker images** for backend and frontend
+2. **Pushes to GitHub Container Registry** (ghcr.io) on main/develop branches
+3. **Validates compose files** to ensure configuration correctness
+4. **Scans for vulnerabilities** using Trivy security scanner
+5. **Reports image sizes** as PR comments
 
-on:
-  push:
-    branches: [main]
+The workflow runs on:
+- Pushes to main/develop branches
+- Pull requests targeting main/develop
+- Changes to Docker-related files
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Build images
-        run: |
-          docker-compose -f docker-compose.prod.yml build
-      
-      - name: Run tests
-        run: |
-          docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+#### Manual Workflow Trigger
+
+You can also manually trigger the workflow from the Actions tab in GitHub.
+
+#### Local Testing Before CI
+
+Before pushing, test your Docker changes locally:
+
+```bash
+# Build images
+docker-compose -f docker-compose.prod.yml build
+
+# Validate compose files
+docker-compose -f docker-compose.dev.yml config
+docker-compose -f docker-compose.prod.yml config
+docker-compose -f docker-compose.test.yml config
+
+# Run tests
+docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ```
 
 ### Image Registry
