@@ -6,11 +6,16 @@
     "scripts": {
         "dev": "nodemon --watch src --exec ts-node src/index.ts",
         "dev:api": "nodemon --watch src --exec ts-node --files src/server.ts",
+        "build": "tsc",
+        "typecheck": "tsc --noEmit",
+        "test": "echo 'No tests configured yet' && exit 0",
+        "prisma:validate": "prisma validate",
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate deploy",
         "lint": "eslint . --ext .ts",
         "lint:fix": "eslint . --ext .ts --fix",
         "format": "prettier --write \"src/**/*.ts\"",
-        "format:check": "prettier --check \"src/**/*.ts\"",
-        "type-check": "tsc --noEmit"
+        "format:check": "prettier --check \"src/**/*.ts\""
     },
     "keywords": [],
     "author": "",
