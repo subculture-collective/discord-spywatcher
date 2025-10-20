@@ -5,6 +5,12 @@ import express from 'express';
 import { db } from '../db';
 import { requireAdmin, requireAuth } from '../middleware/auth';
 import {
+    authLimiter,
+    refreshLimiter,
+    adminLimiter,
+} from '../middleware/rateLimiter';
+import { validateRequest, authSchemas } from '../middleware/validation';
+import {
     generateAccessToken,
     generateRefreshToken,
     verifyRefreshToken,
@@ -17,14 +23,15 @@ import { env } from '../utils/env';
 
 const router = express.Router();
 
-const ALLOWED_DISCORD_IDS = ['247472026191790082'];
+// Use environment variable for allowed Discord IDs instead of hardcoding
+const ALLOWED_DISCORD_IDS = env.ADMIN_DISCORD_IDS || [];
 
-router.get('/discord', async (req, res): Promise<void> => {
-    const code = req.query.code as string;
-    if (!code) {
-        res.status(400).json({ error: 'Missing code' });
-        return;
-    }
+router.get(
+    '/discord',
+    authLimiter,
+    validateRequest(authSchemas.discordCallback),
+    async (req, res): Promise<void> => {
+        const code = req.query.code as string;
     console.log('client_id:', env.DISCORD_CLIENT_ID);
     console.log('client_secret:', env.DISCORD_CLIENT_SECRET);
     console.log('redirect_uri:', env.DISCORD_REDIRECT_URI);
@@ -163,7 +170,11 @@ router.get('/discord', async (req, res): Promise<void> => {
     }
 });
 
-router.post('/refresh', async (req, res): Promise<void> => {
+router.post(
+    '/refresh',
+    refreshLimiter,
+    validateRequest(authSchemas.refreshToken),
+    async (req, res): Promise<void> => {
     const token = req.cookies?.refreshToken || req.body?.token;
     if (!token) {
         res.status(400).json({ error: 'Missing refresh token' });
@@ -227,7 +238,7 @@ router.post('/refresh', async (req, res): Promise<void> => {
     }
 });
 
-router.post('/logout', (req, res): void => {
+router.post('/logout', authLimiter, (req, res): void => {
     clearRefreshTokenCookie(res);
     res.status(200).json({ message: 'Logged out' });
 });
@@ -296,7 +307,7 @@ router.get('/settings', requireAuth, async (req, res): Promise<void> => {
     res.status(200).json({ message: 'Logged out' });
 });
 
-router.get('/admin/users', requireAuth, requireAdmin, async (req, res) => {
+router.get('/admin/users', requireAuth, requireAdmin, adminLimiter, async (req, res) => {
     try {
         const users = await db.user.findMany({
             select: {
@@ -325,14 +336,11 @@ router.post(
     '/admin/users/:discordId/role',
     requireAuth,
     requireAdmin,
+    adminLimiter,
+    validateRequest(authSchemas.updateRole),
     async (req, res): Promise<void> => {
         const { discordId } = req.params;
         const { role } = req.body;
-
-        if (!['USER', 'ADMIN', 'MODERATOR', 'BANNED'].includes(role)) {
-            res.status(400).json({ error: 'Invalid role' });
-            return;
-        }
 
         try {
             const updated = await db.user.update({
@@ -348,7 +356,10 @@ router.post(
     }
 );
 
-router.get('/debug/user/:discordId', async (req, res): Promise<void> => {
+router.get(
+    '/debug/user/:discordId',
+    validateRequest(authSchemas.debugUser),
+    async (req, res): Promise<void> => {
     try {
         const user = await db.user.findUnique({
             where: { discordId: req.params.discordId },
