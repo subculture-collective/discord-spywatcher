@@ -31,6 +31,7 @@ router.get(
     authLimiter,
     validateRequest(authSchemas.discordCallback),
     async (req, res): Promise<void> => {
+        // Safe: 'code' is guaranteed to exist and be a string due to validation middleware
         const code = req.query.code as string;
     console.log('client_id:', env.DISCORD_CLIENT_ID);
     console.log('client_secret:', env.DISCORD_CLIENT_SECRET);
