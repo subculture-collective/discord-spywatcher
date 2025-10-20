@@ -16,8 +16,10 @@ export default tseslint.config(
             'node_modules',
             'dist',
             'build',
+            'coverage',
             'src/generated',
             'eslint.config.mjs',
+            'jest.config.js',
         ],
     },
     // Base ESLint config for all files
