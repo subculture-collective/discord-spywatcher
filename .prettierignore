@@ -17,8 +17,13 @@ coverage/
 .eslintcache
 .stylelintcache
 
+# Test reports
+playwright-report/
+test-results/
+
 # Prisma generated
 **/src/generated/prisma/
+**/prisma/migrations/
 
 # Logs
 *.log
@@ -33,3 +38,7 @@ pnpm-lock.yaml
 .env
 .env.*
 !.env.example
+
+# OS files
+.DS_Store
+Thumbs.db

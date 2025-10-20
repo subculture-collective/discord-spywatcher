@@ -3,13 +3,16 @@
     "version": "1.0.0",
     "private": true,
     "description": "Discord Spywatcher - Backend and Frontend monorepo",
+    "engine": {
+        "node": "22.20.0"
+    },
     "scripts": {
         "prepare": "husky",
         "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
         "lint:fix": "npm run lint:fix --prefix backend && npm run lint:fix --prefix frontend",
         "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
         "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "type-check": "npm run typecheck --prefix backend && npm run type-check --prefix frontend"
+        "type-check": "npm run type-check --prefix backend && npm run type-check --prefix frontend"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.0.0",
