@@ -161,17 +161,3 @@ export async function cleanupRefreshTokens(): Promise<number> {
     return result.count;
 }
 
-/**
- * Encode refresh token as JWT (for backwards compatibility)
- */
-export function encodeRefreshToken(payload: Partial<AuthPayload>): string {
-    return jwt.sign(
-        {
-            discordId: payload.discordId,
-            username: payload.username,
-            role: payload.role,
-        },
-        env.JWT_REFRESH_SECRET,
-        { expiresIn: '7d' }
-    );
-}
