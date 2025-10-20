@@ -1,9 +1,8 @@
 import * as crypto from 'crypto';
-import jwt from 'jsonwebtoken';
 
 import { db } from '../db';
+
 import { AuthPayload } from './auth';
-import { env } from './env';
 
 /**
  * Generate a cryptographically secure refresh token
@@ -160,4 +159,3 @@ export async function cleanupRefreshTokens(): Promise<number> {
     });
     return result.count;
 }
-

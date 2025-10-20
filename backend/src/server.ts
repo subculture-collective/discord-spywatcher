@@ -16,12 +16,10 @@ console.log('✅ cors loaded');
 
 const app = express();
 const PORT = env.PORT || 3001;
-const allowedOrigins = env.CORS_ORIGINS
-    ? env.CORS_ORIGINS.split(',').map(origin => origin.trim()).filter(Boolean)
-    : [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-    ];
+const allowedOrigins =
+    env.CORS_ORIGINS && env.CORS_ORIGINS.length > 0
+        ? env.CORS_ORIGINS
+        : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
 (async () => {
     try {

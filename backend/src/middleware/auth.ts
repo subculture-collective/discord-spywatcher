@@ -1,8 +1,8 @@
+import { Role } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { AuthPayload, verifyAccessToken } from '../utils/auth';
 import { checkGuildAccess, checkUserPermission } from '../utils/permissions';
-import { Role } from '@prisma/client';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -29,14 +29,14 @@ export function requireAuth(
     const token = authHeader.split(' ')[1];
     try {
         const payload = verifyAccessToken(token);
-        
+
         // Check if user is banned
         if (payload.role === 'BANNED') {
             console.warn('❌ Banned user attempted access:', payload.discordId);
             res.status(403).json({ error: 'Account is banned' });
             return;
         }
-        
+
         console.log('✅ Authenticated payload:', payload);
         req.user = payload;
         next();
@@ -97,7 +97,7 @@ export function requirePermission(permissionName: string) {
 
         try {
             const hasPermission = await checkUserPermission(
-                req.user.userId!,
+                req.user.userId,
                 permissionName
             );
 
@@ -139,7 +139,7 @@ export async function requireGuildAccess(
     }
 
     try {
-        const hasAccess = await checkGuildAccess(req.user.userId!, guildId);
+        const hasAccess = await checkGuildAccess(req.user.userId, guildId);
 
         if (!hasAccess) {
             res.status(403).json({
