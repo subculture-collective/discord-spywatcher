@@ -233,7 +233,11 @@ router.post('/refresh', async (req, res): Promise<void> => {
     }
 
     const userAgent = req.headers['user-agent'] || undefined;
-    const ipAddress = (req.ip || req.headers['x-forwarded-for'] || 'unknown') as string;
+    const xForwardedFor = req.headers['x-forwarded-for'];
+    const ipAddress = req.ip
+        || (typeof xForwardedFor === 'string'
+            ? xForwardedFor.split(',')[0].trim()
+            : 'unknown');
 
     try {
         // Verify and rotate the refresh token
