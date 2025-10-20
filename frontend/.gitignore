@@ -7,9 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
+build
+out
 *.local
 
 # Test artifacts
@@ -17,6 +22,7 @@ coverage
 .nyc_output
 playwright-report
 test-results
+.vitest
 
 # Editor directories and files
 .vscode/*
@@ -28,3 +34,18 @@ test-results
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite
+.vite
+
+# Cache
+.cache
+.parcel-cache
