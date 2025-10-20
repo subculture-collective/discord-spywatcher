@@ -690,8 +690,14 @@ router.get('/admin/roles/:role/permissions', requireAuth, requireAdmin, async (r
     const { role } = req.params;
     
     try {
-        const { getRolePermissions } = await import('../utils/permissions');
-        const permissions = await getRolePermissions(role as any);
+        const { getRolePermissions, Role } = await import('../utils/permissions');
+        // Validate that role is a valid Role enum value
+        const validRoles = Object.values(Role);
+        if (!validRoles.includes(role)) {
+            res.status(400).json({ error: 'Invalid role' });
+            return;
+        }
+        const permissions = await getRolePermissions(role as Role);
         
         res.json({ role, permissions });
     } catch (err) {
