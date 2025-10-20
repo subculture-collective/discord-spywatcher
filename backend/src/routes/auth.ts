@@ -42,7 +42,12 @@ router.get('/discord', async (req, res): Promise<void> => {
     console.log('redirect_uri:', env.DISCORD_REDIRECT_URI);
     console.log('auth code from Discord:', code);
 
-    const ipAddress = (req.ip || req.headers['x-forwarded-for'] || 'unknown') as string;
+    const xForwardedFor = req.headers['x-forwarded-for'];
+    const ipAddress =
+        req.ip ||
+        (typeof xForwardedFor === 'string'
+            ? xForwardedFor.split(',')[0].trim()
+            : 'unknown');
     const userAgent = req.headers['user-agent'] || undefined;
 
     try {
