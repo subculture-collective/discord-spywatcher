@@ -5,5 +5,7 @@ export * from './ipBlock';
 export * from './logger';
 export * from './rateLimiter';
 export * from './requestId';
+export * from './security';
+export * from './validation';
 export * from './winstonLogger';
 export * from './validateGuild';

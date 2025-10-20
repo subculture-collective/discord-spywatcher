@@ -121,11 +121,11 @@ export function requirePermission(permissionName: string) {
  * Middleware to require guild access
  * Expects guildId in req.params or req.query
  */
-export function requireGuildAccess(
+export async function requireGuildAccess(
     req: Request,
     res: Response,
     next: NextFunction
-): void {
+): Promise<void> {
     if (!req.user) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
@@ -138,18 +138,19 @@ export function requireGuildAccess(
         return;
     }
 
-    checkGuildAccess(req.user.userId!, guildId)
-        .then((hasAccess) => {
-            if (!hasAccess) {
-                res.status(403).json({
-                    error: 'Forbidden — no access to this guild',
-                });
-                return;
-            }
-            next();
-        })
-        .catch((err) => {
-            console.error('Guild access check error:', err);
-            res.status(500).json({ error: 'Internal server error' });
-        });
+    try {
+        const hasAccess = await checkGuildAccess(req.user.userId!, guildId);
+
+        if (!hasAccess) {
+            res.status(403).json({
+                error: 'Forbidden — no access to this guild',
+            });
+            return;
+        }
+
+        next();
+    } catch (err) {
+        console.error('Guild access check error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 }
