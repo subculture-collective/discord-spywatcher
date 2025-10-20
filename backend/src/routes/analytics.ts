@@ -9,7 +9,6 @@ import {
     getRoleDriftFlags,
 } from '../analytics';
 import { excludeBannedUsers, requireAuth, validateGuild } from '../middleware';
-import { env } from '../utils/env';
 
 const router = Router();
 
