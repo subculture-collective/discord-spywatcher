@@ -124,6 +124,10 @@ model User {
   role                  Role     @default(USER)
 
   guilds                Guild[]
+  refreshTokens         RefreshToken[]
+  sessions              Session[]
+  apiKeys               ApiKey[]
+  loginLogs             LoginLog[]
 }
 
 model Guild {
@@ -135,4 +139,82 @@ model Guild {
   permissions BigInt
   userId      String
   user        User     @relation(fields: [userId], references: [id])
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique // e.g., "analytics.view", "users.ban"
+  description String
+  category    String           // e.g., "analytics", "admin"
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  role         Role       
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  
+  @@id([role, permissionId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  familyId  String   // For token rotation detection
+  used      Boolean  @default(false)
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([familyId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  userAgent    String?
+  ipAddress    String?
+  lastActivity DateTime @default(now())
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  userId      String
+  scopes      String   // JSON array of scopes/permissions
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model LoginLog {
+  id         String   @id @default(cuid())
+  userId     String
+  ipAddress  String
+  userAgent  String?
+  success    Boolean
+  reason     String?  // Failure reason if success=false
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
 }

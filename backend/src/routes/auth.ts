@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
 import axios from 'axios';
+import * as crypto from 'crypto';
 import express from 'express';
 
 import { db } from '../db';
-import { requireAdmin, requireAuth } from '../middleware/auth';
+import { requireAdmin, requireAuth, requirePermission } from '../middleware/auth';
 import {
     generateAccessToken,
-    generateRefreshToken,
-    verifyRefreshToken,
 } from '../utils/auth';
 import {
     clearRefreshTokenCookie,
     setRefreshTokenCookie,
 } from '../utils/cookies';
 import { env } from '../utils/env';
+import { logLoginAttempt, detectSuspiciousLogin } from '../utils/loginLog';
+import { createRefreshToken, verifyAndRotateRefreshToken, revokeRefreshToken, revokeAllUserRefreshTokens } from '../utils/refreshToken';
+import { createSession, getUserSessions, revokeSession, revokeAllUserSessions } from '../utils/sessions';
 
 const router = express.Router();
 
@@ -21,14 +23,26 @@ const ALLOWED_DISCORD_IDS = ['247472026191790082'];
 
 router.get('/discord', async (req, res): Promise<void> => {
     const code = req.query.code as string;
+    const state = req.query.state as string;
+    
     if (!code) {
         res.status(400).json({ error: 'Missing code' });
         return;
     }
+    
+    // State parameter validation for CSRF protection
+    // In production, you should validate this against a stored state
+    if (!state) {
+        console.warn('⚠️ Missing state parameter in OAuth callback');
+    }
+    
     console.log('client_id:', env.DISCORD_CLIENT_ID);
     console.log('client_secret:', env.DISCORD_CLIENT_SECRET);
     console.log('redirect_uri:', env.DISCORD_REDIRECT_URI);
     console.log('auth code from Discord:', code);
+
+    const ipAddress = (req.ip || req.headers['x-forwarded-for'] || 'unknown') as string;
+    const userAgent = req.headers['user-agent'] || undefined;
 
     try {
         const tokenRes = await axios.post(
@@ -43,7 +57,16 @@ router.get('/discord', async (req, res): Promise<void> => {
             { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
         );
 
-        const { access_token, refresh_token } = tokenRes.data;
+        const { access_token, refresh_token, scope } = tokenRes.data;
+        
+        // Validate scopes
+        const requiredScopes = ['identify', 'guilds'];
+        const grantedScopes = scope ? scope.split(' ') : [];
+        const hasRequiredScopes = requiredScopes.every(s => grantedScopes.includes(s));
+        
+        if (!hasRequiredScopes) {
+            console.warn('⚠️ Missing required OAuth scopes');
+        }
 
         const userRes = await axios.get('https://discord.com/api/users/@me', {
             headers: { Authorization: `Bearer ${access_token}` },
@@ -60,12 +83,16 @@ router.get('/discord', async (req, res): Promise<void> => {
         } = userRes.data;
 
         if (!ALLOWED_DISCORD_IDS.includes(discordId)) {
+            await logLoginAttempt(
+                discordId,
+                ipAddress,
+                userAgent,
+                false,
+                'Discord ID not in allowed list'
+            );
             res.status(403).json({ error: 'Unauthorized Discord user' });
             return;
         }
-
-        const ipAddress = req.ip;
-        const userAgent = req.headers['user-agent'] || null;
 
         const dbUser = await db.user.upsert({
             where: { discordId },
@@ -103,8 +130,22 @@ router.get('/discord', async (req, res): Promise<void> => {
         });
 
         if (dbUser.role === 'BANNED') {
+            await logLoginAttempt(
+                dbUser.id,
+                ipAddress,
+                userAgent,
+                false,
+                'Account is banned'
+            );
             res.status(403).json({ error: 'This account is banned.' });
             return;
+        }
+        
+        // Check for suspicious login
+        const suspicionCheck = await detectSuspiciousLogin(dbUser.id, ipAddress);
+        if (suspicionCheck.suspicious) {
+            console.warn(`⚠️ Suspicious login detected: ${suspicionCheck.reason}`);
+            // In production, you might want to require additional verification
         }
 
         const guildsRes = await axios.get(
@@ -138,6 +179,7 @@ router.get('/discord', async (req, res): Promise<void> => {
             });
         }
 
+        // Generate access token (15 minutes)
         const accessToken = generateAccessToken({
             userId: dbUser.id,
             discordId,
@@ -145,9 +187,23 @@ router.get('/discord', async (req, res): Promise<void> => {
             access: true,
             role: dbUser.role,
         });
-        const refreshToken = generateRefreshToken({ discordId });
+        
+        // Create refresh token with rotation family
+        const familyId = crypto.randomUUID();
+        const newRefreshToken = await createRefreshToken(
+            dbUser.id,
+            familyId,
+            userAgent,
+            ipAddress
+        );
+        
+        // Create session
+        await createSession(dbUser.id, userAgent, ipAddress);
+        
+        // Log successful login
+        await logLoginAttempt(dbUser.id, ipAddress, userAgent, true);
 
-        setRefreshTokenCookie(res, refreshToken);
+        setRefreshTokenCookie(res, newRefreshToken);
 
         res.json({ accessToken });
     } catch (err) {
@@ -170,64 +226,58 @@ router.post('/refresh', async (req, res): Promise<void> => {
         return;
     }
 
+    const userAgent = req.headers['user-agent'] || undefined;
+    const ipAddress = (req.ip || req.headers['x-forwarded-for'] || 'unknown') as string;
+
     try {
-        const payload = verifyRefreshToken(token);
-        console.log('🔄 refresh payload:', payload);
-        const user = await db.user.upsert({
-            where: { discordId: payload.discordId },
-            update: {
-                refreshTokenIssuedAt: new Date(),
-            },
-            create: {
-                discordId: payload.discordId,
-                username: payload.username || 'unknown',
-                discriminator: payload.username?.split('#')[1] || '0000',
-                role: payload.role || 'USER',
-                verified: false,
-                accessToken: '',
-                refreshToken: '',
-                accessTokenExpiresAt: new Date(0),
-                lastSeenAt: new Date(),
-                refreshTokenIssuedAt: new Date(),
-            },
-        });
+        // Verify and rotate the refresh token
+        const { user, newRefreshToken } = await verifyAndRotateRefreshToken(
+            token,
+            userAgent,
+            ipAddress
+        );
 
-        if (!user) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-        }
-
-        // Optional: Refresh token TTL = 7 days
-        const maxAge = 7 * 24 * 60 * 60 * 1000;
-        const isExpired =
-            Date.now() - new Date(user.refreshTokenIssuedAt).getTime() > maxAge;
-
-        if (isExpired) {
-            res.status(401).json({ error: 'Refresh token expired' });
-            return;
-        }
-
+        // Generate new access token
         const newAccessToken = generateAccessToken({
-            userId: user.id,
+            userId: user.userId,
             discordId: user.discordId,
-            username: `${user.username}#${user.discriminator}`,
+            username: user.username,
             access: true,
             role: user.role,
         });
 
-        await db.user.update({
-            where: { discordId: user.discordId },
-            data: { refreshTokenIssuedAt: new Date() },
-        });
+        // Set new refresh token cookie
+        setRefreshTokenCookie(res, newRefreshToken);
 
-        console.log('✅ Refresh route hit. Sending new access token.');
+        console.log('✅ Refresh route hit. Tokens rotated successfully.');
         res.json({ accessToken: newAccessToken });
-    } catch (_err) {
-        res.status(401).json({ error: 'Invalid refresh token' });
+    } catch (err) {
+        const error = err as Error;
+        console.error('❌ Refresh token error:', error.message);
+        
+        // Clear invalid token from cookie
+        clearRefreshTokenCookie(res);
+        
+        res.status(401).json({ 
+            error: 'Invalid refresh token',
+            detail: error.message 
+        });
     }
 });
 
-router.post('/logout', (req, res): void => {
+router.post('/logout', async (req, res): Promise<void> => {
+    const token = req.cookies?.refreshToken || req.body?.token;
+    
+    if (token) {
+        try {
+            // Revoke the refresh token
+            await revokeRefreshToken(token);
+            console.log('✅ Refresh token revoked');
+        } catch (err) {
+            console.error('Failed to revoke refresh token:', err);
+        }
+    }
+    
     clearRefreshTokenCookie(res);
     res.status(200).json({ message: 'Logged out' });
 });
@@ -296,6 +346,101 @@ router.get('/settings', requireAuth, async (req, res): Promise<void> => {
     res.status(200).json({ message: 'Logged out' });
 });
 
+// ============================================================================
+// Session Management Routes
+// ============================================================================
+
+router.get('/sessions', requireAuth, async (req, res): Promise<void> => {
+    try {
+        const sessions = await getUserSessions(req.user!.userId!);
+        
+        res.json({
+            sessions: sessions.map(s => ({
+                id: s.id,
+                userAgent: s.userAgent,
+                ipAddress: s.ipAddress,
+                lastActivity: s.lastActivity,
+                createdAt: s.createdAt,
+                expiresAt: s.expiresAt,
+            })),
+        });
+    } catch (err) {
+        console.error('Failed to fetch sessions:', err);
+        res.status(500).json({ error: 'Failed to fetch sessions' });
+    }
+});
+
+router.delete('/sessions/:sessionId', requireAuth, async (req, res): Promise<void> => {
+    const { sessionId } = req.params;
+    
+    try {
+        // Verify the session belongs to the user
+        const session = await db.session.findUnique({
+            where: { id: sessionId },
+        });
+        
+        if (!session) {
+            res.status(404).json({ error: 'Session not found' });
+            return;
+        }
+        
+        if (session.userId !== req.user!.userId) {
+            res.status(403).json({ error: 'Cannot revoke another user\'s session' });
+            return;
+        }
+        
+        await revokeSession(sessionId);
+        res.json({ message: 'Session revoked' });
+    } catch (err) {
+        console.error('Failed to revoke session:', err);
+        res.status(500).json({ error: 'Failed to revoke session' });
+    }
+});
+
+router.post('/sessions/revoke-all', requireAuth, async (req, res): Promise<void> => {
+    try {
+        const count = await revokeAllUserSessions(req.user!.userId!);
+        
+        // Also revoke all refresh tokens
+        await revokeAllUserRefreshTokens(req.user!.userId!);
+        
+        // Clear cookie
+        clearRefreshTokenCookie(res);
+        
+        res.json({ 
+            message: 'All sessions revoked',
+            count 
+        });
+    } catch (err) {
+        console.error('Failed to revoke all sessions:', err);
+        res.status(500).json({ error: 'Failed to revoke all sessions' });
+    }
+});
+
+router.get('/login-history', requireAuth, async (req, res): Promise<void> => {
+    try {
+        const { getUserLoginHistory } = await import('../utils/loginLog');
+        const history = await getUserLoginHistory(req.user!.userId!, 20);
+        
+        res.json({
+            history: history.map(log => ({
+                ipAddress: log.ipAddress,
+                userAgent: log.userAgent,
+                success: log.success,
+                reason: log.reason,
+                createdAt: log.createdAt,
+            })),
+        });
+    } catch (err) {
+        console.error('Failed to fetch login history:', err);
+        res.status(500).json({ error: 'Failed to fetch login history' });
+    }
+});
+
+// ============================================================================
+// Admin Routes
+// ============================================================================
+
 router.get('/admin/users', requireAuth, requireAdmin, async (req, res) => {
     try {
         const users = await db.user.findMany({
@@ -363,6 +508,114 @@ router.get('/debug/user/:discordId', async (req, res): Promise<void> => {
     } catch (err) {
         console.error('Debug user fetch failed:', err);
         res.status(500).json({ error: 'Internal error' });
+    }
+});
+
+// ============================================================================
+// Admin Session Management Routes
+// ============================================================================
+
+router.get('/admin/sessions', requireAuth, requirePermission('sessions.view.all'), async (req, res): Promise<void> => {
+    try {
+        const sessions = await db.session.findMany({
+            where: {
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        discordId: true,
+                        username: true,
+                        discriminator: true,
+                    },
+                },
+            },
+            orderBy: {
+                lastActivity: 'desc',
+            },
+        });
+        
+        res.json({
+            sessions: sessions.map(s => ({
+                id: s.id,
+                user: s.user,
+                userAgent: s.userAgent,
+                ipAddress: s.ipAddress,
+                lastActivity: s.lastActivity,
+                createdAt: s.createdAt,
+                expiresAt: s.expiresAt,
+            })),
+        });
+    } catch (err) {
+        console.error('Failed to fetch all sessions:', err);
+        res.status(500).json({ error: 'Failed to fetch sessions' });
+    }
+});
+
+router.delete('/admin/sessions/:sessionId', requireAuth, requirePermission('sessions.revoke.all'), async (req, res): Promise<void> => {
+    const { sessionId } = req.params;
+    
+    try {
+        await revokeSession(sessionId);
+        res.json({ message: 'Session revoked' });
+    } catch (err) {
+        console.error('Failed to revoke session:', err);
+        res.status(500).json({ error: 'Failed to revoke session' });
+    }
+});
+
+router.post('/admin/users/:userId/revoke-sessions', requireAuth, requirePermission('sessions.revoke.all'), async (req, res): Promise<void> => {
+    const { userId } = req.params;
+    
+    try {
+        const sessionCount = await revokeAllUserSessions(userId);
+        const tokenCount = await revokeAllUserRefreshTokens(userId);
+        
+        res.json({ 
+            message: 'All user sessions and tokens revoked',
+            sessionsRevoked: sessionCount,
+            tokensRevoked: tokenCount,
+        });
+    } catch (err) {
+        console.error('Failed to revoke user sessions:', err);
+        res.status(500).json({ error: 'Failed to revoke user sessions' });
+    }
+});
+
+// ============================================================================
+// Admin Permission Routes
+// ============================================================================
+
+router.get('/admin/permissions', requireAuth, requireAdmin, async (req, res): Promise<void> => {
+    try {
+        const permissions = await db.permission.findMany({
+            orderBy: [
+                { category: 'asc' },
+                { name: 'asc' },
+            ],
+        });
+        
+        res.json({ permissions });
+    } catch (err) {
+        console.error('Failed to fetch permissions:', err);
+        res.status(500).json({ error: 'Failed to fetch permissions' });
+    }
+});
+
+router.get('/admin/roles/:role/permissions', requireAuth, requireAdmin, async (req, res): Promise<void> => {
+    const { role } = req.params;
+    
+    try {
+        const { getRolePermissions } = await import('../utils/permissions');
+        const permissions = await getRolePermissions(role as any);
+        
+        res.json({ role, permissions });
+    } catch (err) {
+        console.error('Failed to fetch role permissions:', err);
+        res.status(500).json({ error: 'Failed to fetch role permissions' });
     }
 });
 
