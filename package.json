@@ -3,6 +3,9 @@
     "version": "1.0.0",
     "private": true,
     "description": "Discord Spywatcher - Backend and Frontend monorepo",
+    "engine": {
+        "node": "22.20.0"
+    },
     "scripts": {
         "prepare": "husky",
         "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
