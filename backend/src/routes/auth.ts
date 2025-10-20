@@ -16,6 +16,7 @@ import { env } from '../utils/env';
 import { logLoginAttempt, detectSuspiciousLogin } from '../utils/loginLog';
 import { createRefreshToken, verifyAndRotateRefreshToken, revokeRefreshToken, revokeAllUserRefreshTokens } from '../utils/refreshToken';
 import { createSession, getUserSessions, revokeSession, revokeAllUserSessions } from '../utils/sessions';
+import { createApiKey, getUserApiKeys, revokeApiKey } from '../utils/apiKeys';
 
 const router = express.Router();
 
@@ -582,6 +583,86 @@ router.post('/admin/users/:userId/revoke-sessions', requireAuth, requirePermissi
     } catch (err) {
         console.error('Failed to revoke user sessions:', err);
         res.status(500).json({ error: 'Failed to revoke user sessions' });
+    }
+});
+
+// ============================================================================
+// API Key Routes
+// ============================================================================
+
+router.post('/api-keys', requireAuth, requirePermission('apikeys.create'), async (req, res): Promise<void> => {
+    const { name, scopes, expiresInDays } = req.body;
+    
+    if (!name || typeof name !== 'string') {
+        res.status(400).json({ error: 'Invalid or missing name' });
+        return;
+    }
+    
+    try {
+        const { id, key } = await createApiKey(
+            req.user!.userId!,
+            name,
+            scopes || [],
+            expiresInDays
+        );
+        
+        res.status(201).json({
+            id,
+            key,
+            name,
+            scopes: scopes || [],
+            warning: 'Save this key now. You will not be able to see it again.',
+        });
+    } catch (err) {
+        console.error('Failed to create API key:', err);
+        res.status(500).json({ error: 'Failed to create API key' });
+    }
+});
+
+router.get('/api-keys', requireAuth, requirePermission('apikeys.view.own'), async (req, res): Promise<void> => {
+    try {
+        const apiKeys = await getUserApiKeys(req.user!.userId!);
+        
+        res.json({
+            apiKeys: apiKeys.map(k => ({
+                id: k.id,
+                name: k.name,
+                scopes: JSON.parse(k.scopes),
+                lastUsedAt: k.lastUsedAt,
+                expiresAt: k.expiresAt,
+                createdAt: k.createdAt,
+            })),
+        });
+    } catch (err) {
+        console.error('Failed to fetch API keys:', err);
+        res.status(500).json({ error: 'Failed to fetch API keys' });
+    }
+});
+
+router.delete('/api-keys/:keyId', requireAuth, requirePermission('apikeys.revoke.own'), async (req, res): Promise<void> => {
+    const { keyId } = req.params;
+    
+    try {
+        // Verify the key belongs to the user
+        const apiKey = await db.apiKey.findUnique({
+            where: { id: keyId },
+        });
+        
+        if (!apiKey) {
+            res.status(404).json({ error: 'API key not found' });
+            return;
+        }
+        
+        if (apiKey.userId !== req.user!.userId) {
+            res.status(403).json({ error: 'Cannot revoke another user\'s API key' });
+            return;
+        }
+        
+        await revokeApiKey(keyId);
+        res.json({ message: 'API key revoked' });
+    } catch (err) {
+        console.error('Failed to revoke API key:', err);
+        res.status(500).json({ error: 'Failed to revoke API key' });
     }
 });
 
