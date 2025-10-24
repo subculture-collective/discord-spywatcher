@@ -29,20 +29,20 @@ export const DEFAULT_RETENTION_PERIODS: Record<string, number> = {
  * Initialize default data retention policies if they don't exist
  */
 export async function initializeRetentionPolicies(): Promise<void> {
-    const entries = Object.keys(DEFAULT_RETENTION_PERIODS);
-    
-    for (const dataType of entries) {
+    for (const dataType of Object.keys(DEFAULT_RETENTION_PERIODS)) {
         const retentionDays = DEFAULT_RETENTION_PERIODS[dataType as DataType];
-        await db.dataRetentionPolicy.upsert({
-            where: { dataType },
-            update: {},
-            create: {
-                dataType,
-                retentionDays,
-                description: `Default retention policy for ${dataType}`,
-                enabled: true,
-            },
-        });
+        if (retentionDays !== undefined) {
+            await db.dataRetentionPolicy.upsert({
+                where: { dataType },
+                update: {},
+                create: {
+                    dataType,
+                    retentionDays,
+                    description: `Default retention policy for ${dataType}`,
+                    enabled: true,
+                },
+            });
+        }
     }
 }
 

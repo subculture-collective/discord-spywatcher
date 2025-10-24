@@ -115,11 +115,18 @@ router.patch(
             return;
         }
 
+        if (enabled !== undefined && typeof enabled !== 'boolean') {
+            res.status(400).json({
+                error: 'enabled must be a boolean',
+            });
+            return;
+        }
+
         try {
             await updateRetentionPolicy(
                 dataType, 
                 retentionDays, 
-                typeof enabled === 'boolean' ? enabled : true
+                enabled !== undefined ? enabled : true
             );
 
             res.json({
