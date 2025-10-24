@@ -29,12 +29,10 @@ export const DEFAULT_RETENTION_PERIODS: Record<string, number> = {
  * Initialize default data retention policies if they don't exist
  */
 export async function initializeRetentionPolicies(): Promise<void> {
-    const entries = Object.keys(DEFAULT_RETENTION_PERIODS) as Array<
-        keyof typeof DEFAULT_RETENTION_PERIODS
-    >;
+    const entries = Object.keys(DEFAULT_RETENTION_PERIODS);
     
     for (const dataType of entries) {
-        const retentionDays = DEFAULT_RETENTION_PERIODS[dataType];
+        const retentionDays = DEFAULT_RETENTION_PERIODS[dataType as DataType];
         await db.dataRetentionPolicy.upsert({
             where: { dataType },
             update: {},
@@ -106,84 +104,68 @@ export async function cleanupOldData(): Promise<{
 
             let deletedCount = 0;
 
-            switch (policy.dataType) {
-                case DataType.PRESENCE_EVENTS:
-                    deletedCount = (
-                        await db.presenceEvent.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
+            // Use string comparison to avoid enum type issues
+            const dataTypeName = policy.dataType as string;
 
-                case DataType.MESSAGE_EVENTS:
-                    deletedCount = (
-                        await db.messageEvent.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.TYPING_EVENTS:
-                    deletedCount = (
-                        await db.typingEvent.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.DELETED_MESSAGE_EVENTS:
-                    deletedCount = (
-                        await db.deletedMessageEvent.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.JOIN_EVENTS:
-                    deletedCount = (
-                        await db.joinEvent.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.REACTION_TIMES:
-                    deletedCount = (
-                        await db.reactionTime.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.ROLE_CHANGE_EVENTS:
-                    deletedCount = (
-                        await db.roleChangeEvent.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.SESSIONS:
-                    deletedCount = (
-                        await db.session.deleteMany({
-                            where: { expiresAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                case DataType.AUDIT_LOGS:
-                    deletedCount = (
-                        await db.auditLog.deleteMany({
-                            where: { createdAt: { lt: cutoffDate } },
-                        })
-                    ).count;
-                    break;
-
-                default:
-                    console.warn(
-                        `Unknown data type for cleanup: ${policy.dataType}`
-                    );
-                    continue;
+            if (dataTypeName === DataType.PRESENCE_EVENTS) {
+                deletedCount = (
+                    await db.presenceEvent.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.MESSAGE_EVENTS) {
+                deletedCount = (
+                    await db.messageEvent.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.TYPING_EVENTS) {
+                deletedCount = (
+                    await db.typingEvent.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.DELETED_MESSAGE_EVENTS) {
+                deletedCount = (
+                    await db.deletedMessageEvent.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.JOIN_EVENTS) {
+                deletedCount = (
+                    await db.joinEvent.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.REACTION_TIMES) {
+                deletedCount = (
+                    await db.reactionTime.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.ROLE_CHANGE_EVENTS) {
+                deletedCount = (
+                    await db.roleChangeEvent.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.SESSIONS) {
+                deletedCount = (
+                    await db.session.deleteMany({
+                        where: { expiresAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else if (dataTypeName === DataType.AUDIT_LOGS) {
+                deletedCount = (
+                    await db.auditLog.deleteMany({
+                        where: { createdAt: { lt: cutoffDate } },
+                    })
+                ).count;
+            } else {
+                console.warn(
+                    `Unknown data type for cleanup: ${policy.dataType}`
+                );
+                continue;
             }
 
             // Update last cleanup time

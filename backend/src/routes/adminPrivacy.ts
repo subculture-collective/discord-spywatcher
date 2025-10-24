@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Router } from 'express';
 
 import { db } from '../db';
@@ -116,7 +116,11 @@ router.patch(
         }
 
         try {
-            await updateRetentionPolicy(dataType, retentionDays, enabled);
+            await updateRetentionPolicy(
+                dataType, 
+                retentionDays, 
+                typeof enabled === 'boolean' ? enabled : true
+            );
 
             res.json({
                 message: 'Retention policy updated',
