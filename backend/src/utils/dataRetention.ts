@@ -29,9 +29,12 @@ export const DEFAULT_RETENTION_PERIODS: Record<string, number> = {
  * Initialize default data retention policies if they don't exist
  */
 export async function initializeRetentionPolicies(): Promise<void> {
-    for (const [dataType, retentionDays] of Object.entries(
-        DEFAULT_RETENTION_PERIODS
-    )) {
+    const entries = Object.keys(DEFAULT_RETENTION_PERIODS) as Array<
+        keyof typeof DEFAULT_RETENTION_PERIODS
+    >;
+    
+    for (const dataType of entries) {
+        const retentionDays = DEFAULT_RETENTION_PERIODS[dataType];
         await db.dataRetentionPolicy.upsert({
             where: { dataType },
             update: {},

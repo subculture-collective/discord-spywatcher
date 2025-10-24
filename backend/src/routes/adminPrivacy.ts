@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
-import express from 'express';
+import { Router } from 'express';
 
 import { db } from '../db';
 import { requireAuth, requireAdmin } from '../middleware/auth';
@@ -13,7 +13,7 @@ import {
     cleanupOldData,
 } from '../utils/dataRetention';
 
-const router = express.Router();
+const router = Router();
 
 /**
  * Get all audit logs (admin only)

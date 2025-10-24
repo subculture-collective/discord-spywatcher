@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
-import express from 'express';
+import { Router } from 'express';
 
 import { db } from '../db';
 import { requireAuth } from '../middleware/auth';
@@ -7,7 +7,7 @@ import { authLimiter } from '../middleware/rateLimiter';
 import { validateRequest, privacySchemas } from '../middleware/validation';
 import { AuditAction, createAuditLog } from '../utils/auditLog';
 
-const router = express.Router();
+const router = Router();
 
 /**
  * Export user data (GDPR Article 15 - Right to Access)
