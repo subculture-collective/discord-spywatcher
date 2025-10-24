@@ -4,6 +4,7 @@ import express from 'express';
 import { db } from '../db';
 import { requireAuth, requireAdmin } from '../middleware/auth';
 import { adminLimiter } from '../middleware/rateLimiter';
+import { validateRequest, privacySchemas } from '../middleware/validation';
 import { getPendingDeletions } from '../utils/accountDeletion';
 import { getAllAuditLogs } from '../utils/auditLog';
 import {
@@ -23,6 +24,7 @@ router.get(
     requireAuth,
     requireAdmin,
     adminLimiter,
+    validateRequest(privacySchemas.auditLogsQuery),
     async (req, res): Promise<void> => {
         const limit = parseInt(req.query.limit as string) || 100;
         const offset = parseInt(req.query.offset as string) || 0;
@@ -101,6 +103,7 @@ router.patch(
     requireAuth,
     requireAdmin,
     adminLimiter,
+    validateRequest(privacySchemas.updateRetentionPolicy),
     async (req, res): Promise<void> => {
         const { dataType } = req.params;
         const { retentionDays, enabled } = req.body;

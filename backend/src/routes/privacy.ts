@@ -4,6 +4,7 @@ import express from 'express';
 import { db } from '../db';
 import { requireAuth } from '../middleware/auth';
 import { authLimiter } from '../middleware/rateLimiter';
+import { validateRequest, privacySchemas } from '../middleware/validation';
 import { AuditAction, createAuditLog } from '../utils/auditLog';
 
 const router = express.Router();
@@ -204,6 +205,7 @@ router.post(
     '/delete-request',
     requireAuth,
     authLimiter,
+    validateRequest(privacySchemas.deleteRequest),
     async (req, res): Promise<void> => {
         const userId = req.user!.userId;
         const { reason } = req.body;
@@ -373,6 +375,7 @@ router.patch(
     '/profile',
     requireAuth,
     authLimiter,
+    validateRequest(privacySchemas.updateProfile),
     async (req, res): Promise<void> => {
         const userId = req.user!.userId;
         const { email, locale } = req.body;
