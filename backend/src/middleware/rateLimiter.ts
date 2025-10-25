@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call */
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 
@@ -26,7 +26,7 @@ function createRateLimiter(options: {
         legacyHeaders: false,
         skipSuccessfulRequests: options.skipSuccessfulRequests || false,
         skip: options.skip,
-        handler: (req: Request, res: any) => {
+        handler: (req: Request, res: Response) => {
             res.status(429).json({
                 error: 'Too many requests',
                 message: options.message,
