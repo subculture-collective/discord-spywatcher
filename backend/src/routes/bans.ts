@@ -3,10 +3,12 @@ import { Router } from 'express';
 
 import { db } from '../db';
 import { banIP, requireAuth, unbanIP } from '../middleware';
+import { apiLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
 router.use(requireAuth);
+router.use(apiLimiter);
 
 router.get('/banned', async (req, res) => {
     const list = await db.blockedIP.findMany({

@@ -2,9 +2,11 @@ import { Router } from 'express';
 
 import { getSuspicionScores } from '../analytics';
 import { excludeBannedUsers, requireAuth, validateGuild } from '../middleware';
+import { apiLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 router.use(validateGuild);
+router.use(apiLimiter);
 
 router.get('/suspicion', requireAuth, async (req, res) => {
     const since = req.query.since
