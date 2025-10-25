@@ -128,6 +128,8 @@ model User {
   sessions              Session[]
   apiKeys               ApiKey[]
   loginLogs             LoginLog[]
+  deletionRequest       DeletionRequest?
+  consentLogs           ConsentLog[]
 }
 
 model Guild {
@@ -217,4 +219,54 @@ model LoginLog {
   
   @@index([userId])
   @@index([createdAt])
+}
+
+// GDPR Compliance Models
+
+model DeletionRequest {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  reason       String?
+  requestedAt  DateTime @default(now())
+  scheduledFor DateTime
+  status       String   @default("PENDING") // PENDING, CANCELLED, COMPLETED
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // ACCOUNT_CREATED, DATA_EXPORTED, ACCOUNT_DELETED, etc.
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+model ConsentLog {
+  id          String   @id @default(cuid())
+  userId      String
+  consentType String   // PRIVACY_POLICY, COOKIES, DATA_COLLECTION
+  granted     Boolean
+  version     String   // Policy version
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([consentType])
+}
+
+model DataRetentionPolicy {
+  id              String   @id @default(cuid())
+  dataType        String   @unique // PRESENCE_EVENTS, MESSAGE_EVENTS, TYPING_EVENTS, etc.
+  retentionDays   Int      // Number of days to retain data
+  description     String?
+  enabled         Boolean  @default(true)
+  lastCleanupAt   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

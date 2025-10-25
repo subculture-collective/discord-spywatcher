@@ -28,7 +28,7 @@
     "license": "ISC",
     "type": "commonjs",
     "dependencies": {
-        "@prisma/client": "^6.8.2",
+        "@prisma/client": "^6.18.0",
         "axios": "^1.9.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
@@ -39,7 +39,6 @@
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "morgan": "^1.10.0",
-        "prisma": "^6.8.2",
         "uuid": "^13.0.0",
         "winston": "^3.17.0",
         "zod": "^4.1.12"
@@ -63,6 +62,7 @@
         "jest": "^30.2.0",
         "nodemon": "^3.1.10",
         "prettier": "^3.6.2",
+        "prisma": "^6.18.0",
         "supertest": "^7.1.4",
         "ts-jest": "^29.4.5",
         "ts-node": "^10.9.2",

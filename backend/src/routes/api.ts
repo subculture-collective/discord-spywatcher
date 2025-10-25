@@ -1,8 +1,10 @@
 import { Router } from 'express';
 
+import adminPrivacyRoutes from './adminPrivacy';
 import analyticsRoutes from './analytics';
 import authRoutes from './auth';
 import banRoutes from './bans';
+import privacyRoutes from './privacy';
 import suspicionRoutes from './suspicion';
 
 const router = Router();
@@ -13,6 +15,8 @@ router.get('/health', (_req, res) => {
 });
 
 router.use('/auth', authRoutes);
+router.use('/privacy', privacyRoutes);
+router.use('/admin/privacy', adminPrivacyRoutes);
 router.use(analyticsRoutes);
 router.use(suspicionRoutes);
 router.use(banRoutes);

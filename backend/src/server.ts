@@ -109,5 +109,27 @@ const allowedOrigins =
         console.log(
             `🛡️  Rate limiting: ${env.ENABLE_RATE_LIMITING ? 'enabled' : 'disabled'}`
         );
+        
+        // Initialize GDPR compliance features
+        import('./utils/dataRetention')
+            .then(({ initializeRetentionPolicies }) => {
+                return initializeRetentionPolicies();
+            })
+            .then(() => {
+                console.log('✅ Data retention policies initialized');
+            })
+            .catch((err) => {
+                console.error('Failed to initialize retention policies:', err);
+            });
+        
+        // Start scheduled privacy tasks
+        import('./utils/scheduledTasks')
+            .then(({ startScheduledPrivacyTasks }) => {
+                startScheduledPrivacyTasks();
+                console.log('✅ Scheduled privacy tasks started');
+            })
+            .catch((err) => {
+                console.error('Failed to start scheduled tasks:', err);
+            });
     });
 })();
