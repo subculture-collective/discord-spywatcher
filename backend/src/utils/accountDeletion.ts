@@ -1,6 +1,7 @@
 import { db } from '../db';
 
 import { AuditAction, createAuditLog } from './auditLog';
+import { sanitizeForLog } from './security';
 
 /**
  * Process pending account deletions
@@ -111,9 +112,9 @@ export async function deleteUserAccount(
             where: { id: userId },
         });
 
-        console.log(`Successfully deleted account: ${userId}`);
+        console.log(`Successfully deleted account: ${sanitizeForLog(userId)}`);
     } catch (err) {
-        console.error(`Failed to delete account ${userId}:`, err);
+        console.error(`Failed to delete account ${sanitizeForLog(userId)}:`, err);
         throw err;
     }
 }

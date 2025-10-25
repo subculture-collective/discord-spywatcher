@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import slowDown from 'express-slow-down';
 
 import { getRedisClient } from '../utils/redis';
+import { sanitizeForLog } from '../utils/security';
 
 const redis = getRedisClient();
 
@@ -206,7 +207,7 @@ export const abuseDetectionMiddleware = (
                 // If too many violations, auto-block
                 if (violations >= 10) {
                     await redis.set(`blocked:${ip}`, '1', 'EX', 3600);
-                    console.warn(`IP ${ip} auto-blocked after ${violations} rate limit violations`);
+                    console.warn(`IP ${sanitizeForLog(ip)} auto-blocked after ${violations} rate limit violations`);
 
                     // Reset violation counter
                     await redis.del(violationKey);

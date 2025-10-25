@@ -11,6 +11,7 @@ import {
 } from './analytics';
 import { db } from './db';
 import { env } from './utils/env';
+import { sanitizeForLog } from './utils/security';
 
 dotenv.config();
 
@@ -186,7 +187,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 });
 
 client.once('ready', async () => {
-    console.log(`✅ Logged in as ${client.user?.tag}`);
+    console.log(`✅ Logged in as ${sanitizeForLog(client.user?.tag)}`);
     const guilds = client.guilds.cache.map((g) => g.id);
     const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7); // past 7d
 

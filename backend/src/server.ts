@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import { env } from './utils/env';
+import { sanitizeForLog } from './utils/security';
 
 dotenv.config();
 console.log('🌱 Starting boot');
@@ -81,7 +82,7 @@ const allowedOrigins =
                     if (allowedOrigins.includes(origin)) {
                         callback(null, true);
                     } else {
-                        console.warn(`🚫 CORS blocked origin: ${origin}`);
+                        console.warn(`🚫 CORS blocked origin: ${sanitizeForLog(origin)}`);
                         callback(new Error('Not allowed by CORS'));
                     }
                 },

@@ -5,6 +5,7 @@ import {
     verifyHmacSignature,
     createHmacSignature,
     isStrongSecret,
+    sanitizeForLog,
 } from '../../../src/utils/security';
 
 describe('Security Utilities', () => {
@@ -117,6 +118,58 @@ describe('Security Utilities', () => {
             expect(
                 isStrongSecret('a'.repeat(20) + '1'.repeat(10) + '!!!')
             ).toBe(true); // lowercase, numbers, special
+        });
+    });
+
+    describe('sanitizeForLog', () => {
+        it('should handle normal strings without changes', () => {
+            expect(sanitizeForLog('normal text')).toBe('normal text');
+            expect(sanitizeForLog('IP: 192.168.1.1')).toBe('IP: 192.168.1.1');
+        });
+
+        it('should escape newline characters', () => {
+            expect(sanitizeForLog('line1\nline2')).toBe('line1\\nline2');
+            expect(sanitizeForLog('text\n\nmore')).toBe('text\\n\\nmore');
+        });
+
+        it('should escape carriage return characters', () => {
+            expect(sanitizeForLog('line1\rline2')).toBe('line1\\rline2');
+            expect(sanitizeForLog('text\r\nmore')).toBe('text\\r\\nmore');
+        });
+
+        it('should escape tab characters', () => {
+            expect(sanitizeForLog('col1\tcol2')).toBe('col1\\tcol2');
+        });
+
+        it('should escape other control characters', () => {
+            expect(sanitizeForLog('text\x00null')).toBe('text\\x00null');
+            expect(sanitizeForLog('text\x1besc')).toBe('text\\x1besc');
+            expect(sanitizeForLog('text\x7fdel')).toBe('text\\x7fdel');
+        });
+
+        it('should prevent log injection attacks', () => {
+            const maliciousInput = 'innocent\n[ERROR] Fake log entry';
+            expect(sanitizeForLog(maliciousInput)).toBe(
+                'innocent\\n[ERROR] Fake log entry'
+            );
+        });
+
+        it('should handle null and undefined', () => {
+            expect(sanitizeForLog(null)).toBe('null');
+            expect(sanitizeForLog(undefined)).toBe('undefined');
+        });
+
+        it('should convert non-string types to strings', () => {
+            expect(sanitizeForLog(123)).toBe('123');
+            expect(sanitizeForLog(true)).toBe('true');
+            expect(sanitizeForLog(false)).toBe('false');
+        });
+
+        it('should handle objects by converting to string', () => {
+            const obj = { key: 'value' };
+            const result = sanitizeForLog(obj);
+            expect(result).toContain('key');
+            expect(result).not.toContain('\n');
         });
     });
 });
