@@ -124,7 +124,6 @@ export const sanitizeForLog = (input: unknown): string => {
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         str = String(input);
     }
-    
     // Replace newlines, carriage returns, and other control characters
     // with their escaped representations to prevent log injection
     return str
