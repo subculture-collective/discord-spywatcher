@@ -342,7 +342,7 @@ router.get('/me', requireAuth, async (req, res): Promise<void> => {
         res.status(401).json({ error: 'No user in request' });
         return;
     }
-    console.log('🔎 Auth payload:', sanitizeForLog(JSON.stringify(req.user)));
+    console.log('🔎 Auth payload:', sanitizeForLog(req.user));
     try {
         const user = await db.user.findUnique({
             where: { discordId: req.user.discordId },
