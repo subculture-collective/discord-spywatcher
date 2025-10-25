@@ -53,7 +53,6 @@ const allowedOrigins =
         // Security middleware - apply first
         app.use(securityHeaders);
         app.use(additionalSecurityHeaders);
-        
         // DDoS Protection Layer 1: Request validation
         app.use(headerValidationMiddleware);
         app.use(requestValidationMiddleware);
