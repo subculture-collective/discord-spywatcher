@@ -49,13 +49,13 @@ export const requestSizeLimiter = (
     res: Response,
     next: NextFunction
 ): void => {
-    const maxSize = 10 * 1024 * 1024; // 10MB (configurable for different endpoints)
+    const maxSize = env.MAX_REQUEST_SIZE_MB * 1024 * 1024; // Configurable via environment variable
     const contentLength = parseInt(req.headers['content-length'] || '0', 10);
 
     if (contentLength > maxSize) {
         res.status(413).json({
             error: 'Request entity too large',
-            maxSize: '10MB',
+            maxSize: `${env.MAX_REQUEST_SIZE_MB}MB`,
             received: `${(contentLength / 1024 / 1024).toFixed(2)}MB`,
         });
         return;
