@@ -98,3 +98,41 @@ export const isStrongSecret = (secret: string): boolean => {
 
     return complexityCount >= 3;
 };
+
+/**
+ * Sanitize user input for logging to prevent log injection attacks
+ * Removes or escapes newlines, carriage returns, and other control characters
+ *
+ * @param input - The input string to sanitize
+ * @returns Sanitized string safe for logging
+ */
+export const sanitizeForLog = (input: unknown): string => {
+    if (input === null || input === undefined) {
+        return String(input);
+    }
+
+    // Convert to string - handle objects specially to avoid [object Object]
+    let str: string;
+    if (typeof input === 'object') {
+        try {
+            str = JSON.stringify(input);
+        } catch {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            str = String(input);
+        }
+    } else {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        str = String(input);
+    }
+    
+    // Replace newlines, carriage returns, and other control characters
+    // with their escaped representations to prevent log injection
+    return str
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n')
+        .replace(/\t/g, '\\t')
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\x00-\x1F\x7F]/g, (char) => {
+            return '\\x' + char.charCodeAt(0).toString(16).padStart(2, '0');
+        });
+};

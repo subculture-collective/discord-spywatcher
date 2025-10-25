@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { db } from '../db';
 import { getRedisClient } from '../utils/redis';
+import { sanitizeForLog } from '../utils/security';
 
 const redis = getRedisClient();
 
@@ -68,9 +69,9 @@ export async function banIP(ip: string, reason?: string): Promise<void> {
             update: { reason },
             create: { ip, reason },
         });
-        console.log(`IP ${ip} permanently banned. Reason: ${reason || 'N/A'}`);
+        console.log(`IP ${sanitizeForLog(ip)} permanently banned. Reason: ${sanitizeForLog(reason) || 'N/A'}`);
     } catch (err) {
-        console.error(`Failed to ban IP ${ip}:`, err);
+        console.error(`Failed to ban IP ${sanitizeForLog(ip)}:`, err);
         throw err;
     }
 }
@@ -93,7 +94,7 @@ export async function temporarilyBlockIP(
 
     try {
         await redis.set(`blocked:${ip}`, '1', 'EX', duration);
-        console.log(`IP ${ip} temporarily blocked for ${duration} seconds. Reason: ${reason || 'N/A'}`);
+        console.log(`IP ${sanitizeForLog(ip)} temporarily blocked for ${duration} seconds. Reason: ${sanitizeForLog(reason) || 'N/A'}`);
 
         // Log the block in audit log
         await db.auditLog.create({
@@ -105,7 +106,7 @@ export async function temporarilyBlockIP(
             },
         });
     } catch (err) {
-        console.error(`Failed to temporarily block IP ${ip}:`, err);
+        console.error(`Failed to temporarily block IP ${sanitizeForLog(ip)}:`, err);
         throw err;
     }
 }
@@ -128,9 +129,9 @@ export async function autoBlockOnAbuse(
 export async function unbanIP(ip: string): Promise<void> {
     try {
         await db.blockedIP.delete({ where: { ip } });
-        console.log(`IP ${ip} unbanned successfully`);
+        console.log(`IP ${sanitizeForLog(ip)} unbanned successfully`);
     } catch (_err) {
-        console.warn(`Attempted to unban IP ${ip}, but it wasn't found.`);
+        console.warn(`Attempted to unban IP ${sanitizeForLog(ip)}, but it wasn't found.`);
     }
 }
 
@@ -145,9 +146,9 @@ export async function removeTemporaryBlock(ip: string): Promise<void> {
 
     try {
         await redis.del(`blocked:${ip}`);
-        console.log(`Temporary block removed for IP ${ip}`);
+        console.log(`Temporary block removed for IP ${sanitizeForLog(ip)}`);
     } catch (err) {
-        console.error(`Failed to remove temporary block for IP ${ip}:`, err);
+        console.error(`Failed to remove temporary block for IP ${sanitizeForLog(ip)}:`, err);
     }
 }
 
