@@ -94,7 +94,7 @@ export async function temporarilyBlockIP(
 
     try {
         await redis.set(`blocked:${ip}`, '1', 'EX', duration);
-        console.log(`IP ${sanitizeForLog(ip)} temporarily blocked for ${duration} seconds. Reason: ${sanitizeForLog(reason) || 'N/A'}`);
+        console.log(`IP ${sanitizeForLog(ip)} temporarily blocked for ${duration} seconds. Reason: ${sanitizeForLog(reason || 'N/A')}`);
 
         // Log the block in audit log
         await db.auditLog.create({
