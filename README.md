@@ -148,8 +148,11 @@ Copy `backend/.env.example` to `backend/.env` and configure the following variab
 | `CORS_ORIGINS` | Comma-separated allowed origins | `http://localhost:5173` | Comma-separated URLs |
 | `JWT_ACCESS_EXPIRES_IN` | Access token expiration | `15m` | Time string |
 | `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `7d` | Time string |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` | Valid URL |
 | `ENABLE_RATE_LIMITING` | Enable rate limiting | `true` | `true` or `false` |
+| `ENABLE_REDIS_RATE_LIMITING` | Enable Redis-backed rate limiting | `true` | `true` or `false` |
 | `ENABLE_IP_BLOCKING` | Enable IP blocking | `true` | `true` or `false` |
+| `ENABLE_LOAD_SHEDDING` | Enable load shedding under high load | `true` | `true` or `false` |
 | `LOG_LEVEL` | Logging level | `info` | `error`, `warn`, `info`, `debug` |
 | `FRONTEND_URL` | Frontend URL for redirects | - | Valid URL |
 
@@ -195,6 +198,22 @@ Example validation error:
 
 💡 Check your .env file and ensure all required variables are set correctly.
 ```
+
+## 🛡️ Security & Rate Limiting
+
+Spywatcher implements comprehensive security measures to protect against abuse and ensure service availability:
+
+- **Multi-layer rate limiting** with Redis-backed distributed storage
+- **DDoS protection** including request validation, parameter limits, and header validation
+- **IP blocking** with automatic abuse detection
+- **Load management** with circuit breakers and load shedding under high load
+
+See [backend/docs/RATE_LIMITING.md](./backend/docs/RATE_LIMITING.md) for detailed documentation on:
+- Rate limiting configuration
+- Endpoint-specific limits
+- DDoS protection mechanisms
+- Load shedding behavior
+- Admin APIs for IP management
 
 ## 🌐 Endpoints
 

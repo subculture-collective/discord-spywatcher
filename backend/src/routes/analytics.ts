@@ -8,10 +8,17 @@ import {
     getLurkerFlags,
     getRoleDriftFlags,
 } from '../analytics';
-import { excludeBannedUsers, requireAuth, validateGuild } from '../middleware';
+import {
+    excludeBannedUsers,
+    requireAuth,
+    validateGuild,
+    analyticsLimiter,
+} from '../middleware';
 
 const router = Router();
 
+// Apply analytics-specific rate limiting
+router.use(analyticsLimiter);
 router.use(requireAuth);
 router.use(validateGuild);
 

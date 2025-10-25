@@ -24,6 +24,7 @@ jest.mock('../../../src/middleware', () => ({
     requireAuth: jest.fn((req, res, next) => next()),
     validateGuild: jest.fn((req, res, next) => next()),
     excludeBannedUsers: jest.fn((data) => Promise.resolve(data)),
+    analyticsLimiter: jest.fn((req, res, next) => next()),
 }));
 
 describe('Integration - Analytics Routes', () => {
