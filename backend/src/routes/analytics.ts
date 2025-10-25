@@ -21,6 +21,7 @@ const router = Router();
 router.use(analyticsLimiter);
 router.use(requireAuth);
 router.use(validateGuild);
+router.use(apiLimiter);
 
 router.get('/ghosts', async (req, res) => {
     const since = req.query.since
