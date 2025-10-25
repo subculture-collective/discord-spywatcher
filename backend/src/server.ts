@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import { env } from './utils/env';
+import { sanitizeForLog } from './utils/security';
 
 dotenv.config();
 console.log('🌱 Starting boot');
@@ -29,14 +30,41 @@ const allowedOrigins =
             securityHeaders,
             additionalSecurityHeaders,
             requestSizeLimiter,
-            apiLimiter,
+            blockKnownBadIPs,
+            parameterLimitMiddleware,
+            headerValidationMiddleware,
+            requestValidationMiddleware,
+            slowDownMiddleware,
+            abuseDetectionMiddleware,
+            loadSheddingMiddleware,
+            circuitBreakerMiddleware,
+            globalRateLimiter,
         } = await import('./middleware');
         console.log('✅ middleware loaded');
+
+        // Initialize Redis connection
+        const { getRedisClient } = await import('./utils/redis');
+        const redis = getRedisClient();
+        if (redis) {
+            console.log('✅ Redis rate limiting enabled');
+        } else {
+            console.log('⚠️  Redis not available, using in-memory rate limiting');
+        }
 
         // Security middleware - apply first
         app.use(securityHeaders);
         app.use(additionalSecurityHeaders);
+        // DDoS Protection Layer 1: Request validation
+        app.use(headerValidationMiddleware);
+        app.use(requestValidationMiddleware);
         app.use(requestSizeLimiter);
+        app.use(parameterLimitMiddleware);
+
+        // IP Blocking - check for blocked IPs
+        if (env.ENABLE_IP_BLOCKING) {
+            app.use(blockKnownBadIPs);
+            console.log('✅ IP blocking enabled');
+        }
 
         // Request tracking
         app.use(attachRequestId);
@@ -54,7 +82,7 @@ const allowedOrigins =
                     if (allowedOrigins.includes(origin)) {
                         callback(null, true);
                     } else {
-                        console.warn(`🚫 CORS blocked origin: ${origin}`);
+                        console.warn(`🚫 CORS blocked origin: ${sanitizeForLog(origin)}`);
                         callback(new Error('Not allowed by CORS'));
                     }
                 },
@@ -80,10 +108,21 @@ const allowedOrigins =
         // Logging
         app.use(requestLogger);
 
+        // Load management middleware
+        if (env.ENABLE_LOAD_SHEDDING) {
+            app.use(circuitBreakerMiddleware);
+            app.use(loadSheddingMiddleware);
+            console.log('✅ Load shedding enabled');
+        }
+
+        // DDoS Protection Layer 2: Slowdown and abuse detection
+        app.use(slowDownMiddleware);
+        app.use(abuseDetectionMiddleware);
+
         // Apply general API rate limiting
         if (env.ENABLE_RATE_LIMITING) {
-            app.use('/api', apiLimiter);
-            console.log('✅ API rate limiting enabled');
+            app.use('/api', globalRateLimiter);
+            console.log('✅ Global rate limiting enabled');
         }
     } catch (err) {
         console.error('🔥 Failed to import or use middleware:', err);

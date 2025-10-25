@@ -48,10 +48,12 @@ describe('Security Middleware', () => {
             );
 
             expect(mockRes.status).toHaveBeenCalledWith(413);
-            expect(mockRes.json).toHaveBeenCalledWith({
-                error: 'Request entity too large',
-                maxSize: '10MB',
-            });
+            expect(mockRes.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    error: 'Request entity too large',
+                    maxSize: '10MB',
+                })
+            );
             expect(mockNext).not.toHaveBeenCalled();
         });
 

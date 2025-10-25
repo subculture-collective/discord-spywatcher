@@ -22,6 +22,26 @@ services:
           cpus: '1'
           memory: 512M
 
+  redis:
+    image: redis:7-alpine
+    container_name: spywatcher-redis-prod
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spywatcher-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
   backend:
     build:
       context: ./backend
@@ -29,6 +49,7 @@ services:
     container_name: spywatcher-backend-prod
     environment:
       DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
+      REDIS_URL: redis://redis:6379
       NODE_ENV: production
       PORT: 3001
       ADMIN_DISCORD_IDS: ${ADMIN_DISCORD_IDS}
@@ -42,6 +63,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - spywatcher-network
@@ -109,6 +132,7 @@ services:
 
 volumes:
   postgres-data:
+  redis-data:
 
 networks:
   spywatcher-network:
