@@ -196,7 +196,6 @@ export const abuseDetectionMiddleware = (
     }
 
     // Track rate limit violations
-     
     res.on('finish', async () => {
         if (res.statusCode === 429) {
             try {
