@@ -105,7 +105,7 @@ export async function cleanupOldData(): Promise<{
             let deletedCount = 0;
 
             // Use string comparison to avoid enum type issues
-            const dataTypeName = policy.dataType as string;
+            const dataTypeName = policy.dataType;
 
             if (dataTypeName === DataType.PRESENCE_EVENTS) {
                 deletedCount = (

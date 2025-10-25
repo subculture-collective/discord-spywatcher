@@ -16,6 +16,9 @@ const envSchema = z.object({
     // Database
     DATABASE_URL: z.string().url().optional(),
 
+    // Redis
+    REDIS_URL: z.string().url().optional(),
+
     // Discord
     DISCORD_BOT_TOKEN: z
         .string()
@@ -64,6 +67,14 @@ const envSchema = z.object({
         .string()
         .default('true')
         .transform((val: string) => val === 'true' || val === '1'),
+    ENABLE_REDIS_RATE_LIMITING: z
+        .string()
+        .default('true')
+        .transform((val: string) => val === 'true' || val === '1'),
+    ENABLE_LOAD_SHEDDING: z
+        .string()
+        .default('true')
+        .transform((val: string) => val === 'true' || val === '1'),
     LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 
     // Optional Frontend URL
@@ -80,13 +91,13 @@ try {
     env = envSchema.parse(process.env);
 } catch (error) {
     if (error instanceof z.ZodError) {
-        // eslint-disable-next-line no-console
+         
         console.error('❌ Invalid environment configuration:\n');
         error.issues.forEach((err: z.ZodIssue) => {
-            // eslint-disable-next-line no-console
+             
             console.error(`  - ${err.path.join('.')}: ${err.message}`);
         });
-        // eslint-disable-next-line no-console
+         
         console.error(
             '\n💡 Check your .env file and ensure all required variables are set correctly.'
         );

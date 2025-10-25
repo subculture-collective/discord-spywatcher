@@ -18,6 +18,22 @@ services:
     networks:
       - spywatcher-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: spywatcher-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spywatcher-network
+    command: redis-server --appendonly yes
+
   backend:
     build:
       context: ./backend
@@ -29,6 +45,7 @@ services:
       - /app/dist
     environment:
       DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD:-spywatcher_dev_password}@postgres:5432/spywatcher
+      REDIS_URL: redis://redis:6379
       NODE_ENV: development
       PORT: 3001
       ADMIN_DISCORD_IDS: ${ADMIN_DISCORD_IDS}
@@ -44,6 +61,8 @@ services:
       - "3001:3001"
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - spywatcher-network
@@ -69,6 +88,7 @@ services:
 
 volumes:
   postgres-data:
+  redis-data:
 
 networks:
   spywatcher-network:
