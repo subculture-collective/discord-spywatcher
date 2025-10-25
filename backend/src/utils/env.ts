@@ -77,6 +77,9 @@ const envSchema = z.object({
         .transform((val: string) => val === 'true' || val === '1'),
     LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 
+    // Security
+    MAX_REQUEST_SIZE_MB: z.coerce.number().int().positive().default(10),
+
     // Optional Frontend URL
     FRONTEND_URL: z.string().url().optional(),
 });
