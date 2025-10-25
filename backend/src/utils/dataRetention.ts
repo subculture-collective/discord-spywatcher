@@ -104,7 +104,10 @@ export async function cleanupOldData(): Promise<{
 
             let deletedCount = 0;
 
-            // Use string comparison to avoid enum type issues
+            // Use string comparison to avoid enum type issues.
+            // Note: Previously, a type assertion (e.g., 'as string') was used here, but was removed.
+            // Retain this comment to clarify why string comparison is used instead of direct enum comparison,
+            // as the enum and database field types may not always align.
             const dataTypeName = policy.dataType;
 
             if (dataTypeName === DataType.PRESENCE_EVENTS) {
