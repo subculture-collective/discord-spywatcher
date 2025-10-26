@@ -8,6 +8,7 @@ const redis = getRedisClient();
 
 /**
  * Middleware to block known bad IPs (both temporary and permanent)
+ * Whitelisted IPs bypass all blocking checks
  */
 export async function blockKnownBadIPs(
     req: Request,
@@ -19,6 +20,20 @@ export async function blockKnownBadIPs(
     if (!ip) {
         next();
         return;
+    }
+
+    // Check if IP is whitelisted first - whitelisted IPs bypass all blocks
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        const whitelisted = await db.whitelistedIP.findUnique({ where: { ip } });
+        if (whitelisted) {
+            // IP is whitelisted, skip all blocking checks
+            next();
+            return;
+        }
+    } catch (err) {
+        console.error('Database check failed for IP whitelist:', err);
+        // Continue to blocking checks even if whitelist check fails
     }
 
     // Check Redis for temporary blocks (if Redis is available)
@@ -173,6 +188,86 @@ export async function isIPBlocked(ip: string): Promise<boolean> {
     } catch (err) {
         console.error('Database check failed:', err);
         return false;
+    }
+}
+
+/**
+ * Add an IP to the whitelist
+ * Whitelisted IPs bypass all rate limiting and blocking
+ */
+export async function whitelistIP(ip: string, description?: string): Promise<void> {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        await db.whitelistedIP.upsert({
+            where: { ip },
+            update: { description },
+            create: { ip, description },
+        });
+        console.log(`IP ${sanitizeForLog(ip)} added to whitelist. Description: ${sanitizeForLog(description || 'N/A')}`);
+        
+        // Log the action in audit log
+        await db.auditLog.create({
+            data: {
+                action: 'IP_WHITELIST_ADD',
+                details: { ip, description },
+                createdAt: new Date(),
+            },
+        });
+    } catch (err) {
+        console.error(`Failed to whitelist IP ${sanitizeForLog(ip)}:`, err);
+        throw err;
+    }
+}
+
+/**
+ * Remove an IP from the whitelist
+ */
+export async function removeFromWhitelist(ip: string): Promise<void> {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        await db.whitelistedIP.delete({ where: { ip } });
+        console.log(`IP ${sanitizeForLog(ip)} removed from whitelist`);
+        
+        // Log the action in audit log
+        await db.auditLog.create({
+            data: {
+                action: 'IP_WHITELIST_REMOVE',
+                details: { ip },
+                createdAt: new Date(),
+            },
+        });
+    } catch (_err) {
+        console.warn(`Attempted to remove IP ${sanitizeForLog(ip)} from whitelist, but it wasn't found.`);
+    }
+}
+
+/**
+ * Check if an IP is whitelisted
+ */
+export async function isIPWhitelisted(ip: string): Promise<boolean> {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        const whitelisted = await db.whitelistedIP.findUnique({ where: { ip } });
+        return !!whitelisted;
+    } catch (err) {
+        console.error('Database check failed for whitelist:', err);
+        return false;
+    }
+}
+
+/**
+ * Get all whitelisted IPs
+ */
+export async function getWhitelistedIPs(): Promise<Array<{ ip: string; description: string | null; createdAt: Date }>> {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+        return await db.whitelistedIP.findMany({
+            orderBy: { createdAt: 'desc' },
+            select: { ip: true, description: true, createdAt: true },
+        });
+    } catch (err) {
+        console.error('Failed to get whitelisted IPs:', err);
+        return [];
     }
 }
 

@@ -13,15 +13,22 @@ import {
     requireAuth,
     validateGuild,
     analyticsLimiter,
+    redisCacheMiddleware,
+    etagMiddleware,
+    analyticsCache,
 } from '../middleware';
 
 const router = Router();
 
-// Apply analytics-specific rate limiting
+// Apply analytics-specific rate limiting and caching
 router.use(analyticsLimiter);
 router.use(requireAuth);
 router.use(validateGuild);
-router.use(apiLimiter);
+
+// Apply caching middleware - ETag for conditional requests and Redis caching
+router.use(etagMiddleware);
+router.use(analyticsCache(60)); // Cache for 60 seconds with stale-while-revalidate
+router.use(redisCacheMiddleware(60)); // Redis cache for 60 seconds
 
 router.get('/ghosts', async (req, res) => {
     const since = req.query.since

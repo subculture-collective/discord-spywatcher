@@ -18,11 +18,11 @@ enum Role {
 }
 
 model PresenceEvent {
-  id          Int      @id @default(autoincrement())
-  userId      String
-  username    String
-  clients     String    // comma-separated: "desktop,web"
-  createdAt   DateTime  @default(now())
+  id        Int      @id @default(autoincrement())
+  userId    String
+  username  String
+  clients   String // comma-separated: "desktop,web"
+  createdAt DateTime @default(now())
 }
 
 model TypingEvent {
@@ -82,7 +82,7 @@ model RoleChangeEvent {
   userId     String
   username   String
   guildId    String
-  addedRoles String   // comma-separated role IDs or names
+  addedRoles String // comma-separated role IDs or names
   createdAt  DateTime @default(now())
 }
 
@@ -91,6 +91,14 @@ model BlockedIP {
   ip        String   @unique
   reason    String?
   createdAt DateTime @default(now())
+}
+
+model WhitelistedIP {
+  id          Int      @id @default(autoincrement())
+  ip          String   @unique
+  description String? // Why this IP is whitelisted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model BannedUser {
@@ -102,63 +110,63 @@ model BannedUser {
 }
 
 model User {
-  id                    String   @id @default(cuid())
-  discordId             String   @unique
-  username              String
-  discriminator         String
-  avatar                String?
-  email                 String?
-  locale                String?
-  verified              Boolean
-  ipAddress             String?
-  userAgent             String?
-  accessToken           String
-  refreshToken          String
-  refreshTokenIssuedAt  DateTime @default(now())
-  accessTokenExpiresAt  DateTime
-  lastSeenAt            DateTime
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  discordId            String   @unique
+  username             String
+  discriminator        String
+  avatar               String?
+  email                String?
+  locale               String?
+  verified             Boolean
+  ipAddress            String?
+  userAgent            String?
+  accessToken          String
+  refreshToken         String
+  refreshTokenIssuedAt DateTime @default(now())
+  accessTokenExpiresAt DateTime
+  lastSeenAt           DateTime
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   // New role field
-  role                  Role     @default(USER)
+  role Role @default(USER)
 
-  guilds                Guild[]
-  refreshTokens         RefreshToken[]
-  sessions              Session[]
-  apiKeys               ApiKey[]
-  loginLogs             LoginLog[]
-  deletionRequest       DeletionRequest?
-  consentLogs           ConsentLog[]
+  guilds          Guild[]
+  refreshTokens   RefreshToken[]
+  sessions        Session[]
+  apiKeys         ApiKey[]
+  loginLogs       LoginLog[]
+  deletionRequest DeletionRequest?
+  consentLogs     ConsentLog[]
 }
 
 model Guild {
-  id          String   @id @default(cuid())
-  guildId     String   @unique
+  id          String  @id @default(cuid())
+  guildId     String  @unique
   name        String
   icon        String?
   owner       Boolean
   permissions BigInt
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id])
 }
 
 model Permission {
   id          String           @id @default(cuid())
   name        String           @unique // e.g., "analytics.view", "users.ban"
   description String
-  category    String           // e.g., "analytics", "admin"
+  category    String // e.g., "analytics", "admin"
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   roles       RolePermission[]
 }
 
 model RolePermission {
-  role         Role       
+  role         Role
   permissionId String
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now())
-  
+
   @@id([role, permissionId])
 }
 
@@ -166,7 +174,7 @@ model RefreshToken {
   id        String   @id @default(cuid())
   token     String   @unique
   userId    String
-  familyId  String   // For token rotation detection
+  familyId  String // For token rotation detection
   used      Boolean  @default(false)
   revoked   Boolean  @default(false)
   expiresAt DateTime
@@ -174,7 +182,7 @@ model RefreshToken {
   ipAddress String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([familyId])
 }
@@ -188,35 +196,35 @@ model Session {
   expiresAt    DateTime
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
 }
 
 model ApiKey {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  name        String
-  userId      String
-  scopes      String   // JSON array of scopes/permissions
-  lastUsedAt  DateTime?
-  expiresAt   DateTime?
-  revoked     Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id         String    @id @default(cuid())
+  key        String    @unique
+  name       String
+  userId     String
+  scopes     String // JSON array of scopes/permissions
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  revoked    Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model LoginLog {
-  id         String   @id @default(cuid())
-  userId     String
-  ipAddress  String
-  userAgent  String?
-  success    Boolean
-  reason     String?  // Failure reason if success=false
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id        String   @id @default(cuid())
+  userId    String
+  ipAddress String
+  userAgent String?
+  success   Boolean
+  reason    String? // Failure reason if success=false
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([createdAt])
 }
@@ -236,12 +244,12 @@ model DeletionRequest {
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
-  action    String   // ACCOUNT_CREATED, DATA_EXPORTED, ACCOUNT_DELETED, etc.
+  action    String // ACCOUNT_CREATED, DATA_EXPORTED, ACCOUNT_DELETED, etc.
   details   Json?
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
   @@index([createdAt])
   @@index([action])
@@ -250,23 +258,23 @@ model AuditLog {
 model ConsentLog {
   id          String   @id @default(cuid())
   userId      String
-  consentType String   // PRIVACY_POLICY, COOKIES, DATA_COLLECTION
+  consentType String // PRIVACY_POLICY, COOKIES, DATA_COLLECTION
   granted     Boolean
-  version     String   // Policy version
+  version     String // Policy version
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([consentType])
 }
 
 model DataRetentionPolicy {
-  id              String   @id @default(cuid())
-  dataType        String   @unique // PRESENCE_EVENTS, MESSAGE_EVENTS, TYPING_EVENTS, etc.
-  retentionDays   Int      // Number of days to retain data
-  description     String?
-  enabled         Boolean  @default(true)
-  lastCleanupAt   DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String    @id @default(cuid())
+  dataType      String    @unique // PRESENCE_EVENTS, MESSAGE_EVENTS, TYPING_EVENTS, etc.
+  retentionDays Int // Number of days to retain data
+  description   String?
+  enabled       Boolean   @default(true)
+  lastCleanupAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
