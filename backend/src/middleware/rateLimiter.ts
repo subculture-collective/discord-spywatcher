@@ -60,9 +60,13 @@ export const globalRateLimiter = createRateLimiter({
     message: 'Too many requests. Please try again later.',
     prefix: 'global',
     skip: (req: Request) => {
-        // Skip rate limiting for whitelisted IPs (localhost)
+        // Skip rate limiting for localhost
         const whitelist = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
-        return whitelist.includes(req.ip || '');
+        const ip = req.ip || '';
+        
+        // Only check localhost for now - database whitelist checking
+        // is done in the IP block middleware, not in rate limiting
+        return whitelist.includes(ip);
     },
 });
 
