@@ -4,8 +4,6 @@ import {
     blockKnownBadIPs,
     banIP,
     unbanIP,
-    temporarilyBlockIP,
-    removeTemporaryBlock,
     whitelistIP,
     removeIPFromWhitelist,
     isIPBlocked,
