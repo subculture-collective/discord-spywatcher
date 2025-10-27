@@ -94,11 +94,10 @@ model BlockedIP {
 }
 
 model WhitelistedIP {
-  id          Int      @id @default(autoincrement())
-  ip          String   @unique
-  description String? // Why this IP is whitelisted
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  ip        String   @unique
+  reason    String?  // Why this IP is whitelisted (e.g., "Office IP", "Admin")
+  createdAt DateTime @default(now())
 }
 
 model BannedUser {

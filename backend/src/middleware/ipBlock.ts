@@ -22,11 +22,11 @@ export async function blockKnownBadIPs(
         return;
     }
 
-    // Check if IP is whitelisted first - whitelisted IPs bypass all blocks
+    // Check if IP is whitelisted (bypass all blocks)
     try {
         const whitelisted = await db.whitelistedIP.findUnique({ where: { ip } });
         if (whitelisted) {
-            // IP is whitelisted, skip all blocking checks
+            // IP is whitelisted, allow through
             next();
             return;
         }
@@ -192,22 +192,22 @@ export async function isIPBlocked(ip: string): Promise<boolean> {
 
 /**
  * Add an IP to the whitelist
- * Whitelisted IPs bypass all rate limiting and blocking
  */
-export async function whitelistIP(ip: string, description?: string): Promise<void> {
+export async function whitelistIP(ip: string, reason?: string): Promise<void> {
     try {
         await db.whitelistedIP.upsert({
             where: { ip },
-            update: { description },
-            create: { ip, description },
+            update: { reason },
+            create: { ip, reason },
         });
-        console.log(`IP ${sanitizeForLog(ip)} added to whitelist. Description: ${sanitizeForLog(description || 'N/A')}`);
+        console.log(`IP ${sanitizeForLog(ip)} added to whitelist. Reason: ${sanitizeForLog(reason) || 'N/A'}`);
         
         // Log the action in audit log
         await db.auditLog.create({
             data: {
-                action: 'IP_WHITELIST_ADD',
-                details: { ip, description },
+                action: 'IP_WHITELISTED',
+                details: { ip, reason },
+                ipAddress: ip,
                 createdAt: new Date(),
             },
         });
@@ -220,7 +220,7 @@ export async function whitelistIP(ip: string, description?: string): Promise<voi
 /**
  * Remove an IP from the whitelist
  */
-export async function removeFromWhitelist(ip: string): Promise<void> {
+export async function removeIPFromWhitelist(ip: string): Promise<void> {
     try {
         await db.whitelistedIP.delete({ where: { ip } });
         console.log(`IP ${sanitizeForLog(ip)} removed from whitelist`);
@@ -228,8 +228,9 @@ export async function removeFromWhitelist(ip: string): Promise<void> {
         // Log the action in audit log
         await db.auditLog.create({
             data: {
-                action: 'IP_WHITELIST_REMOVE',
+                action: 'IP_WHITELIST_REMOVED',
                 details: { ip },
+                ipAddress: ip,
                 createdAt: new Date(),
             },
         });
@@ -254,15 +255,55 @@ export async function isIPWhitelisted(ip: string): Promise<boolean> {
 /**
  * Get all whitelisted IPs
  */
-export async function getWhitelistedIPs(): Promise<Array<{ ip: string; description: string | null; createdAt: Date }>> {
+export async function getWhitelistedIPs(): Promise<Array<{ ip: string; reason?: string; createdAt: Date }>> {
     try {
-        return await db.whitelistedIP.findMany({
+        const whitelisted = await db.whitelistedIP.findMany({
             orderBy: { createdAt: 'desc' },
-            select: { ip: true, description: true, createdAt: true },
         });
+        return whitelisted.map(w => ({
+            ip: w.ip,
+            reason: w.reason || undefined,
+            createdAt: w.createdAt,
+        }));
     } catch (err) {
         console.error('Failed to get whitelisted IPs:', err);
         return [];
+    }
+}
+
+/**
+ * Get all blocked IPs
+ */
+export async function getBlockedIPs(): Promise<Array<{ ip: string; reason?: string; createdAt: Date }>> {
+    try {
+        const blocked = await db.blockedIP.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
+        return blocked.map(b => ({
+            ip: b.ip,
+            reason: b.reason || undefined,
+            createdAt: b.createdAt,
+        }));
+    } catch (err) {
+        console.error('Failed to get blocked IPs:', err);
+        return [];
+    }
+}
+
+/**
+ * Get rate limit violations for an IP
+ */
+export async function getRateLimitViolations(ip: string): Promise<number> {
+    if (!redis) {
+        return 0;
+    }
+    
+    try {
+        const violations = await redis.get(`violations:${ip}`);
+        return violations ? parseInt(violations, 10) : 0;
+    } catch (err) {
+        console.error('Failed to get rate limit violations:', err);
+        return 0;
     }
 }
 
