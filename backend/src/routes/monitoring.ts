@@ -55,12 +55,12 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
 
         // Get all blocked keys using SCAN for better performance
         const blockedKeys: string[] = [];
-        cursor = '0';
+        let blockedCursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'blocked:*', 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(blockedCursor, 'MATCH', 'blocked:*', 'COUNT', 100);
             blockedKeys.push(...keys);
-            cursor = nextCursor;
-        } while (cursor !== '0');
+            blockedCursor = nextCursor;
+        } while (blockedCursor !== '0');
 
         const tempBlocked: Array<{
             ip: string;
@@ -79,12 +79,12 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
 
         // Get rate limiter statistics using SCAN for better performance
         const rateLimitKeys: string[] = [];
-        cursor = '0';
+        let rateLimitCursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'rl:*', 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(rateLimitCursor, 'MATCH', 'rl:*', 'COUNT', 100);
             rateLimitKeys.push(...keys);
-            cursor = nextCursor;
-        } while (cursor !== '0');
+            rateLimitCursor = nextCursor;
+        } while (rateLimitCursor !== '0');
 
         const rateLimitStats: Record<string, number> = {};
 
