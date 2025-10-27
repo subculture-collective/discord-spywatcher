@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { AuthPayload, verifyAccessToken } from '../utils/auth';
 import { checkGuildAccess, checkUserPermission } from '../utils/permissions';
+import { sanitizeForLog } from '../utils/security';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -32,12 +33,12 @@ export function requireAuth(
 
         // Check if user is banned
         if (payload.role === 'BANNED') {
-            console.warn('❌ Banned user attempted access:', payload.discordId);
+            console.warn('❌ Banned user attempted access:', sanitizeForLog(payload.discordId));
             res.status(403).json({ error: 'Account is banned' });
             return;
         }
 
-        console.log('✅ Authenticated payload:', payload);
+        console.log('✅ Authenticated payload:', sanitizeForLog(payload));
         req.user = payload;
         next();
     } catch (err) {

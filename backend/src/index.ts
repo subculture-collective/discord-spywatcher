@@ -36,7 +36,7 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
 
     if (platforms.length > 1) {
         console.log(
-            `[⚠️ MULTI-CLIENT] ${user.tag} is online on: ${platforms.join(
+            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.tag)} is online on: ${platforms.map(sanitizeForLog).join(
                 ', '
             )}`
         );
@@ -76,9 +76,9 @@ client.on('typingStart', async (typing) => {
 
     if (deltaMs < 5000) {
         console.log(
-            `[⏱️ DB CORRELATED] ${user.tag} started typing ${deltaMs}ms after ${
+            `[⏱️ DB CORRELATED] ${sanitizeForLog(user.tag)} started typing ${deltaMs}ms after ${sanitizeForLog(
                 lastMsg.username
-            } in #${'name' in channel ? channel.name : 'unknown'}`
+            )} in #${sanitizeForLog('name' in channel ? channel.name : 'unknown')}`
         );
 
         // Save for long-term analysis
@@ -117,7 +117,7 @@ client.on('messageCreate', async (message) => {
     });
 
     console.log(
-        `[💬 MESSAGE] ${message.author.tag} in #${channelName}: ${message.content}`
+        `[💬 MESSAGE] ${sanitizeForLog(message.author.tag)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
     );
 });
 
@@ -138,7 +138,7 @@ client.on('guildMemberAdd', async (member) => {
     });
 
     console.log(
-        `[🟢 JOIN] ${member.user.tag} (account age: ${accountAgeDays} days) joined ${member.guild.name}`
+        `[🟢 JOIN] ${sanitizeForLog(member.user.tag)} (account age: ${accountAgeDays} days) joined ${sanitizeForLog(member.guild.name)}`
     );
 });
 
@@ -182,7 +182,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     });
 
     console.log(
-        `[🕵️ ROLE DRIFT] ${newMember.user.tag} gained roles: ${addedRoleNames}`
+        `[🕵️ ROLE DRIFT] ${sanitizeForLog(newMember.user.tag)} gained roles: ${sanitizeForLog(addedRoleNames)}`
     );
 });
 
@@ -203,34 +203,40 @@ client.once('ready', async () => {
                 getSuspicionScores(guildId, since),
             ]);
 
-        console.log(`\n📊 Guild: ${guildId}`);
+        console.log(`\n📊 Guild: ${sanitizeForLog(guildId)}`);
         console.log(`📅 Data since: ${since.toISOString()}`);
         console.log('----------------------------------------');
 
         console.log(`Total Users: ${heatmap.length}`);
         console.log('🌡️ Heatmap:');
-        console.table(heatmap);
+        console.table(heatmap.map(h => ({...h, username: sanitizeForLog(h.username), channel: sanitizeForLog(h.channel)})));
 
         console.log('👻 Top Ghost Users:');
-        console.table(ghosts.slice(0, 10));
+        console.table(ghosts.slice(0, 10).map(g => ({...g, username: sanitizeForLog(g.username)})));
 
         console.log('📱 Top Multi-Client Users:');
-        console.table(logins.slice(0, 10));
+        console.table(logins.slice(0, 10).map(l => ({...l, username: sanitizeForLog(l.username)})));
 
         console.log('🛰️ Most Channel-Diverse Users:');
-        console.table(channelStats.slice(0, 10));
+        console.table(channelStats.slice(0, 10).map(c => ({...c, username: sanitizeForLog(c.username)})));
 
         console.log('🔍 Suspicion Report (Top 10):');
         console.table(
             scores.slice(0, 10).map((s) => ({
-                ...s,
+                userId: s.userId,
+                username: sanitizeForLog(s.username),
+                ghostScore: s.ghostScore,
+                multiClientCount: s.multiClientCount,
+                channelCount: s.channelCount,
+                accountAgeDays: s.accountAgeDays,
+                suspicionScore: s.suspicionScore,
                 avgReactionTime: (s as any).avgReactionTime?.toFixed(0),
                 fastReactionCount: (s as any).fastReactionCount,
-                lurkerScore: s.lurkerScore,
-                presenceCount: s.presenceCount,
-                roleChangeCount: s.roleChangeCount,
-                oldClients: s.oldClients?.join(','),
-                newClients: s.newClients?.join(','),
+                lurkerScore: (s as any).lurkerScore,
+                presenceCount: (s as any).presenceCount,
+                roleChangeCount: (s as any).roleChangeCount,
+                oldClients: s.oldClients?.map(sanitizeForLog).join(','),
+                newClients: s.newClients?.map(sanitizeForLog).join(','),
             }))
         );
     }
