@@ -24,8 +24,15 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
     }
 
     try {
-        // Get all violation keys
-        const violationKeys = await redis.keys('violations:*');
+        // Get all violation keys using SCAN for better performance
+        const violationKeys: string[] = [];
+        let cursor = '0';
+        do {
+            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'violations:*', 'COUNT', 100);
+            violationKeys.push(...keys);
+            cursor = nextCursor;
+        } while (cursor !== '0');
+
         const violations: Array<{
             ip: string;
             count: number;
@@ -46,8 +53,15 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
             }
         }
 
-        // Get all blocked keys
-        const blockedKeys = await redis.keys('blocked:*');
+        // Get all blocked keys using SCAN for better performance
+        const blockedKeys: string[] = [];
+        let blockedCursor = '0';
+        do {
+            const [nextCursor, keys] = await redis.scan(blockedCursor, 'MATCH', 'blocked:*', 'COUNT', 100);
+            blockedKeys.push(...keys);
+            blockedCursor = nextCursor;
+        } while (blockedCursor !== '0');
+
         const tempBlocked: Array<{
             ip: string;
             ttl: number;
@@ -63,8 +77,15 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
             });
         }
 
-        // Get rate limiter statistics
-        const rateLimitKeys = await redis.keys('rl:*');
+        // Get rate limiter statistics using SCAN for better performance
+        const rateLimitKeys: string[] = [];
+        let rateLimitCursor = '0';
+        do {
+            const [nextCursor, keys] = await redis.scan(rateLimitCursor, 'MATCH', 'rl:*', 'COUNT', 100);
+            rateLimitKeys.push(...keys);
+            rateLimitCursor = nextCursor;
+        } while (rateLimitCursor !== '0');
+
         const rateLimitStats: Record<string, number> = {};
 
         for (const key of rateLimitKeys) {
@@ -181,8 +202,15 @@ router.delete('/rate-limits/:ip', async (req: Request, res: Response) => {
         // Clear violations
         await redis.del(`violations:${ip}`);
 
-        // Clear all rate limit keys for this IP
-        const rateLimitKeys = await redis.keys(`rl:*:${ip}*`);
+        // Clear all rate limit keys for this IP using SCAN for better performance
+        const rateLimitKeys: string[] = [];
+        let cursor = '0';
+        do {
+            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', `rl:*:${ip}*`, 'COUNT', 100);
+            rateLimitKeys.push(...keys);
+            cursor = nextCursor;
+        } while (cursor !== '0');
+
         if (rateLimitKeys.length > 0) {
             await redis.del(...rateLimitKeys);
         }
