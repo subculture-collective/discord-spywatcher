@@ -218,7 +218,16 @@ export async function clearCache(pattern: string): Promise<void> {
     }
 
     try {
-        const keys = await redis.keys(`cache:${pattern}*`);
+        // Use SCAN to avoid blocking Redis
+        let cursor = '0';
+        const keys: string[] = [];
+        do {
+            const [nextCursor, foundKeys] = await redis.scan(cursor, 'MATCH', `cache:${pattern}*`, 'COUNT', 100);
+            cursor = nextCursor;
+            if (Array.isArray(foundKeys)) {
+                keys.push(...foundKeys);
+            }
+        } while (cursor !== '0');
         if (keys.length > 0) {
             await redis.del(...keys);
             console.log(`Cleared ${keys.length} cache entries matching pattern: ${pattern}`);
