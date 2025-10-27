@@ -179,6 +179,7 @@ export const headerValidationMiddleware = (
 /**
  * Rate limit tracking for abuse detection
  * Tracks rate limit violations and can trigger automatic blocking
+ * Logs violations to audit log for monitoring
  */
 export const abuseDetectionMiddleware = (
     req: Request,
@@ -204,10 +205,38 @@ export const abuseDetectionMiddleware = (
                 const violations = await redis.incr(violationKey);
                 await redis.expire(violationKey, 3600); // 1 hour window
 
+                // Log rate limit violation to audit log
+                const { db } = await import('../db');
+                await db.auditLog.create({
+                    data: {
+                        action: 'RATE_LIMIT_VIOLATION',
+                        details: {
+                            ip,
+                            path: req.path,
+                            method: req.method,
+                            userAgent: req.headers['user-agent'],
+                            violations,
+                        },
+                        ipAddress: ip,
+                        userAgent: req.headers['user-agent'],
+                        createdAt: new Date(),
+                    },
+                });
+
                 // If too many violations, auto-block
                 if (violations >= 10) {
                     await redis.set(`blocked:${ip}`, '1', 'EX', 3600);
                     console.warn(`IP ${sanitizeForLog(ip)} auto-blocked after ${violations} rate limit violations`);
+
+                    // Log auto-block to audit log
+                    await db.auditLog.create({
+                        data: {
+                            action: 'AUTO_IP_BLOCK',
+                            details: { ip, violations, duration: 3600 },
+                            ipAddress: ip,
+                            createdAt: new Date(),
+                        },
+                    });
 
                     // Reset violation counter
                     await redis.del(violationKey);
