@@ -112,8 +112,20 @@ export const redisCacheMiddleware = (ttl: number = 60) => {
             res.send = function (data): Response {
                 // Cache the response
                 if (res.statusCode === 200 && data) {
-                    redis.setex(cacheKey, ttl, typeof data === 'string' ? data : JSON.stringify(data))
-                        .catch(err => console.error('Failed to cache response:', err));
+                    const cacheData = typeof data === 'string' ? data : JSON.stringify(data);
+                    const dataSize = Buffer.byteLength(cacheData, 'utf8');
+                    redis.setex(cacheKey, ttl, cacheData)
+                        .catch(err => {
+                            console.error(
+                                `Failed to cache response in Redis.`,
+                                {
+                                    cacheKey,
+                                    ttl,
+                                    dataSize,
+                                    error: err
+                                }
+                            );
+                        });
                 }
 
                 res.setHeader('X-Cache', 'MISS');
