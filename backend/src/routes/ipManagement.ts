@@ -141,7 +141,7 @@ router.post('/temp-block', async (req: Request, res: Response) => {
 
         const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
         console.log(
-            `Admin ${sanitizeForLog(username)} temporarily blocked IP ${sanitizeForLog(ip)} for ${blockDuration}s`
+            `Admin ${sanitizeForLog(username)} temporarily blocked IP ${sanitizeForLog(ip)} for ${sanitizeForLog(String(blockDuration))}s`
         );
 
         res.json({
