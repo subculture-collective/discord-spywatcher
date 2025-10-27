@@ -25,8 +25,8 @@ router.use(analyticsLimiter);
 router.use(requireAuth);
 router.use(validateGuild);
 
-// Apply caching middleware - ETag for conditional requests and Redis caching
-router.use(etagMiddleware);
+// Apply caching middleware - Redis caching only to avoid double res.json override
+// router.use(etagMiddleware); // Removed to prevent double res.json override
 router.use(analyticsCache(60)); // Cache for 60 seconds with stale-while-revalidate
 router.use(redisCacheMiddleware(60)); // Redis cache for 60 seconds
 
