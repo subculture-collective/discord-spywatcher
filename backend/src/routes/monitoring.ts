@@ -123,8 +123,14 @@ router.get('/rate-limits/:ip', async (req: Request, res: Response) => {
         const isBlocked = await redis.get(`blocked:${ip}`);
         const blockTTL = isBlocked ? await redis.ttl(`blocked:${ip}`) : null;
 
-        // Get rate limit keys for this IP
-        const rateLimitKeys = await redis.keys(`rl:*:${ip}*`);
+        // Get rate limit keys for this IP using SCAN for better performance
+        const rateLimitKeys: string[] = [];
+        let cursor = '0';
+        do {
+            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', `rl:*:${ip}*`, 'COUNT', 100);
+            rateLimitKeys.push(...keys);
+            cursor = nextCursor;
+        } while (cursor !== '0');
         const rateLimitInfo: Record<string, { value: string; ttl: number }> = {};
 
         for (const key of rateLimitKeys) {
