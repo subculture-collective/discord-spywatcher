@@ -350,7 +350,7 @@ router.get('/me', requireAuth, async (req, res): Promise<void> => {
         });
 
         if (!user) {
-            console.warn('⚠️ DB user not found for:', req.user.discordId);
+            console.warn('⚠️ DB user not found for:', sanitizeForLog(req.user.discordId));
             res.status(404).json({ error: 'User not found in DB' });
             return;
         }
