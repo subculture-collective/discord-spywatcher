@@ -277,3 +277,33 @@ model DataRetentionPolicy {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
+
+model SecurityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String // LOGIN_ATTEMPT, PERMISSION_DENIED, DATA_EXPORT, etc.
+  resource   String? // Resource being accessed
+  result     String // SUCCESS, FAILURE
+  ipAddress  String?
+  userAgent  String?
+  requestId  String?
+  metadata   Json?
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([ipAddress])
+}
+
+model AlertLog {
+  id        String   @id @default(cuid())
+  severity  String // LOW, MEDIUM, HIGH, CRITICAL
+  title     String
+  message   String
+  details   Json?
+  sentAt    DateTime @default(now())
+
+  @@index([severity])
+  @@index([sentAt])
+}

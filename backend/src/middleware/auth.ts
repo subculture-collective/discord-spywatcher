@@ -102,13 +102,56 @@ export function requirePermission(permissionName: string) {
                 permissionName
             );
 
+            // Dynamically import to avoid circular dependency
+            const { logSecurityEvent, SecurityActions } = await import(
+                '../utils/securityLogger'
+            );
+
             if (!hasPermission) {
+                // Log permission denial
+                await logSecurityEvent({
+                    userId: req.user.userId,
+                    action: SecurityActions.PERMISSION_DENIED,
+                    resource: req.path,
+                    result: 'FAILURE',
+                    ipAddress:
+                        req.ip ||
+                        (typeof req.headers['x-forwarded-for'] === 'string'
+                            ? req.headers['x-forwarded-for']
+                                  .split(',')[0]
+                                  .trim()
+                            : 'unknown'),
+                    userAgent: req.get('user-agent'),
+                    metadata: {
+                        permission: permissionName,
+                        method: req.method,
+                    },
+                });
+
                 res.status(403).json({
                     error: 'Forbidden — missing permission',
                     required: permissionName,
                 });
                 return;
             }
+
+            // Log successful permission check
+            await logSecurityEvent({
+                userId: req.user.userId,
+                action: SecurityActions.PERMISSION_GRANTED,
+                resource: req.path,
+                result: 'SUCCESS',
+                ipAddress:
+                    req.ip ||
+                    (typeof req.headers['x-forwarded-for'] === 'string'
+                        ? req.headers['x-forwarded-for'].split(',')[0].trim()
+                        : 'unknown'),
+                userAgent: req.get('user-agent'),
+                metadata: {
+                    permission: permissionName,
+                    method: req.method,
+                },
+            });
 
             next();
         } catch (err) {

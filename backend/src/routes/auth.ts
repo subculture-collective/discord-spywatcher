@@ -32,6 +32,10 @@ import {
 } from '../utils/refreshToken';
 import { sanitizeForLog } from '../utils/security';
 import {
+    logSecurityEvent,
+    SecurityActions,
+} from '../utils/securityLogger';
+import {
     createSession,
     getUserSessions,
     revokeSession,
@@ -126,6 +130,16 @@ router.get(
                     false,
                     'Discord ID not in allowed list'
                 );
+                await logSecurityEvent({
+                    action: SecurityActions.LOGIN_FAILURE,
+                    result: 'FAILURE',
+                    ipAddress,
+                    userAgent,
+                    metadata: {
+                        reason: 'Discord ID not in allowed list',
+                        discordId,
+                    },
+                });
                 res.status(403).json({ error: 'Unauthorized Discord user' });
                 return;
             }
@@ -173,6 +187,17 @@ router.get(
                     false,
                     'Account is banned'
                 );
+                await logSecurityEvent({
+                    userId: dbUser.id,
+                    action: SecurityActions.LOGIN_FAILURE,
+                    result: 'FAILURE',
+                    ipAddress,
+                    userAgent,
+                    metadata: {
+                        reason: 'Account is banned',
+                        discordId,
+                    },
+                });
                 res.status(403).json({ error: 'This account is banned.' });
                 return;
             }
@@ -244,6 +269,39 @@ router.get(
             // Log successful login
             await logLoginAttempt(dbUser.id, ipAddress, userAgent, true);
 
+            // Log security events for OAuth and login
+            await logSecurityEvent({
+                userId: dbUser.id,
+                action: SecurityActions.OAUTH_GRANT,
+                result: 'SUCCESS',
+                ipAddress,
+                userAgent,
+                metadata: {
+                    scopes: grantedScopes,
+                    discordId,
+                },
+            });
+
+            await logSecurityEvent({
+                userId: dbUser.id,
+                action: SecurityActions.LOGIN_SUCCESS,
+                result: 'SUCCESS',
+                ipAddress,
+                userAgent,
+                metadata: {
+                    discordId,
+                    username: `${username}#${discriminator}`,
+                },
+            });
+
+            await logSecurityEvent({
+                userId: dbUser.id,
+                action: SecurityActions.SESSION_CREATED,
+                result: 'SUCCESS',
+                ipAddress,
+                userAgent,
+            });
+
             setRefreshTokenCookie(res, newRefreshToken);
 
             res.json({ accessToken });
@@ -303,11 +361,31 @@ router.post(
             // Set new refresh token cookie
             setRefreshTokenCookie(res, newRefreshToken);
 
+            // Log successful token refresh
+            await logSecurityEvent({
+                userId: user.userId,
+                action: SecurityActions.TOKEN_REFRESH,
+                result: 'SUCCESS',
+                ipAddress,
+                userAgent,
+            });
+
             console.log('✅ Refresh route hit. Tokens rotated successfully.');
             res.json({ accessToken: newAccessToken });
         } catch (err) {
             const error = err as Error;
             console.error('❌ Refresh token error:', error.message);
+
+            // Log failed token refresh
+            await logSecurityEvent({
+                action: SecurityActions.TOKEN_REFRESH_FAILURE,
+                result: 'FAILURE',
+                ipAddress,
+                userAgent,
+                metadata: {
+                    error: error.message,
+                },
+            });
 
             // Clear invalid token from cookie
             clearRefreshTokenCookie(res);
@@ -323,11 +401,29 @@ router.post(
 router.post('/logout', authLimiter, async (req, res): Promise<void> => {
     const token = req.cookies?.refreshToken || req.body?.token;
 
+    // Get client IP for logging
+    const xForwardedFor = req.headers['x-forwarded-for'];
+    const ipAddress =
+        req.ip ||
+        (typeof xForwardedFor === 'string'
+            ? xForwardedFor.split(',')[0].trim()
+            : 'unknown');
+    const userAgent = req.headers['user-agent'] || undefined;
+
     if (token) {
         try {
             // Revoke the refresh token
             await revokeRefreshToken(token);
             console.log('✅ Refresh token revoked');
+
+            // Log logout event
+            await logSecurityEvent({
+                userId: req.user?.userId,
+                action: SecurityActions.LOGOUT,
+                result: 'SUCCESS',
+                ipAddress,
+                userAgent,
+            });
         } catch (err) {
             console.error('Failed to revoke refresh token:', err);
         }
@@ -547,10 +643,46 @@ router.post(
         const { discordId } = req.params;
         const { role } = req.body;
 
+        const xForwardedFor = req.headers['x-forwarded-for'];
+        const ipAddress =
+            req.ip ||
+            (typeof xForwardedFor === 'string'
+                ? xForwardedFor.split(',')[0].trim()
+                : 'unknown');
+        const userAgent = req.headers['user-agent'] || undefined;
+
         try {
+            // Get the user's current role before updating
+            const currentUser = await db.user.findUnique({
+                where: { discordId },
+                select: { id: true, role: true },
+            });
+
+            if (!currentUser) {
+                res.status(404).json({ error: 'User not found' });
+                return;
+            }
+
             const updated = await db.user.update({
                 where: { discordId },
                 data: { role },
+            });
+
+            // Log role change
+            await logSecurityEvent({
+                userId: req.user!.userId,
+                action: SecurityActions.ROLE_CHANGE,
+                resource: `/admin/users/${discordId}/role`,
+                result: 'SUCCESS',
+                ipAddress,
+                userAgent,
+                metadata: {
+                    targetUserId: currentUser.id,
+                    targetDiscordId: discordId,
+                    oldRole: currentUser.role,
+                    newRole: role,
+                    adminUserId: req.user!.userId,
+                },
             });
 
             res.json({ message: 'Role updated', user: updated });
