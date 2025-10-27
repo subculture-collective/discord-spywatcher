@@ -22,7 +22,7 @@
     },
     "dependencies": {
         "@catppuccin/palette": "^1.7.1",
-        "axios": "^1.12.2",
+        "axios": "^1.13.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-hot-toast": "^2.6.0",
