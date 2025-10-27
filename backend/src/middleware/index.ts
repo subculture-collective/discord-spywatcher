@@ -1,5 +1,6 @@
 export * from './apiKey';
 export * from './auth';
+export * from './caching';
 export * from './ddosProtection';
 export * from './filterBannedUsers';
 export * from './ipBlock';
