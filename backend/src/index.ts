@@ -223,13 +223,10 @@ client.once('ready', async () => {
         console.log('🔍 Suspicion Report (Top 10):');
         console.table(
             scores.slice(0, 10).map((s) => ({
-                userId: s.userId,
+                ...s,
                 username: sanitizeForLog(s.username),
                 avgReactionTime: (s as any).avgReactionTime?.toFixed(0),
                 fastReactionCount: (s as any).fastReactionCount,
-                lurkerScore: s.lurkerScore,
-                presenceCount: s.presenceCount,
-                roleChangeCount: s.roleChangeCount,
                 oldClients: s.oldClients?.join(','),
                 newClients: s.newClients?.join(','),
             }))
