@@ -36,7 +36,7 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
 
     if (platforms.length > 1) {
         console.log(
-            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.tag)} is online on: ${platforms.join(
+            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.tag)} is online on: ${platforms.map(sanitizeForLog).join(
                 ', '
             )}`
         );
@@ -235,8 +235,8 @@ client.once('ready', async () => {
                 lurkerScore: (s as any).lurkerScore,
                 presenceCount: (s as any).presenceCount,
                 roleChangeCount: (s as any).roleChangeCount,
-                oldClients: s.oldClients?.join(','),
-                newClients: s.newClients?.join(','),
+                oldClients: s.oldClients?.map(sanitizeForLog).join(','),
+                newClients: s.newClients?.map(sanitizeForLog).join(','),
             }))
         );
     }
