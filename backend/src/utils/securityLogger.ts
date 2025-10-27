@@ -40,16 +40,51 @@ export const securityLogger = createLogger({
 });
 
 /**
+ * Sanitize sensitive data from metadata before logging
+ */
+function sanitizeMetadata(
+    metadata?: Record<string, unknown>
+): Record<string, unknown> | undefined {
+    if (!metadata) return undefined;
+
+    const sanitized = { ...metadata };
+    const sensitiveKeys = [
+        'password',
+        'token',
+        'accessToken',
+        'refreshToken',
+        'secret',
+        'apiKey',
+        'scopes', // OAuth scopes can be sensitive
+        'email',
+    ];
+
+    for (const key of sensitiveKeys) {
+        if (key in sanitized) {
+            sanitized[key] = '[REDACTED]';
+        }
+    }
+
+    return sanitized;
+}
+
+/**
  * Log security event to both Winston and database
  */
 export async function logSecurityEvent(
     event: SecurityEvent
 ): Promise<void> {
     try {
-        // Log to Winston for file-based logging
-        securityLogger.info('Security event', event);
+        // Sanitize event metadata before logging
+        const sanitizedEvent = {
+            ...event,
+            metadata: sanitizeMetadata(event.metadata),
+        };
 
-        // Log to database for persistence and analysis
+        // Log to Winston for file-based logging
+        securityLogger.info('Security event', sanitizedEvent);
+
+        // Log to database for persistence and analysis (use sanitized metadata)
         await db.securityLog.create({
             data: {
                 userId: event.userId,
@@ -59,7 +94,7 @@ export async function logSecurityEvent(
                 ipAddress: event.ipAddress,
                 userAgent: event.userAgent,
                 requestId: event.requestId,
-                metadata: event.metadata as never,
+                metadata: sanitizedEvent.metadata as never,
                 timestamp: new Date(),
             },
         });
@@ -68,11 +103,8 @@ export async function logSecurityEvent(
         await checkAlertConditions(event);
     } catch (error) {
         // Log error but don't throw - security logging failures shouldn't break main flow
-        console.error('Failed to log security event:', error);
-        securityLogger.error('Failed to log security event', {
-            error,
-            event,
-        });
+        console.error('Failed to log security event');
+        securityLogger.error('Failed to log security event');
     }
 }
 

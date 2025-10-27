@@ -1,6 +1,14 @@
 import { db } from '../db';
 
 /**
+ * Sanitize IP address for logging to prevent log injection
+ */
+function sanitizeIPForLog(ip: string): string {
+    // Only allow valid IP address characters
+    return ip.replace(/[^\d.:\[\]a-fA-F]/g, '').substring(0, 45);
+}
+
+/**
  * Auto-block an IP address due to abuse
  */
 export async function autoBlockOnAbuse(
@@ -14,7 +22,7 @@ export async function autoBlockOnAbuse(
         });
 
         if (existing) {
-            console.log(`IP ${ipAddress} is already blocked`);
+            console.log('IP is already blocked');
             return;
         }
 
@@ -25,7 +33,7 @@ export async function autoBlockOnAbuse(
 
         if (whitelisted) {
             console.log(
-                `IP ${ipAddress} is whitelisted, not blocking despite abuse`
+                'IP is whitelisted, not blocking despite abuse'
             );
             return;
         }
@@ -38,8 +46,9 @@ export async function autoBlockOnAbuse(
             },
         });
 
+        const sanitizedIP = sanitizeIPForLog(ipAddress);
         console.log(
-            `🔒 Blocked IP ${ipAddress} for ${durationSeconds} seconds`
+            `🔒 Blocked IP ${sanitizedIP} for ${durationSeconds} seconds`
         );
 
         // Schedule unblock if duration is specified
@@ -50,11 +59,10 @@ export async function autoBlockOnAbuse(
                         await db.blockedIP.deleteMany({
                             where: { ip: ipAddress },
                         });
-                        console.log(`🔓 Auto-unblocked IP ${ipAddress}`);
+                        console.log(`🔓 Auto-unblocked IP ${sanitizeIPForLog(ipAddress)}`);
                     } catch (error) {
                         console.error(
-                            `Failed to auto-unblock IP ${ipAddress}:`,
-                            error
+                            'Failed to auto-unblock IP'
                         );
                     }
                 },
@@ -62,7 +70,7 @@ export async function autoBlockOnAbuse(
             );
         }
     } catch (error) {
-        console.error(`Failed to auto-block IP ${ipAddress}:`, error);
+        console.error('Failed to auto-block IP');
         throw error;
     }
 }

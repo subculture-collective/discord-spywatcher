@@ -82,11 +82,12 @@ export async function sendAlert(alert: Alert): Promise<void> {
             },
         });
 
+        // Log alert without sensitive details
         console.log(
-            `${getSeverityEmoji(alert.severity)} Alert sent: [${alert.severity}] ${alert.title}`
+            `${getSeverityEmoji(alert.severity)} Alert sent with severity: ${alert.severity}`
         );
     } catch (error) {
-        console.error('Failed to send alert:', error);
+        console.error('Failed to send alert');
         // Don't throw - alert failures shouldn't break the main flow
     }
 }
