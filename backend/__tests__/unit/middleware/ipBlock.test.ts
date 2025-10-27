@@ -116,7 +116,10 @@ describe('IP Block Middleware', () => {
         });
 
         it('should continue if IP is not provided', async () => {
-            mockRequest.ip = undefined;
+            mockRequest = {
+                ...mockRequest,
+                ip: undefined,
+            };
 
             await blockKnownBadIPs(
                 mockRequest as Request,

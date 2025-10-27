@@ -36,7 +36,10 @@ describe('Caching Middleware', () => {
 
     describe('cacheControlHeaders', () => {
         it('should set cache headers for analytics endpoints', () => {
-            mockRequest.path = '/api/analytics/test';
+            mockRequest = {
+                ...mockRequest,
+                path: '/api/analytics/test',
+            };
 
             cacheControlHeaders(
                 mockRequest as Request,
@@ -52,7 +55,10 @@ describe('Caching Middleware', () => {
         });
 
         it('should set no-cache headers for health endpoints', () => {
-            mockRequest.path = '/api/health';
+            mockRequest = {
+                ...mockRequest,
+                path: '/api/health',
+            };
 
             cacheControlHeaders(
                 mockRequest as Request,
@@ -68,8 +74,11 @@ describe('Caching Middleware', () => {
         });
 
         it('should set cache headers for general GET requests', () => {
-            mockRequest.method = 'GET';
-            mockRequest.path = '/api/data';
+            mockRequest = {
+                ...mockRequest,
+                method: 'GET',
+                path: '/api/data',
+            };
 
             cacheControlHeaders(
                 mockRequest as Request,
