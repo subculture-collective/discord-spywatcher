@@ -7,7 +7,7 @@ import {
     requireAuth,
     unbanIP,
     whitelistIP,
-    removeFromWhitelist,
+    removeIPFromWhitelist,
     getWhitelistedIPs,
 } from '../middleware';
 import { apiLimiter } from '../middleware/rateLimiter';
@@ -65,7 +65,7 @@ router.delete('/whitelist', async (req, res): Promise<void> => {
         return;
     }
 
-    await removeFromWhitelist(ip);
+    await removeIPFromWhitelist(ip);
     res.json({ message: `IP ${ip} removed from whitelist` });
 });
 

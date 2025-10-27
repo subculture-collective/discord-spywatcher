@@ -55,6 +55,7 @@ describe('Redis Utility', () => {
     describe('isRedisAvailable', () => {
         it('should return false when Redis client is null', async () => {
             jest.resetModules();
+            jest.mock('../../../src/utils/redis');
             jest.mock('../../../src/utils/env', () => ({
                 env: {
                     REDIS_URL: undefined,
@@ -67,7 +68,8 @@ describe('Redis Utility', () => {
             expect(available).toBe(false);
         });
     });
-});
+
+    describe('scanKeys', () => {
         it('should return empty array when Redis client is null', async () => {
             jest.resetModules();
             jest.mock('../../../src/utils/env', () => ({

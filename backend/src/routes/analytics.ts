@@ -13,14 +13,11 @@ import {
     requireAuth,
     validateGuild,
     analyticsLimiter,
-    redisCacheMiddleware,
-    etagMiddleware,
-    analyticsCache,
 } from '../middleware';
 
 const router = Router();
 
-// Apply analytics-specific rate limiting and caching
+// Apply analytics-specific rate limiting
 router.use(analyticsLimiter);
 router.use(requireAuth);
 router.use(validateGuild);
