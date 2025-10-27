@@ -39,6 +39,8 @@ const allowedOrigins =
             loadSheddingMiddleware,
             circuitBreakerMiddleware,
             globalRateLimiter,
+            cacheControlHeaders,
+            etagMiddleware,
         } = await import('./middleware');
         console.log('✅ middleware loaded');
 
@@ -107,6 +109,10 @@ const allowedOrigins =
 
         // Logging
         app.use(requestLogger);
+
+        // Caching headers for better performance
+        app.use(cacheControlHeaders);
+        app.use(etagMiddleware);
 
         // Load management middleware
         if (env.ENABLE_LOAD_SHEDDING) {
