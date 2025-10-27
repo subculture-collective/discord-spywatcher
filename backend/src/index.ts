@@ -36,7 +36,7 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
 
     if (platforms.length > 1) {
         console.log(
-            `[⚠️ MULTI-CLIENT] ${user.tag} is online on: ${platforms.join(
+            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.tag)} is online on: ${platforms.join(
                 ', '
             )}`
         );
@@ -76,9 +76,9 @@ client.on('typingStart', async (typing) => {
 
     if (deltaMs < 5000) {
         console.log(
-            `[⏱️ DB CORRELATED] ${user.tag} started typing ${deltaMs}ms after ${
+            `[⏱️ DB CORRELATED] ${sanitizeForLog(user.tag)} started typing ${deltaMs}ms after ${sanitizeForLog(
                 lastMsg.username
-            } in #${'name' in channel ? channel.name : 'unknown'}`
+            )} in #${sanitizeForLog('name' in channel ? channel.name : 'unknown')}`
         );
 
         // Save for long-term analysis
@@ -117,7 +117,7 @@ client.on('messageCreate', async (message) => {
     });
 
     console.log(
-        `[💬 MESSAGE] ${message.author.tag} in #${channelName}: ${message.content}`
+        `[💬 MESSAGE] ${sanitizeForLog(message.author.tag)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
     );
 });
 
@@ -138,7 +138,7 @@ client.on('guildMemberAdd', async (member) => {
     });
 
     console.log(
-        `[🟢 JOIN] ${member.user.tag} (account age: ${accountAgeDays} days) joined ${member.guild.name}`
+        `[🟢 JOIN] ${sanitizeForLog(member.user.tag)} (account age: ${accountAgeDays} days) joined ${sanitizeForLog(member.guild.name)}`
     );
 });
 
@@ -182,7 +182,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     });
 
     console.log(
-        `[🕵️ ROLE DRIFT] ${newMember.user.tag} gained roles: ${addedRoleNames}`
+        `[🕵️ ROLE DRIFT] ${sanitizeForLog(newMember.user.tag)} gained roles: ${sanitizeForLog(addedRoleNames)}`
     );
 });
 

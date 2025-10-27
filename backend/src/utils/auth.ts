@@ -1,6 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import { env } from './env';
+import { sanitizeForLog } from './security';
 
 const JWT_SECRET = env.JWT_SECRET;
 const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET;
@@ -29,13 +30,13 @@ export function verifyAccessToken(token: string): AuthPayload {
     }
 
     const payload = decoded as Partial<AuthPayload>;
-    console.log('🧪 Decoded payload:', payload); // <--- Add this
+    console.log('🧪 Decoded payload:', sanitizeForLog(payload)); // <--- Add this
 
     if (!payload.discordId || !payload.access || !payload.role) {
         console.error('❌ Invalid payload fields:', {
-            discordId: payload.discordId,
-            access: payload.access,
-            role: payload.role,
+            discordId: sanitizeForLog(payload.discordId),
+            access: sanitizeForLog(payload.access),
+            role: sanitizeForLog(payload.role),
         });
         throw new Error('Invalid access token payload');
     }
