@@ -2,10 +2,19 @@ import { db } from '../db';
 
 /**
  * Sanitize IP address for logging to prevent log injection
+ * Validates IPv4 and IPv6 format
  */
 function sanitizeIPForLog(ip: string): string {
-    // Only allow valid IP address characters
-    return ip.replace(/[^\d.:\[\]a-fA-F]/g, '').substring(0, 45);
+    // IPv4: digits and dots only
+    // IPv6: hex digits, colons, and brackets for IPv6
+    // Strict validation to prevent any injection
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    const ipv6Regex = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
+    
+    if (ipv4Regex.test(ip) || ipv6Regex.test(ip)) {
+        return ip.substring(0, 45); // Max IPv6 length
+    }
+    return '[invalid-ip]';
 }
 
 /**
@@ -38,7 +47,7 @@ export async function autoBlockOnAbuse(
             return;
         }
 
-        // Block the IP
+        // Block the IP - don't include raw IP in reason field
         await db.blockedIP.create({
             data: {
                 ip: ipAddress,
