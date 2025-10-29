@@ -1,6 +1,20 @@
 import { Router, Request, Response } from 'express';
 
 import { requireAuth, requireRole } from '../middleware/auth';
+import {
+    getSlowQueryLogs,
+    getSlowQueryStats,
+    clearSlowQueryLogs,
+} from '../middleware/slowQueryLogger';
+import {
+    checkDatabaseHealth,
+    getTableStats,
+    getIndexUsageStats,
+    getUnusedIndexes,
+    getSlowQueries,
+    generateMaintenanceReport,
+    analyzeAllTables,
+} from '../utils/databaseMaintenance';
 import { getRedisClient } from '../utils/redis';
 
 const router = Router();
@@ -267,6 +281,162 @@ router.get('/system', async (_req: Request, res: Response) => {
             available: !!redis,
         },
     });
+});
+
+/**
+ * GET /api/admin/monitoring/database/health
+ * Get database health status
+ */
+router.get('/database/health', async (_req: Request, res: Response) => {
+    try {
+        const health = await checkDatabaseHealth();
+        res.json(health);
+    } catch (error) {
+        console.error('Failed to check database health:', error);
+        res.status(500).json({
+            error: 'Failed to check database health',
+            connected: false,
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/database/tables
+ * Get table statistics (sizes, row counts, etc.)
+ */
+router.get('/database/tables', async (_req: Request, res: Response) => {
+    try {
+        const stats = await getTableStats();
+        res.json(stats);
+    } catch (error) {
+        console.error('Failed to get table statistics:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve table statistics',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/database/indexes
+ * Get index usage statistics
+ */
+router.get('/database/indexes', async (_req: Request, res: Response) => {
+    try {
+        const [indexStats, unusedIndexes] = await Promise.all([
+            getIndexUsageStats(),
+            getUnusedIndexes(),
+        ]);
+
+        res.json({
+            indexStats,
+            unusedIndexes,
+            summary: {
+                totalIndexes: indexStats.length,
+                unusedCount: unusedIndexes.length,
+            },
+        });
+    } catch (error) {
+        console.error('Failed to get index statistics:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve index statistics',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/database/slow-queries
+ * Get slow query logs from application monitoring
+ */
+router.get('/database/slow-queries', async (_req: Request, res: Response) => {
+    try {
+        const logs = getSlowQueryLogs();
+        const stats = getSlowQueryStats();
+
+        res.json({
+            logs,
+            stats,
+        });
+    } catch (error) {
+        console.error('Failed to get slow query logs:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve slow query logs',
+        });
+    }
+});
+
+/**
+ * DELETE /api/admin/monitoring/database/slow-queries
+ * Clear slow query logs
+ */
+router.delete('/database/slow-queries', async (_req: Request, res: Response) => {
+    try {
+        clearSlowQueryLogs();
+        res.json({
+            message: 'Slow query logs cleared successfully',
+        });
+    } catch (error) {
+        console.error('Failed to clear slow query logs:', error);
+        res.status(500).json({
+            error: 'Failed to clear slow query logs',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/database/pg-slow-queries
+ * Get slow queries from PostgreSQL statistics (requires pg_stat_statements)
+ */
+router.get('/database/pg-slow-queries', async (req: Request, res: Response) => {
+    try {
+        const minCalls = parseInt(req.query.minCalls as string) || 10;
+        const queries = await getSlowQueries(minCalls);
+
+        res.json({
+            queries,
+            note: queries.length === 0
+                ? 'pg_stat_statements extension may not be enabled'
+                : undefined,
+        });
+    } catch (error) {
+        console.error('Failed to get PostgreSQL slow queries:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve PostgreSQL slow queries',
+        });
+    }
+});
+
+/**
+ * POST /api/admin/monitoring/database/analyze
+ * Run ANALYZE on all tables to update statistics
+ */
+router.post('/database/analyze', async (_req: Request, res: Response) => {
+    try {
+        await analyzeAllTables();
+        res.json({
+            message: 'Database tables analyzed successfully',
+        });
+    } catch (error) {
+        console.error('Failed to analyze tables:', error);
+        res.status(500).json({
+            error: 'Failed to analyze database tables',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/database/report
+ * Generate comprehensive database maintenance report
+ */
+router.get('/database/report', async (_req: Request, res: Response) => {
+    try {
+        const report = await generateMaintenanceReport();
+        res.json(report);
+    } catch (error) {
+        console.error('Failed to generate maintenance report:', error);
+        res.status(500).json({
+            error: 'Failed to generate maintenance report',
+        });
+    }
 });
 
 export default router;
