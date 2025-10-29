@@ -287,7 +287,7 @@ router.get('/system', async (_req: Request, res: Response) => {
  * GET /api/admin/monitoring/database/health
  * Get database health status
  */
-router.get('/database/health', (_req: Request, res: Response) => {
+router.get('/database/health', async (_req: Request, res: Response) => {
     try {
         const health = await checkDatabaseHealth();
         res.json(health);
