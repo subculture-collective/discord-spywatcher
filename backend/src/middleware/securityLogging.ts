@@ -13,11 +13,8 @@ export function securityLoggingMiddleware(
     res: Response,
     next: NextFunction
 ): void {
-    // Store original send function
-    const originalSend = res.send;
-
-    // Override send to intercept response
-    res.send = function (data): Response {
+    // Use response finish event to capture all response methods
+    res.on('finish', () => {
         // Log security-relevant responses
         if (res.statusCode === 401) {
             // Unauthorized - authentication failed
@@ -54,10 +51,7 @@ export function securityLoggingMiddleware(
                 console.error('Failed to log forbidden access:', err)
             );
         }
-
-        // Call original send
-        return originalSend.call(this, data);
-    };
+    });
 
     next();
 }
@@ -88,7 +82,7 @@ export function logAdminAction(
         res.on('finish', () => {
             const result = res.statusCode < 400 ? 'SUCCESS' : 'FAILURE';
             logSecurityEvent({
-                userId: req.user.userId,
+                userId: req.user!.userId,
                 action: SecurityActions.ADMIN_ACTION,
                 resource: req.path,
                 result,

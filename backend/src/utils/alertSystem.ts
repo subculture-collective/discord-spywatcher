@@ -227,7 +227,7 @@ export async function checkAlertConditions(
         ) {
             await sendAlert({
                 severity: 'CRITICAL',
-                title: `${event.action.replaceAll('_', ' ')} Detected`,
+                title: `${event.action.replace(/_/g, ' ')} Detected`,
                 message: `Potential attack detected from ${event.ipAddress || 'unknown IP'}`,
                 details: {
                     ipAddress: event.ipAddress || 'unknown',

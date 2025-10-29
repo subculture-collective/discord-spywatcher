@@ -87,10 +87,11 @@ model RoleChangeEvent {
 }
 
 model BlockedIP {
-  id        Int      @id @default(autoincrement())
-  ip        String   @unique
+  id        Int       @id @default(autoincrement())
+  ip        String    @unique
   reason    String?
-  createdAt DateTime @default(now())
+  expiresAt DateTime? // Optional expiration time for temporary blocks
+  createdAt DateTime  @default(now())
 }
 
 model WhitelistedIP {

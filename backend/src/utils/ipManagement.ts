@@ -47,11 +47,16 @@ export async function autoBlockOnAbuse(
             return;
         }
 
-        // Block the IP - don't include raw IP in reason field
+        // Block the IP with optional expiration time
+        const expiresAt = durationSeconds > 0 
+            ? new Date(Date.now() + durationSeconds * 1000)
+            : null;
+
         await db.blockedIP.create({
             data: {
                 ip: ipAddress,
                 reason: `Auto-blocked due to abuse detected at ${new Date().toISOString()} for ${durationSeconds} seconds`,
+                expiresAt,
             },
         });
 
@@ -60,24 +65,6 @@ export async function autoBlockOnAbuse(
             `🔒 Blocked IP ${sanitizedIP} for ${durationSeconds} seconds`
         );
 
-        // Schedule unblock if duration is specified
-        if (durationSeconds > 0) {
-            setTimeout(
-                async () => {
-                    try {
-                        await db.blockedIP.deleteMany({
-                            where: { ip: ipAddress },
-                        });
-                        console.log(`🔓 Auto-unblocked IP ${sanitizeIPForLog(ipAddress)}`);
-                    } catch (error) {
-                        console.error(
-                            'Failed to auto-unblock IP'
-                        );
-                    }
-                },
-                durationSeconds * 1000
-            );
-        }
     } catch (error) {
         console.error('Failed to auto-block IP');
         throw error;
@@ -110,12 +97,27 @@ export async function unblockIP(ipAddress: string): Promise<void> {
 
 /**
  * Check if an IP is blocked
+ * Automatically cleans up expired blocks
  */
 export async function isIPBlocked(ipAddress: string): Promise<boolean> {
     const blocked = await db.blockedIP.findFirst({
         where: { ip: ipAddress },
     });
-    return !!blocked;
+    
+    if (!blocked) {
+        return false;
+    }
+    
+    // Check if block has expired
+    if (blocked.expiresAt && blocked.expiresAt < new Date()) {
+        // Block has expired, remove it
+        await db.blockedIP.deleteMany({
+            where: { ip: ipAddress },
+        });
+        return false;
+    }
+    
+    return true;
 }
 
 /**
@@ -144,4 +146,19 @@ export async function getWhitelistedIPs() {
     return db.whitelistedIP.findMany({
         orderBy: { createdAt: 'desc' },
     });
+}
+
+/**
+ * Clean up expired IP blocks
+ * Should be called periodically (e.g., via cron job or scheduled task)
+ */
+export async function cleanupExpiredBlocks(): Promise<number> {
+    const result = await db.blockedIP.deleteMany({
+        where: {
+            expiresAt: {
+                lt: new Date(),
+            },
+        },
+    });
+    return result.count;
 }
