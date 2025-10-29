@@ -304,7 +304,7 @@ router.get('/database/health', (_req: Request, res: Response) => {
  * GET /api/admin/monitoring/database/tables
  * Get table statistics (sizes, row counts, etc.)
  */
-router.get('/database/tables', (_req: Request, res: Response) => {
+router.get('/database/tables', async (_req: Request, res: Response) => {
     try {
         const stats = await getTableStats();
         res.json(stats);
