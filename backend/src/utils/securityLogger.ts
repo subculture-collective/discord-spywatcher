@@ -103,8 +103,8 @@ export async function logSecurityEvent(
         await checkAlertConditions(sanitizedEvent);
     } catch (error) {
         // Log error but don't throw - security logging failures shouldn't break main flow
-        console.error('Failed to log security event');
-        securityLogger.error('Failed to log security event');
+        console.error('Failed to log security event:', error);
+        securityLogger.error('Failed to log security event', { error });
     }
 }
 
