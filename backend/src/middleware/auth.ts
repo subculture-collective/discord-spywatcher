@@ -135,23 +135,7 @@ export function requirePermission(permissionName: string) {
                 return;
             }
 
-            // Log successful permission check
-            await logSecurityEvent({
-                userId: req.user.userId,
-                action: SecurityActions.PERMISSION_GRANTED,
-                resource: req.path,
-                result: 'SUCCESS',
-                ipAddress:
-                    req.ip ||
-                    (typeof req.headers['x-forwarded-for'] === 'string'
-                        ? req.headers['x-forwarded-for'].split(',')[0].trim()
-                        : 'unknown'),
-                userAgent: req.get('user-agent'),
-                metadata: {
-                    permission: permissionName,
-                    method: req.method,
-                },
-            });
+            // (Success logging removed to reduce log volume)
 
             next();
         } catch (err) {
