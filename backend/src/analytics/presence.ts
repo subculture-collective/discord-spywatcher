@@ -10,7 +10,7 @@ export async function getMultiClientLoginCounts(guildId: string, since?: Date) {
     const userMap = new Map<string, { username: string; count: number }>();
 
     for (const e of events) {
-        const clientCount = e.clients.split(',').length;
+        const clientCount = e.clients.length;
 
         if (clientCount >= 2) {
             const current = userMap.get(e.userId) ?? {

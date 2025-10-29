@@ -10,6 +10,7 @@ import {
     getSuspicionScores,
 } from './analytics';
 import { db } from './db';
+import { cacheInvalidation } from './services/cacheInvalidation';
 import { env } from './utils/env';
 import { sanitizeForLog } from './utils/security';
 
@@ -44,7 +45,7 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
             data: {
                 userId: user.id,
                 username: user.tag,
-                clients: platforms.join(','),
+                clients: platforms,
             },
         });
     }
@@ -116,6 +117,9 @@ client.on('messageCreate', async (message) => {
         },
     });
 
+    // Invalidate analytics caches after message creation
+    await cacheInvalidation.onMessageCreated(message.guild.id);
+
     console.log(
         `[💬 MESSAGE] ${sanitizeForLog(message.author.tag)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
     );
@@ -169,8 +173,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
     const addedRoleNames = added
         .map((rid) => newMember.guild.roles.cache.get(rid)?.name)
-        .filter(Boolean)
-        .join(',');
+        .filter(Boolean) as string[];
 
     await db.roleChangeEvent.create({
         data: {
