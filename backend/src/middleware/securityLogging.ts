@@ -85,19 +85,22 @@ export function logAdminAction(
 ): void {
     // Only log for admin routes
     if (req.user && req.user.role === 'ADMIN') {
-        logSecurityEvent({
-            userId: req.user.userId,
-            action: SecurityActions.ADMIN_ACTION,
-            resource: req.path,
-            result: 'SUCCESS',
-            ipAddress: getClientIP(req),
-            userAgent: req.get('user-agent'),
-            requestId: req.id,
-            metadata: {
-                method: req.method,
-                body: sanitizeBody(req.body),
-            },
-        }).catch((err) => console.error('Failed to log admin action:', err));
+        res.on('finish', () => {
+            const result = res.statusCode < 400 ? 'SUCCESS' : 'FAILURE';
+            logSecurityEvent({
+                userId: req.user.userId,
+                action: SecurityActions.ADMIN_ACTION,
+                resource: req.path,
+                result,
+                ipAddress: getClientIP(req),
+                userAgent: req.get('user-agent'),
+                requestId: req.id,
+                metadata: {
+                    method: req.method,
+                    body: sanitizeBody(req.body),
+                },
+            }).catch((err) => console.error('Failed to log admin action:', err));
+        });
     }
 
     next();
