@@ -82,6 +82,10 @@ const envSchema = z.object({
 
     // Optional Frontend URL
     FRONTEND_URL: z.string().url().optional(),
+
+    // Alert Webhooks (optional)
+    DISCORD_ALERT_WEBHOOK: z.string().url().optional(),
+    SLACK_ALERT_WEBHOOK: z.string().url().optional(),
 });
 
 // Export the inferred type

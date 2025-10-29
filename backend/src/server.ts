@@ -41,6 +41,7 @@ const allowedOrigins =
             globalRateLimiter,
             cacheControlHeaders,
             etagMiddleware,
+            securityLoggingMiddleware,
         } = await import('./middleware');
         console.log('✅ middleware loaded');
 
@@ -109,6 +110,10 @@ const allowedOrigins =
 
         // Logging
         app.use(requestLogger);
+
+        // Security event logging middleware
+        app.use(securityLoggingMiddleware);
+        console.log('✅ Security logging enabled');
 
         // Caching headers for better performance
         app.use(cacheControlHeaders);
