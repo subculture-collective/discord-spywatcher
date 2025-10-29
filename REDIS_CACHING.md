@@ -384,13 +384,30 @@ const data = await cache.remember(key, ttl, () => db.query(...));
 console.log(`Cache time: ${Date.now() - start}ms`);
 ```
 
+## Cache Warming
+
+The cache service includes a warming utility to pre-populate cache on startup:
+
+```typescript
+import { cache } from './services/cache';
+
+// Warm cache with initial data
+await cache.warm([
+  { 
+    key: 'analytics:ghosts:123:all', 
+    value: await fetchGhostData('123'), 
+    options: { ttl: 300, tags: ['guild:123'] }
+  },
+  // ... more entries
+]);
+```
+
 ## Future Enhancements
 
-1. **Cache Warming** - Pre-populate cache on startup
-2. **Distributed Caching** - Multi-region cache synchronization
-3. **Cache Compression** - Reduce memory usage for large values
-4. **Smart Invalidation** - ML-based invalidation strategies
-5. **Cache Analytics** - Detailed usage patterns and optimization suggestions
+1. **Distributed Caching** - Multi-region cache synchronization
+2. **Cache Compression** - Reduce memory usage for large values
+3. **Smart Invalidation** - ML-based invalidation strategies
+4. **Cache Analytics** - Detailed usage patterns and optimization suggestions
 
 ## References
 

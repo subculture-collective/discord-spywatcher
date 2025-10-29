@@ -202,6 +202,25 @@ describe('CacheService', () => {
         });
     });
 
+    describe('invalidateByTags', () => {
+        it('should invalidate multiple tags', async () => {
+            mockRedis.smembers
+                .mockResolvedValueOnce(['key1', 'key2'])
+                .mockResolvedValueOnce(['key3']);
+            mockRedis.del.mockResolvedValue(1);
+            
+            const result = await cacheService.invalidateByTags(['tag1', 'tag2']);
+            
+            expect(result).toBe(3); // 2 keys from tag1 + 1 key from tag2
+            expect(mockRedis.smembers).toHaveBeenCalledTimes(2);
+        });
+
+        it('should return 0 for empty tags array', async () => {
+            const result = await cacheService.invalidateByTags([]);
+            expect(result).toBe(0);
+        });
+    });
+
     describe('remember', () => {
         it('should return cached value if available', async () => {
             const cachedData = { foo: 'cached' };
