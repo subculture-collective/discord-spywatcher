@@ -10,11 +10,6 @@ export const db =
     log: process.env.NODE_ENV === 'development' 
       ? ['query', 'error', 'warn'] 
       : ['error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
   });
 
 // Prevent multiple instances in development (hot reload)
@@ -22,9 +17,33 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = db;
 }
 
-// Graceful shutdown
-process.on('beforeExit', async () => {
+// Graceful shutdown handlers
+const gracefulShutdown = async (signal: string) => {
+  console.log(`Received ${signal}, closing database connections...`);
+  try {
+    await db.$disconnect();
+    console.log('Database connections closed.');
+  } catch (error) {
+    console.error('Error during database disconnect:', error);
+  } finally {
+    process.exit(0);
+  }
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions and unhandled rejections
+process.on('uncaughtException', async (err) => {
+  console.error('Uncaught Exception:', err);
   await db.$disconnect();
+  process.exit(1);
+});
+
+process.on('unhandledRejection', async (reason) => {
+  console.error('Unhandled Rejection:', reason);
+  await db.$disconnect();
+  process.exit(1);
 });
 
 // Connection pooling is configured via DATABASE_URL query parameters:

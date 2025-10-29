@@ -28,7 +28,7 @@ echo "Database: $DB_NAME"
 echo "Backup file: $BACKUP_FILE"
 
 # Create backup
-if PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -F c -b -v "$DB_NAME" 2>&1 | gzip > "$BACKUP_FILE"; then
+if PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -F c -b -v "$DB_NAME" | gzip > "$BACKUP_FILE"; then
     BACKUP_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
     echo -e "${GREEN}✓ Backup completed successfully${NC}"
     echo "Backup size: $BACKUP_SIZE"

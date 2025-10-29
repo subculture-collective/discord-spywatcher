@@ -23,10 +23,13 @@ const sqlite = new PrismaClient({
 });
 
 // PostgreSQL connection
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable must be set for PostgreSQL connection.');
+}
 const postgres = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://spywatcher:password@localhost:5432/spywatcher'
+      url: process.env.DATABASE_URL
     }
   }
 });
@@ -55,7 +58,7 @@ function generateUUID(): string {
  * Split comma-separated string into array
  */
 function splitToArray(value: string): string[] {
-  if (!value || value.trim() === '') return [];
+  if (!value || typeof value !== 'string' || value.trim() === '') return [];
   return value.split(',').map(v => v.trim()).filter(v => v);
 }
 

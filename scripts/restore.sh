@@ -59,8 +59,8 @@ WHERE pg_stat_activity.datname = '$DB_NAME'
   AND pid <> pg_backend_pid();
 " > /dev/null 2>&1 || true
 
-# Restore backup
-if gunzip -c "$BACKUP_FILE" | PGPASSWORD="$DB_PASSWORD" pg_restore -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -v --clean --if-exists 2>&1; then
+# Restore backup (custom format is already compressed by pg_dump)
+if gunzip -c "$BACKUP_FILE" | PGPASSWORD="$DB_PASSWORD" pg_restore -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -v --clean --if-exists -F c; then
     echo -e "${GREEN}✓ Restore completed successfully${NC}"
 else
     echo -e "${RED}✗ Restore failed${NC}"

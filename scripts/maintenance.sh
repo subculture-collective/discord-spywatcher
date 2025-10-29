@@ -35,9 +35,10 @@ fi
 
 # 2. Update statistics
 echo -e "${YELLOW}Updating table statistics...${NC}"
-TABLES=$(run_sql "SELECT tablename FROM pg_tables WHERE schemaname = 'public';" | grep -v "^(" | grep -v "rows)" | grep -v "^$" | tail -n +3 | head -n -2)
+TABLES=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
 
 while IFS= read -r table; do
+    table=$(echo "$table" | xargs)  # Trim whitespace
     if [ -n "$table" ]; then
         echo "  Analyzing $table..."
         run_sql "ANALYZE \"$table\";" > /dev/null 2>&1 || echo "    Warning: Failed to analyze $table"
