@@ -24,6 +24,7 @@
         "db:backup": "../scripts/backup.sh",
         "db:restore": "../scripts/restore.sh",
         "db:maintenance": "../scripts/maintenance.sh",
+        "db:fulltext": "../scripts/setup-fulltext-search.sh",
         "lint": "eslint . --ext .ts",
         "lint:fix": "eslint . --ext .ts --fix",
         "format": "prettier --write \"src/**/*.ts\"",

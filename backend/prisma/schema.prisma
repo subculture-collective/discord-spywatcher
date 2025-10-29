@@ -3,7 +3,6 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -61,7 +60,7 @@ model MessageEvent {
   @@index([guildId])
   @@index([channelId])
   @@index([createdAt])
-  @@fulltext([content]) // Full-text search index
+  // Full-text search can be implemented using PostgreSQL's tsvector in a raw query or migration
 }
 
 model JoinEvent {

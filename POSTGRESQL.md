@@ -82,27 +82,52 @@ createdAt: DateTime @default(now()) @db.Timestamptz
 
 ### Full-Text Search
 
-The `MessageEvent` model includes full-text search on the `content` field:
+The `MessageEvent` model supports full-text search on the `content` field using PostgreSQL's native text search capabilities.
+
+#### Setup
+
+Run the setup script to add the full-text search index:
+
+```bash
+DB_PASSWORD=yourpassword ./scripts/setup-fulltext-search.sh
+```
+
+This creates:
+- A generated `content_search` tsvector column
+- A GIN index for efficient text searches
+
+#### Usage
 
 ```typescript
-// Search messages with full-text
-const messages = await db.messageEvent.findMany({
-  where: {
-    content: {
-      search: 'search terms'
-    }
-  }
-});
-
-// Using Prisma's preview feature
+// Raw SQL query for full-text search
 const results = await db.$queryRaw`
-  SELECT *, ts_rank(to_tsvector('english', content), plainto_tsquery('english', ${query})) AS rank
+  SELECT *, ts_rank(content_search, to_tsquery('english', ${query})) AS rank
   FROM "MessageEvent"
-  WHERE to_tsvector('english', content) @@ plainto_tsquery('english', ${query})
+  WHERE content_search @@ to_tsquery('english', ${query})
   ORDER BY rank DESC
   LIMIT 20;
 `;
+
+// Search for phrases
+const results = await db.$queryRaw`
+  SELECT * FROM "MessageEvent"
+  WHERE content_search @@ plainto_tsquery('english', ${'hello world'})
+`;
+
+// Complex search with operators
+const results = await db.$queryRaw`
+  SELECT * FROM "MessageEvent"
+  WHERE content_search @@ to_tsquery('english', ${'cat & dog | bird'})
+`;
 ```
+
+#### Search Operators
+- `&` - AND (both terms must be present)
+- `|` - OR (either term can be present)
+- `!` - NOT (term must not be present)
+- `<->` - Phrase search (terms must be adjacent)
+
+Example: `'cat & dog'` finds messages with both "cat" and "dog"
 
 ### Performance Features
 

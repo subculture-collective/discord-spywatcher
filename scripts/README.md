@@ -138,6 +138,33 @@ BATCH_SIZE=500 SQLITE_DATABASE_URL="file:./prisma/dev.db" DATABASE_URL="postgres
 - JoinEvent
 - RoleChangeEvent (with array addedRoles)
 
+### 6. `setup-fulltext-search.sh`
+Sets up full-text search capabilities for the MessageEvent table.
+
+**Features:**
+- Adds tsvector column for efficient text search
+- Creates GIN index for performance
+- Verifies index creation
+- Colored output
+
+**Usage:**
+```bash
+# Setup full-text search
+DB_PASSWORD=your_password ./scripts/setup-fulltext-search.sh
+
+# From backend directory
+DB_PASSWORD=your_password npm run db:fulltext
+```
+
+**Environment Variables:**
+- `DB_NAME` - Database name (default: spywatcher)
+- `DB_USER` - Database user (default: spywatcher)
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)
+- `DB_PASSWORD` - Database password (required)
+
+**Note:** This should be run after the database schema is created and before searching messages.
+
 ## Automation
 
 ### Scheduled Backups
