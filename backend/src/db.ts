@@ -17,6 +17,10 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = db;
 }
 
+// Initialize slow query logger middleware
+// This must be done after the db instance is created but before queries run
+// The initialization is done in the application entry point (server.ts or index.ts)
+
 // Graceful shutdown handlers
 const gracefulShutdown = async (signal: string) => {
   console.log(`Received ${signal}, closing database connections...`);

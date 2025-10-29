@@ -27,6 +27,7 @@ model PresenceEvent {
 
   @@index([userId])
   @@index([createdAt])
+  @@index([userId, createdAt(sort: Desc)]) // Composite index for user queries with time filter
 }
 
 model TypingEvent {
@@ -43,6 +44,8 @@ model TypingEvent {
   @@index([guildId])
   @@index([channelId])
   @@index([createdAt])
+  @@index([userId, channelId]) // Composite index for user-channel queries
+  @@index([guildId, createdAt(sort: Desc)]) // Composite index for guild queries with time filter
 }
 
 model MessageEvent {
@@ -60,6 +63,9 @@ model MessageEvent {
   @@index([guildId])
   @@index([channelId])
   @@index([createdAt])
+  @@index([userId, createdAt(sort: Desc)]) // Composite index for user queries with time filter
+  @@index([guildId, channelId]) // Composite index for guild-channel queries
+  @@index([guildId, createdAt(sort: Desc)]) // Composite index for guild queries with time filter
   // Full-text search setup via scripts/setup-fulltext-search.sh which adds a tsvector column and GIN index
 }
 
@@ -75,6 +81,7 @@ model JoinEvent {
   @@index([userId])
   @@index([guildId])
   @@index([createdAt])
+  @@index([guildId, createdAt(sort: Desc)]) // Composite index for guild queries with time filter
 }
 
 model DeletedMessageEvent {
@@ -109,6 +116,9 @@ model ReactionTime {
   @@index([actorId])
   @@index([guildId])
   @@index([createdAt])
+  @@index([observerId, createdAt(sort: Desc)]) // Composite index for observer queries with time filter
+  @@index([guildId, createdAt(sort: Desc)]) // Composite index for guild queries with time filter
+  @@index([deltaMs]) // Index for fast reaction queries
 }
 
 model RoleChangeEvent {
@@ -123,6 +133,7 @@ model RoleChangeEvent {
   @@index([userId])
   @@index([guildId])
   @@index([createdAt])
+  @@index([guildId, createdAt(sort: Desc)]) // Composite index for guild queries with time filter
 }
 
 model BlockedIP {
@@ -187,6 +198,9 @@ model User {
 
   @@index([discordId])
   @@index([email])
+  @@index([role]) // Index for role-based queries
+  @@index([lastSeenAt(sort: Desc)]) // Index for last seen queries
+  @@index([role, lastSeenAt(sort: Desc)]) // Composite index for role + last seen queries
 }
 
 model Guild {
