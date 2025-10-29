@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
 }
 
 datasource db {
@@ -18,55 +18,83 @@ enum Role {
 }
 
 model PresenceEvent {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   userId    String
   username  String
-  clients   String // comma-separated: "desktop,web"
-  createdAt DateTime @default(now())
+  clients   String[] // Array instead of comma-separated
+  metadata  Json?    @db.JsonB // JSONB for flexible data
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model TypingEvent {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   userId    String
   username  String
   channelId String
   channel   String
   guildId   String
-  createdAt DateTime @default(now())
+  metadata  Json?    @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([guildId])
+  @@index([channelId])
+  @@index([createdAt])
 }
 
 model MessageEvent {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   userId    String
   username  String
   channelId String
   channel   String
   guildId   String
-  content   String
-  createdAt DateTime @default(now())
+  content   String   @db.Text
+  metadata  Json?    @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([guildId])
+  @@index([channelId])
+  @@index([createdAt])
+  // Full-text search setup via scripts/setup-fulltext-search.sh which adds a tsvector column and GIN index
 }
 
 model JoinEvent {
-  id             Int      @id @default(autoincrement())
+  id             String   @id @default(uuid())
   userId         String
   username       String
   guildId        String
   accountAgeDays Int
-  createdAt      DateTime @default(now())
+  metadata       Json?    @db.JsonB
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([guildId])
+  @@index([createdAt])
 }
 
 model DeletedMessageEvent {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   userId    String
   username  String
   channelId String
   channel   String
   guildId   String
-  createdAt DateTime @default(now())
+  metadata  Json?    @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([guildId])
+  @@index([channelId])
+  @@index([createdAt])
 }
 
 model ReactionTime {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid())
   observerId   String
   observerName String
   actorId      String
@@ -74,31 +102,47 @@ model ReactionTime {
   channelId    String
   guildId      String
   deltaMs      Int
-  createdAt    DateTime @default(now())
+  metadata     Json?    @db.JsonB
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  @@index([observerId])
+  @@index([actorId])
+  @@index([guildId])
+  @@index([createdAt])
 }
 
 model RoleChangeEvent {
-  id         Int      @id @default(autoincrement())
+  id         String   @id @default(uuid())
   userId     String
   username   String
   guildId    String
-  addedRoles String // comma-separated role IDs or names
-  createdAt  DateTime @default(now())
+  addedRoles String[] // Array instead of comma-separated
+  metadata   Json?    @db.JsonB
+  createdAt  DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([guildId])
+  @@index([createdAt])
 }
 
 model BlockedIP {
   id        Int       @id @default(autoincrement())
   ip        String    @unique
   reason    String?
-  expiresAt DateTime? // Optional expiration time for temporary blocks
-  createdAt DateTime  @default(now())
+  expiresAt DateTime? @db.Timestamptz // Optional expiration time for temporary blocks
+  createdAt DateTime  @default(now()) @db.Timestamptz
+
+  @@index([ip])
+  @@index([expiresAt])
 }
 
 model WhitelistedIP {
   id        Int      @id @default(autoincrement())
   ip        String   @unique
   reason    String?  // Why this IP is whitelisted (e.g., "Office IP", "Admin")
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([ip])
 }
 
 model BannedUser {
@@ -106,7 +150,9 @@ model BannedUser {
   userId    String   @unique
   username  String
   reason    String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
 }
 
 model User {
@@ -122,11 +168,11 @@ model User {
   userAgent            String?
   accessToken          String
   refreshToken         String
-  refreshTokenIssuedAt DateTime @default(now())
-  accessTokenExpiresAt DateTime
-  lastSeenAt           DateTime
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  refreshTokenIssuedAt DateTime @default(now()) @db.Timestamptz
+  accessTokenExpiresAt DateTime @db.Timestamptz
+  lastSeenAt           DateTime @db.Timestamptz
+  createdAt            DateTime @default(now()) @db.Timestamptz
+  updatedAt            DateTime @updatedAt @db.Timestamptz
 
   // New role field
   role Role @default(USER)
@@ -138,6 +184,9 @@ model User {
   loginLogs       LoginLog[]
   deletionRequest DeletionRequest?
   consentLogs     ConsentLog[]
+
+  @@index([discordId])
+  @@index([email])
 }
 
 model Guild {
@@ -156,16 +205,19 @@ model Permission {
   name        String           @unique // e.g., "analytics.view", "users.ban"
   description String
   category    String // e.g., "analytics", "admin"
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime         @default(now()) @db.Timestamptz
+  updatedAt   DateTime         @updatedAt @db.Timestamptz
   roles       RolePermission[]
+
+  @@index([category])
+  @@index([name])
 }
 
 model RolePermission {
   role         Role
   permissionId String
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime   @default(now()) @db.Timestamptz
 
   @@id([role, permissionId])
 }
@@ -177,14 +229,16 @@ model RefreshToken {
   familyId  String // For token rotation detection
   used      Boolean  @default(false)
   revoked   Boolean  @default(false)
-  expiresAt DateTime
+  expiresAt DateTime @db.Timestamptz
   userAgent String?
   ipAddress String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([familyId])
+  @@index([token])
+  @@index([expiresAt])
 }
 
 model Session {
@@ -192,12 +246,13 @@ model Session {
   userId       String
   userAgent    String?
   ipAddress    String?
-  lastActivity DateTime @default(now())
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
+  lastActivity DateTime @default(now()) @db.Timestamptz
+  expiresAt    DateTime @db.Timestamptz
+  createdAt    DateTime @default(now()) @db.Timestamptz
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
 }
 
 model ApiKey {
@@ -206,13 +261,14 @@ model ApiKey {
   name       String
   userId     String
   scopes     String // JSON array of scopes/permissions
-  lastUsedAt DateTime?
-  expiresAt  DateTime?
+  lastUsedAt DateTime? @db.Timestamptz
+  expiresAt  DateTime? @db.Timestamptz
   revoked    Boolean   @default(false)
-  createdAt  DateTime  @default(now())
+  createdAt  DateTime  @default(now()) @db.Timestamptz
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([key])
 }
 
 model LoginLog {
@@ -222,11 +278,12 @@ model LoginLog {
   userAgent String?
   success   Boolean
   reason    String? // Failure reason if success=false
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt])
+  @@index([ipAddress])
 }
 
 // GDPR Compliance Models
@@ -235,24 +292,28 @@ model DeletionRequest {
   id           String   @id @default(cuid())
   userId       String   @unique
   reason       String?
-  requestedAt  DateTime @default(now())
-  scheduledFor DateTime
+  requestedAt  DateTime @default(now()) @db.Timestamptz
+  scheduledFor DateTime @db.Timestamptz
   status       String   @default("PENDING") // PENDING, CANCELLED, COMPLETED
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([scheduledFor])
 }
 
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
   action    String // ACCOUNT_CREATED, DATA_EXPORTED, ACCOUNT_DELETED, etc.
-  details   Json?
+  details   Json?    @db.JsonB
   ipAddress String?
   userAgent String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz
 
   @@index([userId])
   @@index([createdAt])
   @@index([action])
+  @@index([ipAddress])
 }
 
 model ConsentLog {
@@ -261,7 +322,7 @@ model ConsentLog {
   consentType String // PRIVACY_POLICY, COOKIES, DATA_COLLECTION
   granted     Boolean
   version     String // Policy version
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @db.Timestamptz
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -274,36 +335,40 @@ model DataRetentionPolicy {
   retentionDays Int // Number of days to retain data
   description   String?
   enabled       Boolean   @default(true)
-  lastCleanupAt DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  lastCleanupAt DateTime? @db.Timestamptz
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  @@index([dataType])
+  @@index([enabled])
 }
 
 model SecurityLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  action     String // LOGIN_ATTEMPT, PERMISSION_DENIED, DATA_EXPORT, etc.
-  resource   String? // Resource being accessed
-  result     String // SUCCESS, FAILURE
-  ipAddress  String?
-  userAgent  String?
-  requestId  String?
-  metadata   Json?
-  timestamp  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String // LOGIN_ATTEMPT, PERMISSION_DENIED, DATA_EXPORT, etc.
+  resource  String? // Resource being accessed
+  result    String // SUCCESS, FAILURE
+  ipAddress String?
+  userAgent String?
+  requestId String?
+  metadata  Json?    @db.JsonB
+  timestamp DateTime @default(now()) @db.Timestamptz
 
   @@index([userId])
   @@index([action])
   @@index([timestamp])
   @@index([ipAddress])
+  @@index([result])
 }
 
 model AlertLog {
-  id        String   @id @default(cuid())
-  severity  String // LOW, MEDIUM, HIGH, CRITICAL
-  title     String
-  message   String
-  details   Json?
-  sentAt    DateTime @default(now())
+  id       String   @id @default(cuid())
+  severity String // LOW, MEDIUM, HIGH, CRITICAL
+  title    String
+  message  String
+  details  Json?    @db.JsonB
+  sentAt   DateTime @default(now()) @db.Timestamptz
 
   @@index([severity])
   @@index([sentAt])
