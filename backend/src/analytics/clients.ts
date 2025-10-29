@@ -47,7 +47,7 @@ async function getClientDriftFlagsUncached(_guildId: string, _since?: Date) {
         const map = new Map<string, Set<string>>();
         for (const e of events) {
             const set = map.get(e.userId) ?? new Set();
-            e.clients.forEach((c: string) => set.add(c));
+            e.clients.forEach((c) => set.add(c));
             map.set(e.userId, set);
         }
         return map;

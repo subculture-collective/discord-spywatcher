@@ -46,6 +46,10 @@ export class PubSubService {
             console.error('Redis subscriber error:', err);
         });
 
+        this.subscriber.on('ready', () => {
+            console.log('✅ Pub/Sub subscriber ready');
+        });
+
         console.log('✅ Pub/Sub service initialized');
     }
 

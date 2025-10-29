@@ -71,7 +71,7 @@ export class CacheInvalidationService {
             ]);
 
             // Publish real-time update
-            await pubsub.publishPresenceUpdate(userId, {
+            await pubsub.publish(`cache:invalidated:${userId}`, {
                 event: 'presence_updated',
                 userId,
                 timestamp: new Date().toISOString(),

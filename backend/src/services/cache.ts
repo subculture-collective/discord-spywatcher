@@ -324,11 +324,17 @@ export class CacheService {
     }
 
     /**
+     * Escape special regex characters in a string for use in a RegExp
+     */
+    private escapeRegex(str: string): string {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    /**
      * Parse numeric value from Redis INFO command output
      */
     private parseInfoValue(info: string, key: string): number | null {
-        // Escape special regex characters in key
-        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedKey = this.escapeRegex(key);
         const match = info.match(new RegExp(`${escapedKey}:(\\d+)`));
         return match ? parseInt(match[1], 10) : null;
     }
@@ -337,8 +343,7 @@ export class CacheService {
      * Parse string value from Redis INFO command output
      */
     private parseInfoString(info: string, key: string): string | null {
-        // Escape special regex characters in key
-        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedKey = this.escapeRegex(key);
         const match = info.match(new RegExp(`${escapedKey}:([^\\r\\n]+)`));
         return match ? match[1] : null;
     }

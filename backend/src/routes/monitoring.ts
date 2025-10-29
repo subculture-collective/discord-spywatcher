@@ -6,6 +6,7 @@ import {
     getSlowQueryStats,
     clearSlowQueryLogs,
 } from '../middleware/slowQueryLogger';
+import { cache } from '../services/cache';
 import {
     checkDatabaseHealth,
     getTableStats,
@@ -16,7 +17,6 @@ import {
     analyzeAllTables,
 } from '../utils/databaseMaintenance';
 import { getRedisClient } from '../utils/redis';
-import { cache } from '../services/cache';
 
 const router = Router();
 const redis = getRedisClient();
@@ -521,10 +521,17 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
     try {
         const { tag } = req.params;
         
-        if (!tag || !/^[a-zA-Z0-9:_-]+$/.test(tag)) {
+        // Validate tag format - disallow Redis pattern special characters
+        // to prevent unintended key matching
+        if (
+            !tag ||
+            !/^[a-zA-Z0-9:_-]+$/.test(tag) ||
+            /^[*?[\]{}()|\\]/.test(tag) ||
+            /[*?[\]{}()|\\]/.test(tag)
+        ) {
             res.status(400).json({ 
                 error: 'Invalid tag format',
-                message: 'Tag must contain only alphanumeric characters, colons, underscores, and hyphens'
+                message: 'Tag must contain only alphanumeric characters, colons, underscores, and hyphens, and must not contain Redis pattern special characters (*, ?, [, ], {, }, (, ), |, \\)'
             });
             return;
         }
