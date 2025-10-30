@@ -14,7 +14,12 @@ function ExportButton({ data, filename, label = 'Export CSV' }: ExportButtonProp
         }
 
         // Convert data to CSV
-        const headers = Object.keys(data[0] as object);
+        // Collect all unique keys from all objects in data
+        const headerSet = new Set<string>();
+        data.forEach((row) => {
+            Object.keys(row as object).forEach((key) => headerSet.add(key));
+        });
+        const headers = Array.from(headerSet);
         const csvContent = [
             headers.join(','),
             ...data.map((row) =>
