@@ -7,6 +7,7 @@ import banRoutes from './bans';
 import ipManagementRoutes from './ipManagement';
 import monitoringRoutes from './monitoring';
 import privacyRoutes from './privacy';
+import publicApiRoutes from './publicApi';
 import suspicionRoutes from './suspicion';
 import timelineRoutes from './timeline';
 
@@ -16,6 +17,9 @@ const router = Router();
 router.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Public API documentation routes
+router.use('/public', publicApiRoutes);
 
 router.use('/auth', authRoutes);
 router.use('/privacy', privacyRoutes);

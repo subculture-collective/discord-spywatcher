@@ -13,6 +13,8 @@ Spywatcher is a full-stack surveillance and analytics tool for Discord servers. 
 - Offers analytics endpoints for presence and role drift
 - Includes a React-based frontend with dashboards and settings
 - Secure Discord OAuth2 authentication
+- **Public API** with comprehensive documentation for third-party integrations
+- **Official TypeScript/JavaScript SDK** for easy API access
 
 ## 🏗️ Tech Stack
 
@@ -26,6 +28,8 @@ Spywatcher is a full-stack surveillance and analytics tool for Discord servers. 
 ```bash
 backend/        # Discord bot + API server
 frontend/       # React + Vite frontend client
+sdk/            # TypeScript/JavaScript SDK for API integration
+docs/           # Comprehensive documentation
 .github/        # CI/CD workflows and automation
 ```
 
@@ -271,6 +275,52 @@ Available at `http://localhost:3001`
 #### Suspicion Routes
 
 - `GET` `/suspicion`
+
+## 🌐 Public API & SDK
+
+Spywatcher provides a comprehensive public API for third-party integrations with an official TypeScript/JavaScript SDK.
+
+### Quick Start with SDK
+
+```bash
+npm install @spywatcher/sdk
+```
+
+```typescript
+import { Spywatcher } from '@spywatcher/sdk';
+
+const client = new Spywatcher({
+  baseUrl: 'https://api.spywatcher.com/api',
+  apiKey: 'spy_live_your_api_key_here'
+});
+
+// Get ghost users
+const ghosts = await client.analytics.getGhosts();
+
+// Get suspicion data
+const suspicions = await client.getSuspicionData();
+```
+
+### API Documentation
+
+- **[Public API Reference](./docs/PUBLIC_API.md)** - Complete API documentation with examples
+- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Step-by-step guide for building integrations
+- **[SDK Documentation](./sdk/README.md)** - TypeScript/JavaScript SDK usage guide
+- **[SDK Examples](./sdk/examples/)** - Complete example applications
+
+### Features
+
+- ✅ RESTful API with comprehensive endpoints
+- ✅ API key authentication with OAuth2
+- ✅ TypeScript SDK with full type definitions
+- ✅ Rate limiting and security protection
+- ✅ Complete API documentation (JSON & OpenAPI 3.0)
+- ✅ Code examples in multiple languages
+- ✅ Developer guides and best practices
+
+### API Endpoints
+
+Access API documentation at `/api/public/docs` or see the [Public API Reference](./docs/PUBLIC_API.md).
 
 ## 📊 Frontend Dashboard
 

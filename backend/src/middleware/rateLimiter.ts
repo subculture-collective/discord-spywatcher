@@ -189,3 +189,14 @@ export const userRateLimiter = rateLimit({
     }),
 });
 
+/**
+ * Rate limiter for public API endpoints
+ * Standard: 60 requests per minute
+ */
+export const publicApiLimiter = createRateLimiter({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 60,
+    message: 'Too many requests to public API. Please try again later.',
+    prefix: 'public-api',
+});
+
