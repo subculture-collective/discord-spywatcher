@@ -32,8 +32,9 @@ function Suspicion() {
             });
     }, []);
 
-    // Filter logic can be enhanced later with banned user data
-    const filtered = filterBanned ? data : data;
+    // Filter logic - currently a placeholder for future banned user filtering
+    // TODO: Implement banned user filtering when ban data is available
+    const filtered = data;
 
     const getScoreColor = (score: number) => {
         if (score > 75) return 'text-red-600 font-bold';

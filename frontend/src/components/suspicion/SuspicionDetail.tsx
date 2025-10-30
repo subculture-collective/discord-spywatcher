@@ -50,10 +50,10 @@ function SuspicionDetail() {
                 <div className="text-center">
                     <p className="text-red-600 mb-4">{error || 'No data available'}</p>
                     <button
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/suspicion')}
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     >
-                        Back to Dashboard
+                        Back to Suspicion List
                     </button>
                 </div>
             </div>
@@ -106,7 +106,7 @@ function SuspicionDetail() {
         })
             .then(() => {
                 toast.success(`Banned ${suspicion.username}`);
-                navigate('/dashboard');
+                navigate('/suspicion');
             })
             .catch((err) => {
                 console.error('Error banning user:', err);
@@ -121,10 +121,10 @@ function SuspicionDetail() {
                 <div className="flex items-center justify-between">
                     <div>
                         <button
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/suspicion')}
                             className="text-blue-600 hover:text-blue-800 mb-2"
                         >
-                            ← Back to Dashboard
+                            ← Back to Suspicion List
                         </button>
                         <h1 className="text-3xl font-bold text-gray-900">
                             Suspicion Analysis
