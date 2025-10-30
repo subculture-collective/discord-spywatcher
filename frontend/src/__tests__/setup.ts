@@ -32,3 +32,10 @@ Object.defineProperty(window, 'matchMedia', {
         dispatchEvent: () => {},
     }),
 });
+
+// Mock ResizeObserver for recharts
+(globalThis as typeof globalThis & { ResizeObserver: unknown }).ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+};

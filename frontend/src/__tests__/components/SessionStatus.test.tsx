@@ -16,7 +16,7 @@ vi.mock('../../store/auth', () => ({
 
 // Mock toast (if used, seems to be missing import in actual component)
 (
-    global as typeof global & {
+    globalThis as typeof globalThis & {
         toast: { success: () => void; error: () => void };
     }
 ).toast = {
