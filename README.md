@@ -208,12 +208,33 @@ Spywatcher implements comprehensive security measures to protect against abuse a
 - **IP blocking** with automatic abuse detection
 - **Load management** with circuit breakers and load shedding under high load
 
-See [backend/docs/RATE_LIMITING.md](./backend/docs/RATE_LIMITING.md) for detailed documentation on:
+See [RATE_LIMITING.md](./RATE_LIMITING.md) for detailed documentation on:
 - Rate limiting configuration
 - Endpoint-specific limits
 - DDoS protection mechanisms
 - Load shedding behavior
 - Admin APIs for IP management
+
+## 🗄️ Database & Connection Pooling
+
+Spywatcher uses PostgreSQL with PgBouncer for efficient connection pooling and resource management:
+
+- **PgBouncer** - Transaction-mode connection pooling for optimal performance
+- **Prisma** - Type-safe database access with connection pool monitoring
+- **Redis** - Distributed caching and rate limiting with connection management
+- **Graceful shutdown** - Proper connection cleanup on application shutdown
+
+See [CONNECTION_POOLING.md](./CONNECTION_POOLING.md) for detailed documentation on:
+- PgBouncer setup and configuration
+- Connection pool monitoring and metrics
+- Database health checks and alerting
+- Performance optimization strategies
+- Troubleshooting connection issues
+
+Additional database documentation:
+- [POSTGRESQL.md](./POSTGRESQL.md) - PostgreSQL setup and management
+- [DATABASE_OPTIMIZATION.md](./DATABASE_OPTIMIZATION.md) - Query optimization and indexing
+- [docs/PGBOUNCER_SETUP.md](./docs/PGBOUNCER_SETUP.md) - Quick reference guide
 
 ## 🌐 Endpoints
 

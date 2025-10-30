@@ -46,6 +46,24 @@ services:
       - "-c"
       - "max_wal_size=4GB"
 
+  pgbouncer:
+    build:
+      context: ./pgbouncer
+      dockerfile: Dockerfile
+    container_name: spywatcher-pgbouncer-dev
+    environment:
+      DB_USER: spywatcher
+      DB_PASSWORD: ${DB_PASSWORD:-spywatcher_dev_password}
+      PGBOUNCER_ADMIN_USER: pgbouncer_admin
+      PGBOUNCER_ADMIN_PASSWORD: ${PGBOUNCER_ADMIN_PASSWORD:-pgbouncer_admin_pass}
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spywatcher-network
+
   redis:
     image: redis:7-alpine
     container_name: spywatcher-redis-dev
@@ -72,7 +90,9 @@ services:
       - /app/node_modules
       - /app/dist
     environment:
-      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD:-spywatcher_dev_password}@postgres:5432/spywatcher
+      # Use PgBouncer for application connections, direct for migrations
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD:-spywatcher_dev_password}@pgbouncer:6432/spywatcher?pgbouncer=true
+      DATABASE_URL_DIRECT: postgresql://spywatcher:${DB_PASSWORD:-spywatcher_dev_password}@postgres:5432/spywatcher
       REDIS_URL: redis://redis:6379
       NODE_ENV: development
       PORT: 3001
@@ -88,13 +108,13 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      postgres:
-        condition: service_healthy
+      pgbouncer:
+        condition: service_started
       redis:
         condition: service_healthy
     networks:
       - spywatcher-network
-    command: sh -c "npx prisma migrate dev && npm run dev:api"
+    command: sh -c "DATABASE_URL=$DATABASE_URL_DIRECT npx prisma migrate dev && npm run dev:api"
 
   frontend:
     build:

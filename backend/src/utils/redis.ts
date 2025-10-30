@@ -6,6 +6,7 @@ import { env } from './env';
  * Redis client instance for rate limiting and caching
  */
 let redisClient: Redis | null = null;
+let isShuttingDown = false;
 
 /**
  * Initialize and return Redis client
@@ -27,14 +28,22 @@ export function getRedisClient(): Redis | null {
             maxRetriesPerRequest: 3,
             enableReadyCheck: true,
             retryStrategy(times: number) {
+                // Don't retry during shutdown
+                if (isShuttingDown) {
+                    return null;
+                }
                 const delay = Math.min(times * 50, 2000);
                 return delay;
             },
             lazyConnect: false,
+            // Connection pool settings for better performance
+            enableOfflineQueue: true,
+            connectTimeout: 10000,
+            keepAlive: 30000,
         });
 
         redisClient.on('error', (err: Error) => {
-            console.error('Redis connection error:', err);
+            console.error('❌ Redis connection error:', err);
         });
 
         redisClient.on('connect', () => {
@@ -43,6 +52,16 @@ export function getRedisClient(): Redis | null {
 
         redisClient.on('ready', () => {
             console.log('✅ Redis ready for operations');
+        });
+
+        redisClient.on('reconnecting', () => {
+            console.log('🔄 Redis reconnecting...');
+        });
+
+        redisClient.on('close', () => {
+            if (!isShuttingDown) {
+                console.log('⚠️  Redis connection closed unexpectedly');
+            }
         });
 
         return redisClient;
@@ -70,15 +89,77 @@ export async function isRedisAvailable(): Promise<boolean> {
 }
 
 /**
+ * Get Redis connection metrics
+ */
+export async function getRedisMetrics() {
+    const client = getRedisClient();
+    if (!client) {
+        return {
+            available: false,
+            connected: false,
+        };
+    }
+
+    try {
+        const info = await client.info('stats');
+        const stats = info.split('\r\n').reduce(
+            (acc, line) => {
+                const [key, value] = line.split(':');
+                if (key && value) {
+                    // eslint-disable-next-line security/detect-object-injection
+                    acc[key] = value;
+                }
+                return acc;
+            },
+            {} as Record<string, string>
+        );
+
+        return {
+            available: true,
+            connected: client.status === 'ready',
+            status: client.status,
+            totalConnectionsReceived: stats['total_connections_received'] ?? 'N/A',
+            totalCommandsProcessed: stats['total_commands_processed'] ?? 'N/A',
+            instantaneousOpsPerSec: stats['instantaneous_ops_per_sec'] ?? 'N/A',
+            usedMemory: stats['used_memory_human'] ?? 'N/A',
+        };
+    } catch (error) {
+        return {
+            available: true,
+            connected: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        };
+    }
+}
+
+/**
  * Gracefully close Redis connection
  */
 export async function closeRedisConnection(): Promise<void> {
+    if (isShuttingDown) {
+        return;
+    }
+
+    isShuttingDown = true;
+
     if (redisClient) {
-        await redisClient.quit();
-        redisClient = null;
-        console.log('✅ Redis connection closed');
+        console.log('Closing Redis connection...');
+        try {
+            // Use quit() for graceful shutdown - waits for pending commands
+            await redisClient.quit();
+            redisClient = null;
+            console.log('✅ Redis connection closed successfully');
+        } catch (error) {
+            console.error('❌ Error closing Redis connection:', error);
+            // Force disconnect if quit fails
+            redisClient.disconnect();
+            redisClient = null;
+        }
     }
 }
+
+// Note: Shutdown handlers are registered in db.ts to avoid conflicts
+// Redis cleanup is called from the main shutdown handler
 
 /**
  * Scan Redis keys matching a pattern using SCAN command (non-blocking)

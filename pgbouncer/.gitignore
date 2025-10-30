@@ -1,0 +1,3 @@
+# Ignore generated userlist with credentials
+# This file is generated at runtime by entrypoint.sh
+userlist.txt

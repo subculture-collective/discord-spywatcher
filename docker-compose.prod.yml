@@ -50,6 +50,28 @@ services:
           cpus: '1'
           memory: 512M
 
+  pgbouncer:
+    build:
+      context: ./pgbouncer
+      dockerfile: Dockerfile
+    container_name: spywatcher-pgbouncer-prod
+    environment:
+      DB_USER: spywatcher
+      DB_PASSWORD: ${DB_PASSWORD}
+      PGBOUNCER_ADMIN_USER: pgbouncer_admin
+      PGBOUNCER_ADMIN_PASSWORD: ${PGBOUNCER_ADMIN_PASSWORD:-pgbouncer_admin_pass}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - spywatcher-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
   redis:
     image: redis:7-alpine
     container_name: spywatcher-redis-prod
@@ -76,7 +98,7 @@ services:
       dockerfile: Dockerfile
     container_name: spywatcher-backend-prod
     environment:
-      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@pgbouncer:6432/spywatcher?pgbouncer=true
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
       PORT: 3001
@@ -90,8 +112,8 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      postgres:
-        condition: service_healthy
+      pgbouncer:
+        condition: service_started
       redis:
         condition: service_healthy
     networks:
@@ -110,6 +132,7 @@ services:
       dockerfile: Dockerfile
     container_name: spywatcher-migrate-prod
     environment:
+      # Migrations should connect directly to postgres, not through pgbouncer
       DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
     depends_on:
       postgres:
