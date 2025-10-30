@@ -49,7 +49,7 @@ router.get('/usage', requireAuth, async (req: Request, res: Response) => {
  * Get quota limits for all tiers
  * GET /api/quota/limits
  */
-router.get('/limits', (_req: Request, res: Response) => {
+router.get('/limits', async (_req: Request, res: Response) => {
     try {
         const tiers: SubscriptionTier[] = ['FREE', 'PRO', 'ENTERPRISE'];
         const limits: Record<string, { quotas: unknown; rateLimits: unknown }> = {};
