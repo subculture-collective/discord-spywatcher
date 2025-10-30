@@ -18,7 +18,6 @@ type UserEntry = {
 function Suspicion() {
     const [data, setData] = useState<UserEntry[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterBanned, setFilterBanned] = useState(false);
 
     useEffect(() => {
         api.get('/suspicion')
@@ -31,10 +30,6 @@ function Suspicion() {
                 setLoading(false);
             });
     }, []);
-
-    // Filter logic - currently a placeholder for future banned user filtering
-    // TODO: Implement banned user filtering when ban data is available
-    const filtered = data;
 
     const getScoreColor = (score: number) => {
         if (score > 75) return 'text-red-600 font-bold';
@@ -57,18 +52,9 @@ function Suspicion() {
         <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">Suspicion Analysis</h1>
 
-            <div className="mb-4 flex items-center justify-between">
-                <label className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        checked={filterBanned}
-                        onChange={(e) => setFilterBanned(e.target.checked)}
-                        className="w-4 h-4"
-                    />
-                    <span className="text-gray-700">Hide banned users</span>
-                </label>
+            <div className="mb-4 flex items-center justify-end">
                 <p className="text-gray-600">
-                    {filtered.length} users monitored
+                    {data.length} users monitored
                 </p>
             </div>
 
@@ -100,7 +86,7 @@ function Suspicion() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {filtered.length === 0 ? (
+                        {data.length === 0 ? (
                             <tr>
                                 <td
                                     colSpan={7}
@@ -110,7 +96,7 @@ function Suspicion() {
                                 </td>
                             </tr>
                         ) : (
-                            filtered.map((user) => (
+                            data.map((user) => (
                                 <tr
                                     key={user.userId}
                                     className="hover:bg-gray-50 transition-colors"

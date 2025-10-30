@@ -5,6 +5,10 @@ import {
     UserActivityData,
 } from '../types/analytics';
 
+// Constants
+const MAX_SAMPLE_SIZE = 100;
+const MAX_MESSAGES_FOR_SIMILARITY = 20;
+
 /**
  * Calculate advanced suspicion score with multi-factor analysis
  */
@@ -27,6 +31,7 @@ export async function calculateAdvancedSuspicion(
         lurkerScore: calculateLurkerScore(userData),
         multiClientFreq: await calculateMultiClientFrequency(
             userId,
+            guildId,
             sinceDate
         ),
         timingAnomalies: calculateTimingAnomalies(userData, guildAvg),
@@ -99,7 +104,7 @@ async function getUserActivityData(
             username: true,
         },
         orderBy: { createdAt: 'desc' },
-        take: 100,
+        take: MAX_SAMPLE_SIZE,
     });
 
     // Fetch typing events
@@ -130,7 +135,7 @@ async function getUserActivityData(
             deltaMs: true,
         },
         orderBy: { createdAt: 'desc' },
-        take: 100,
+        take: MAX_SAMPLE_SIZE,
     });
 
     // Fetch account age from join event
@@ -252,6 +257,7 @@ function calculateLurkerScore(userData: UserActivityData): number {
  */
 async function calculateMultiClientFrequency(
     userId: string,
+    guildId: string,
     since: Date
 ): Promise<number> {
     const presenceEvents = await db.presenceEvent.findMany({
@@ -304,8 +310,10 @@ function calculateTimingAnomalies(
     const fastReactionScore = avg < 500 ? (500 - avg) / 5 : 0;
 
     // Deviation from guild average
+    // Guard against division by zero
+    const safeGuildReactionTime = guildAvg.reactionTime > 0 ? guildAvg.reactionTime : 5000;
     const deviationFromNorm =
-        Math.abs(avg - guildAvg.reactionTime) / guildAvg.reactionTime;
+        Math.abs(avg - safeGuildReactionTime) / safeGuildReactionTime;
     const deviationScore = Math.min(100, deviationFromNorm * 100);
 
     return Math.min(
@@ -355,7 +363,7 @@ function calculateContentSimilarity(userData: UserActivityData): number {
     let similarPairs = 0;
     let totalPairs = 0;
 
-    const maxMessages = Math.min(messages.length, 20);
+    const maxMessages = Math.min(messages.length, MAX_MESSAGES_FOR_SIMILARITY);
     for (let i = 0; i < maxMessages; i++) {
         const messageI = messages[i];
         if (!messageI) continue;
