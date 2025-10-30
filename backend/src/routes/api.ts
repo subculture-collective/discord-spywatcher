@@ -8,6 +8,7 @@ import ipManagementRoutes from './ipManagement';
 import monitoringRoutes from './monitoring';
 import privacyRoutes from './privacy';
 import publicApiRoutes from './publicApi';
+import quotaManagementRoutes from './quotaManagement';
 import suspicionRoutes from './suspicion';
 import timelineRoutes from './timeline';
 
@@ -26,6 +27,7 @@ router.use('/privacy', privacyRoutes);
 router.use('/admin/privacy', adminPrivacyRoutes);
 router.use('/admin/ip-management', ipManagementRoutes);
 router.use('/admin/monitoring', monitoringRoutes);
+router.use('/quota', quotaManagementRoutes);
 router.use(analyticsRoutes);
 router.use(suspicionRoutes);
 router.use(banRoutes);
