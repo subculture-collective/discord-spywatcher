@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast';
+
 interface ExportButtonProps {
     data: unknown[];
     filename: string;
@@ -7,7 +9,7 @@ interface ExportButtonProps {
 function ExportButton({ data, filename, label = 'Export CSV' }: ExportButtonProps) {
     const handleExport = () => {
         if (!data || data.length === 0) {
-            alert('No data to export');
+            toast.error('No data to export');
             return;
         }
 
@@ -42,6 +44,11 @@ function ExportButton({ data, filename, label = 'Export CSV' }: ExportButtonProp
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        // Clean up the URL object to prevent memory leaks
+        URL.revokeObjectURL(url);
+        
+        toast.success('Data exported successfully');
     };
 
     return (

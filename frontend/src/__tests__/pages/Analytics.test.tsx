@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import Analytics from '../../pages/Analytics';
 import api from '../../lib/api';
+import Analytics from '../../pages/Analytics';
 
 // Mock the API
 vi.mock('../../lib/api');
