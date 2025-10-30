@@ -27,7 +27,7 @@ export async function getMultiClientLoginCounts(guildId: string, since?: Date) {
 /**
  * Internal uncached implementation using optimized database aggregation
  */
-async function getMultiClientLoginCountsUncached(_guildId: string, since?: Date) {
+async function getMultiClientLoginCountsUncached(guildId: string, since?: Date) {
     const sinceDate = since || new Date(0);
 
     // Single optimized query using database aggregation
@@ -47,7 +47,6 @@ async function getMultiClientLoginCountsUncached(_guildId: string, since?: Date)
     WHERE "createdAt" >= ${sinceDate}::timestamptz
       AND array_length(clients, 1) >= 2
     GROUP BY "userId"
-    HAVING COUNT(*) > 0
     ORDER BY multi_client_count DESC
     LIMIT 100
   `;

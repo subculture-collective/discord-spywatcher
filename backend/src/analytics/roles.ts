@@ -44,7 +44,6 @@ async function getRoleDriftFlagsUncached(guildId: string, since?: Date) {
     WHERE "guildId" = ${guildId}
       AND "createdAt" >= ${sinceDate}::timestamptz
     GROUP BY "userId"
-    HAVING COUNT(*) > 0
     ORDER BY role_change_count DESC
     LIMIT 100
   `;
