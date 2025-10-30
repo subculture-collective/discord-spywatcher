@@ -307,22 +307,22 @@ async function getApproximateEventCount(
     const counts = await Promise.all([
         eventTypes.includes('presence')
             ? prisma.presenceEvent.count({ where: baseFilter })
-            : 0,
+            : Promise.resolve(0),
         eventTypes.includes('message')
             ? prisma.messageEvent.count({ where: guildFilter })
-            : 0,
+            : Promise.resolve(0),
         eventTypes.includes('typing')
             ? prisma.typingEvent.count({ where: guildFilter })
-            : 0,
+            : Promise.resolve(0),
         eventTypes.includes('role')
             ? prisma.roleChangeEvent.count({ where: guildFilter })
-            : 0,
+            : Promise.resolve(0),
         eventTypes.includes('join')
             ? prisma.joinEvent.count({ where: guildFilter })
-            : 0,
+            : Promise.resolve(0),
         eventTypes.includes('deleted_message')
             ? prisma.deletedMessageEvent.count({ where: guildFilter })
-            : 0,
+            : Promise.resolve(0),
     ]);
 
     return counts.reduce((sum: number, count: number) => sum + count, 0);
