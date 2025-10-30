@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import DateRangeSelector from '../components/analytics/DateRangeSelector';
@@ -53,7 +53,7 @@ function Analytics() {
     const [suspicionData, setSuspicionData] = useState<SuspicionData[]>([]);
     const [lurkerData, setLurkerData] = useState<LurkerData[]>([]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const sinceParam = dateRange?.start.toISOString();
@@ -75,15 +75,14 @@ function Analytics() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [dateRange]);
 
     useEffect(() => {
         fetchData();
         // Set up auto-refresh every 30 seconds
         const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dateRange]);
+    }, [fetchData]);
 
     // Calculate key metrics
     const totalUsers = new Set([

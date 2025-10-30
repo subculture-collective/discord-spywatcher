@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface DateRangeSelectorProps {
     onRangeChange: (range: { start: Date; end: Date } | null) => void;
@@ -35,6 +35,12 @@ function DateRangeSelector({ onRangeChange }: DateRangeSelectorProps) {
 
         onRangeChange({ start, end });
     };
+
+    // Initialize with default range on mount
+    useEffect(() => {
+        handleRangeChange('7d');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const ranges = [
         { value: '24h', label: 'Last 24 Hours' },
