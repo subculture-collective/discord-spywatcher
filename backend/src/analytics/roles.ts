@@ -23,9 +23,45 @@ export async function getRoleDriftFlags(guildId: string, since?: Date) {
 }
 
 /**
- * Internal uncached implementation
+ * Internal uncached implementation using optimized database aggregation
  */
 async function getRoleDriftFlagsUncached(guildId: string, since?: Date) {
+    const sinceDate = since || new Date(0);
+
+    // Single optimized query using database aggregation
+    const result = await db.$queryRaw<
+        {
+            userId: string;
+            username: string;
+            role_change_count: bigint;
+        }[]
+    >`
+    SELECT 
+      "userId",
+      MAX("username") as username,
+      COUNT(*) as role_change_count
+    FROM "RoleChangeEvent"
+    WHERE "guildId" = ${guildId}
+      AND "createdAt" >= ${sinceDate}::timestamptz
+    GROUP BY "userId"
+    HAVING COUNT(*) > 0
+    ORDER BY role_change_count DESC
+    LIMIT 100
+  `;
+
+    return result.map((r) => ({
+        userId: r.userId,
+        username: r.username,
+        roleChangeCount: Number(r.role_change_count),
+        roleDriftScore: Number(r.role_change_count) >= 2 ? 1 : 0,
+    }));
+}
+
+/**
+ * Legacy implementation kept for comparison
+ * @deprecated Use getRoleDriftFlags for better performance
+ */
+export async function getRoleDriftFlagsLegacy(guildId: string, since?: Date) {
     const events = await db.roleChangeEvent.findMany({
         where: {
             guildId,
@@ -45,6 +81,6 @@ async function getRoleDriftFlagsUncached(guildId: string, since?: Date) {
         userId,
         username,
         roleChangeCount: count,
-        roleDriftScore: count >= 2 ? 1 : 0, // configurable threshold
+        roleDriftScore: count >= 2 ? 1 : 0,
     }));
 }
