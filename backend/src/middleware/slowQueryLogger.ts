@@ -4,6 +4,8 @@ interface SlowQueryLog {
     duration: number;
     args?: unknown;
     timestamp: Date;
+    query?: string; // SQL query text for raw queries
+    rowsAffected?: number; // Number of rows affected/returned
 }
 
 // Configurable thresholds
@@ -57,9 +59,21 @@ function logSlowQuery(log: SlowQueryLog): void {
 
 /**
  * Get recent slow query logs for monitoring dashboard
+ * Supports pagination via limit and offset parameters
  */
-export function getSlowQueryLogs(): SlowQueryLog[] {
-    return [...slowQueryLogs];
+export function getSlowQueryLogs(limit?: number, offset = 0): {
+    logs: SlowQueryLog[];
+    total: number;
+} {
+    const total = slowQueryLogs.length;
+    const logs = limit
+        ? slowQueryLogs.slice(offset, offset + limit)
+        : slowQueryLogs.slice(offset);
+
+    return {
+        logs,
+        total,
+    };
 }
 
 /**
@@ -127,7 +141,8 @@ export function initializeSlowQueryLogger(): void {
 export async function trackQueryPerformance<T>(
     model: string,
     action: string,
-    operation: () => Promise<T>
+    operation: () => Promise<T>,
+    options?: { query?: string; args?: unknown }
 ): Promise<T> {
     const before = Date.now();
     const result = await operation();
@@ -135,11 +150,20 @@ export async function trackQueryPerformance<T>(
 
     // Log if query exceeds threshold
     if (duration > SLOW_QUERY_THRESHOLD_MS) {
+        // Try to determine rows affected for array results
+        let rowsAffected: number | undefined;
+        if (Array.isArray(result)) {
+            rowsAffected = result.length;
+        }
+
         logSlowQuery({
             model,
             action,
             duration,
             timestamp: new Date(),
+            query: options?.query,
+            args: options?.args,
+            rowsAffected,
         });
     }
 

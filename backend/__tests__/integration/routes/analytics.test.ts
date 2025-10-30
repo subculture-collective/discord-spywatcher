@@ -22,7 +22,10 @@ jest.mock('../../../src/analytics', () => ({
 // Mock the middleware
 jest.mock('../../../src/middleware', () => ({
     requireAuth: jest.fn((req, res, next) => next()),
-    validateGuild: jest.fn((req, res, next) => next()),
+    validateGuild: jest.fn((req, res, next) => {
+        req.guildId = 'test-guild-123';
+        next();
+    }),
     excludeBannedUsers: jest.fn((data) => Promise.resolve(data)),
     analyticsLimiter: jest.fn((req, res, next) => next()),
 }));

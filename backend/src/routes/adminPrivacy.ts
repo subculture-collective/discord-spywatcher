@@ -12,12 +12,17 @@ import {
     updateRetentionPolicy,
     cleanupOldData,
 } from '../utils/dataRetention';
+import {
+    parsePaginationParams,
+    buildPaginationResult,
+} from '../utils/pagination';
 
 const router = Router();
 
 /**
  * Get all audit logs (admin only)
  * GET /api/admin/privacy/audit-logs
+ * Supports pagination via ?page=1&limit=50
  */
 router.get(
     '/audit-logs',
@@ -26,21 +31,18 @@ router.get(
     adminLimiter,
     validateRequest(privacySchemas.auditLogsQuery),
     async (req, res): Promise<void> => {
-        const limit = parseInt(req.query.limit as string) || 100;
-        const offset = parseInt(req.query.offset as string) || 0;
-
         try {
-            const logs = await getAllAuditLogs(limit, offset);
-            const total = await db.auditLog.count();
+            const { page = 1, limit = 50 } = parsePaginationParams(req.query);
+            const offset = (page - 1) * limit;
 
-            res.json({
-                logs,
-                pagination: {
-                    limit,
-                    offset,
-                    total,
-                },
-            });
+            const [logs, total] = await Promise.all([
+                getAllAuditLogs(limit, offset),
+                db.auditLog.count(),
+            ]);
+
+            const result = buildPaginationResult(logs, total, page, limit);
+
+            res.json(result);
         } catch (err) {
             console.error('Failed to fetch audit logs:', err);
             res.status(500).json({ error: 'Failed to fetch audit logs' });
@@ -126,7 +128,7 @@ router.patch(
             await updateRetentionPolicy(
                 dataType, 
                 retentionDays, 
-                enabled !== undefined ? enabled : true
+                enabled !== undefined ? Boolean(enabled) : true
             );
 
             res.json({
