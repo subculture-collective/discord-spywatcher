@@ -347,14 +347,27 @@ router.get('/database/indexes', async (_req: Request, res: Response) => {
 /**
  * GET /api/admin/monitoring/database/slow-queries
  * Get slow query logs from application monitoring
+ * Supports pagination via ?limit=20&offset=0
  */
-router.get('/database/slow-queries', async (_req: Request, res: Response) => {
+router.get('/database/slow-queries', async (req: Request, res: Response) => {
     try {
-        const logs = getSlowQueryLogs();
+        const limit = req.query.limit
+            ? parseInt(req.query.limit as string, 10)
+            : undefined;
+        const offset = req.query.offset
+            ? parseInt(req.query.offset as string, 10)
+            : 0;
+
+        const { logs, total } = getSlowQueryLogs(limit, offset);
         const stats = getSlowQueryStats();
 
         res.json({
-            logs,
+            data: logs,
+            pagination: {
+                total,
+                limit: limit || total,
+                offset,
+            },
             stats,
         });
     } catch (error) {

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
+import { db } from '../../../src/db';
 import {
     blockKnownBadIPs,
     banIP,
@@ -9,7 +10,6 @@ import {
     isIPBlocked,
     isIPWhitelisted,
 } from '../../../src/middleware/ipBlock';
-import { db } from '../../../src/db';
 
 // Mock database
 jest.mock('../../../src/db', () => ({

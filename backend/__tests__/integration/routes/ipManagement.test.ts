@@ -1,8 +1,8 @@
-import request from 'supertest';
 import express from 'express';
+import request from 'supertest';
 
-import ipManagementRoutes from '../../../src/routes/ipManagement';
 import { db } from '../../../src/db';
+import ipManagementRoutes from '../../../src/routes/ipManagement';
 
 // Mock database
 jest.mock('../../../src/db', () => ({
