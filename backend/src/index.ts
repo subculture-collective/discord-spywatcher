@@ -30,23 +30,33 @@ const client = new Client({
 client.on('presenceUpdate', async (oldPresence, newPresence) => {
     const user = newPresence?.user;
     const clientStatus = newPresence?.clientStatus;
+    const guildId = newPresence?.guild?.id;
 
-    if (!user || !clientStatus) return;
+    if (!user || !clientStatus || !guildId) return;
 
     const platforms = Object.keys(clientStatus); // desktop, mobile, web
 
     if (platforms.length > 1) {
         console.log(
-            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.tag)} is online on: ${platforms.map(sanitizeForLog).join(
+            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.username)} is online on: ${platforms.map(sanitizeForLog).join(
                 ', '
             )}`
         );
         await db.presenceEvent.create({
             data: {
                 userId: user.id,
-                username: user.tag,
+                username: user.username,
                 clients: platforms,
             },
+        });
+
+        // Emit WebSocket event for multi-client detection
+        const { websocketService } = await import('./services/websocket');
+        websocketService.emitMultiClientAlert(guildId, {
+            userId: user.id,
+            username: user.username,
+            platforms,
+            timestamp: new Date(),
         });
     }
 });
@@ -77,7 +87,7 @@ client.on('typingStart', async (typing) => {
 
     if (deltaMs < 5000) {
         console.log(
-            `[⏱️ DB CORRELATED] ${sanitizeForLog(user.tag)} started typing ${deltaMs}ms after ${sanitizeForLog(
+            `[⏱️ DB CORRELATED] ${sanitizeForLog(user.username)} started typing ${deltaMs}ms after ${sanitizeForLog(
                 lastMsg.username
             )} in #${sanitizeForLog('name' in channel ? channel.name : 'unknown')}`
         );
@@ -86,7 +96,7 @@ client.on('typingStart', async (typing) => {
         await db.reactionTime.create({
             data: {
                 observerId: user.id,
-                observerName: user.tag ?? user.id,
+                observerName: user.username ?? user.id,
                 actorId: lastMsg.userId,
                 actorName: lastMsg.username,
                 channelId: channel.id,
@@ -109,7 +119,7 @@ client.on('messageCreate', async (message) => {
     await db.messageEvent.create({
         data: {
             userId: message.author.id,
-            username: message.author.tag ?? message.author.id,
+            username: message.author.username ?? message.author.id,
             channelId: message.channel.id,
             channel: channelName,
             guildId: message.guild.id,
@@ -120,8 +130,24 @@ client.on('messageCreate', async (message) => {
     // Invalidate analytics caches after message creation
     await cacheInvalidation.onMessageCreated(message.guild.id);
 
+    // Emit WebSocket event for new message
+    const { websocketService } = await import('./services/websocket');
+    websocketService.emitNewMessage(message.guild.id, {
+        userId: message.author.id,
+        username: message.author.username ?? message.author.id,
+        channelId: message.channel.id,
+        channelName,
+        timestamp: new Date(),
+    });
+
+    // Broadcast throttled analytics update
+    const { analyticsBroadcaster } = await import(
+        './services/analyticsBroadcaster'
+    );
+    analyticsBroadcaster.broadcastAnalyticsUpdate(message.guild.id);
+
     console.log(
-        `[💬 MESSAGE] ${sanitizeForLog(message.author.tag)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
+        `[💬 MESSAGE] ${sanitizeForLog(message.author.username)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
     );
 });
 
@@ -135,14 +161,23 @@ client.on('guildMemberAdd', async (member) => {
     await db.joinEvent.create({
         data: {
             userId: member.user.id,
-            username: member.user.tag ?? member.user.id,
+            username: member.user.username ?? member.user.id,
             guildId: member.guild.id,
             accountAgeDays,
         },
     });
 
+    // Emit WebSocket event for user join
+    const { websocketService } = await import('./services/websocket');
+    websocketService.emitUserJoin(member.guild.id, {
+        userId: member.user.id,
+        username: member.user.username ?? member.user.id,
+        accountAgeDays,
+        timestamp: new Date(),
+    });
+
     console.log(
-        `[🟢 JOIN] ${sanitizeForLog(member.user.tag)} (account age: ${accountAgeDays} days) joined ${sanitizeForLog(member.guild.name)}`
+        `[🟢 JOIN] ${sanitizeForLog(member.user.username)} (account age: ${accountAgeDays} days) joined ${sanitizeForLog(member.guild.name)}`
     );
 });
 
@@ -155,7 +190,7 @@ client.on('messageDelete', async (message) => {
     await db.deletedMessageEvent.create({
         data: {
             userId: message.author?.id ?? 'unknown',
-            username: message.author?.tag ?? 'unknown',
+            username: message.author?.username ?? 'unknown',
             channelId: message.channel.id,
             channel: channelName,
             guildId: message.guild.id,
@@ -178,19 +213,28 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     await db.roleChangeEvent.create({
         data: {
             userId: newMember.id,
-            username: newMember.user.tag ?? newMember.id,
+            username: newMember.user.username ?? newMember.id,
             guildId: newMember.guild.id,
             addedRoles: addedRoleNames,
         },
     });
 
+    // Emit WebSocket event for role change
+    const { websocketService } = await import('./services/websocket');
+    websocketService.emitRoleChange(newMember.guild.id, {
+        userId: newMember.id,
+        username: newMember.user.username ?? newMember.id,
+        addedRoles: addedRoleNames,
+        timestamp: new Date(),
+    });
+
     console.log(
-        `[🕵️ ROLE DRIFT] ${sanitizeForLog(newMember.user.tag)} gained roles: ${sanitizeForLog(addedRoleNames)}`
+        `[🕵️ ROLE DRIFT] ${sanitizeForLog(newMember.user.username)} gained roles: ${sanitizeForLog(addedRoleNames)}`
     );
 });
 
 client.once('ready', async () => {
-    console.log(`✅ Logged in as ${sanitizeForLog(client.user?.tag)}`);
+    console.log(`✅ Logged in as ${sanitizeForLog(client.user?.username)}`);
     const guilds = client.guilds.cache.map((g) => g.id);
     const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7); // past 7d
 
