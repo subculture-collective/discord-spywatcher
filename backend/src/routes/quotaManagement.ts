@@ -4,11 +4,11 @@ import express, { Request, Response } from 'express';
 import { db } from '../db';
 import { requireAuth, requireRole } from '../middleware/auth';
 import {
-    getQuotaUsage,
-    resetQuota,
-    getQuotaLimitsForTier,
-    getRateLimitsForTier,
     EndpointCategory,
+    getQuotaLimitsForTier,
+    getQuotaUsage,
+    getRateLimitsForTier,
+    resetQuota,
 } from '../utils/quotaManager';
 
 const router = express.Router();
@@ -49,10 +49,10 @@ router.get('/usage', requireAuth, async (req: Request, res: Response) => {
  * Get quota limits for all tiers
  * GET /api/quota/limits
  */
-router.get('/limits', async (_req: Request, res: Response) => {
+router.get('/limits', (_req: Request, res: Response) => {
     try {
         const tiers: SubscriptionTier[] = ['FREE', 'PRO', 'ENTERPRISE'];
-        const limits: Record<string, any> = {};
+        const limits: Record<string, { quotas: unknown; rateLimits: unknown }> = {};
 
         tiers.forEach((tier) => {
             // eslint-disable-next-line security/detect-object-injection

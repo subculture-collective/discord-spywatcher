@@ -1,5 +1,5 @@
-import { AnalyticsBroadcaster } from '../../../src/services/analyticsBroadcaster';
 import * as analyticsModule from '../../../src/analytics';
+import { AnalyticsBroadcaster } from '../../../src/services/analyticsBroadcaster';
 import * as websocketModule from '../../../src/services/websocket';
 
 // Mock the analytics functions

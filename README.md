@@ -15,6 +15,8 @@ Spywatcher is a full-stack surveillance and analytics tool for Discord servers. 
 - Secure Discord OAuth2 authentication
 - **Public API** with comprehensive documentation for third-party integrations
 - **Official TypeScript/JavaScript SDK** for easy API access
+- **Tier-based quotas** with FREE, PRO, and ENTERPRISE subscription tiers
+- **Per-endpoint rate limiting** and daily usage quotas
 
 ## 🏗️ Tech Stack
 
@@ -313,6 +315,8 @@ const suspicions = await client.getSuspicionData();
 - ✅ RESTful API with comprehensive endpoints
 - ✅ API key authentication with OAuth2
 - ✅ TypeScript SDK with full type definitions
+- ✅ **Tier-based quota system** (FREE, PRO, ENTERPRISE)
+- ✅ **Usage tracking** with daily quotas per endpoint category
 - ✅ Rate limiting and security protection
 - ✅ Complete API documentation (JSON & OpenAPI 3.0)
 - ✅ Code examples in multiple languages

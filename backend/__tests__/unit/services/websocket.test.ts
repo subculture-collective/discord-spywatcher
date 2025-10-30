@@ -1,11 +1,12 @@
 import { Server as HttpServer } from 'http';
 import { AddressInfo } from 'net';
+
 import ioClient from 'socket.io-client';
 
-import { generateAccessToken } from '../../../src/utils/auth';
 import { WebSocketService } from '../../../src/services/websocket';
+import { generateAccessToken } from '../../../src/utils/auth';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 type ClientSocket = any;
 
 describe('WebSocketService', () => {
@@ -141,7 +142,7 @@ describe('WebSocketService', () => {
 
                 clientSocket.on(
                     'analytics:update',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (data: any) => {
                         expect(data).toBeDefined();
                         expect(data.guildId).toBe(guildId);
@@ -169,7 +170,7 @@ describe('WebSocketService', () => {
 
                 clientSocket.on(
                     'message:new',
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     (data: any) => {
                         expect(data).toBeDefined();
                         expect(data.username).toBe('TestUser');
@@ -240,7 +241,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'message:new',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 (data: any) => {
                     expect(data.username).toBe('TestUser');
                     expect(data.channelName).toBe('general');
@@ -279,7 +280,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'alert:multiClient',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 (data: any) => {
                     expect(data.username).toBe('TestUser');
                     expect(data.platforms).toEqual(['desktop', 'mobile']);
@@ -318,7 +319,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'role:change',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 (data: any) => {
                     expect(data.username).toBe('TestUser');
                     expect(data.addedRoles).toEqual(['Moderator']);
@@ -357,7 +358,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'user:join',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 (data: any) => {
                     expect(data.username).toBe('NewUser');
                     expect(data.accountAgeDays).toBe(30);

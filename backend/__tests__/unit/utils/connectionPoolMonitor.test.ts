@@ -9,13 +9,13 @@ jest.mock('../../../src/db');
 jest.mock('../../../src/utils/redis');
 
 import * as db from '../../../src/db';
-import * as redis from '../../../src/utils/redis';
 import {
     getSystemHealth,
     getConnectionPoolStats,
     getConnectionPoolAlerts,
     isConnectionPoolOverloaded,
 } from '../../../src/utils/connectionPoolMonitor';
+import * as redis from '../../../src/utils/redis';
 
 describe('Connection Pool Monitor', () => {
     beforeEach(() => {

@@ -26,11 +26,15 @@ describe('Quota Middleware', () => {
     let mockReq: Partial<Request>;
     let mockRes: Partial<Response>;
     let mockNext: NextFunction;
+     
     let mockDb: any;
+     
     let mockCheckQuota: any;
 
     beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         mockDb = require('../../../src/db').db;
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const quotaManager = require('../../../src/utils/quotaManager');
         mockCheckQuota = quotaManager.checkQuota;
         mockReq = {

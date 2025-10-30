@@ -4,9 +4,9 @@ import { NextFunction, Request, Response } from 'express';
 import { db } from '../db';
 import {
     checkQuota,
+    EndpointCategory,
     getEndpointCategory,
     incrementQuota,
-    EndpointCategory,
 } from '../utils/quotaManager';
 
 /**

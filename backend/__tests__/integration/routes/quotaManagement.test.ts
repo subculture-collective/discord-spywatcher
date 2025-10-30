@@ -39,9 +39,12 @@ jest.mock('../../../src/middleware/auth', () => ({
     requireRole: () => (_req: any, _res: any, next: any) => next(),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const quotaManager = require('../../../src/utils/quotaManager');
+
 describe('Quota Management Routes', () => {
     let app: express.Application;
-    const { getQuotaUsage, resetQuota } = require('../../../src/utils/quotaManager');
+    const { getQuotaUsage, resetQuota } = quotaManager;
 
     beforeEach(() => {
         app = express();
