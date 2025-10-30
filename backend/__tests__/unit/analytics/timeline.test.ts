@@ -210,5 +210,91 @@ describe('Analytics - User Timeline', () => {
             expect(result.events[1].isAnomalous).toBe(true);
             expect(result.events[1].anomalyReason).toBe('Rapid activity detected');
         });
+
+        it('should correctly determine hasMore based on fetched results', async () => {
+            const baseDate = new Date('2024-01-01T12:00:00Z');
+            
+            // Create exactly limit + 1 events to test pagination
+            const mockMessageEvents = Array.from({ length: 51 }, (_, i) => ({
+                id: `message${i}`,
+                userId: 'user1',
+                username: 'Test User',
+                channelId: 'channel1',
+                channel: 'general',
+                guildId: 'guild1',
+                content: `Test message ${i}`,
+                metadata: null,
+                createdAt: new Date(baseDate.getTime() - i * 1000),
+            }));
+
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessageEvents);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.roleChangeEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.joinEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.deletedMessageEvent.findMany as jest.Mock).mockResolvedValue([]);
+
+            (db.presenceEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.messageEvent.count as jest.Mock).mockResolvedValue(51);
+            (db.typingEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.roleChangeEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.joinEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.deletedMessageEvent.count as jest.Mock).mockResolvedValue(0);
+
+            const result = await getUserTimeline({
+                userId: 'user1',
+                guildId: 'guild1',
+                limit: 50,
+            });
+
+            // Should return exactly 50 events (the limit)
+            expect(result.events).toHaveLength(50);
+            // Should indicate there are more results
+            expect(result.hasMore).toBe(true);
+            expect(result.nextCursor).not.toBeNull();
+        });
+
+        it('should set hasMore to false when all results fit within limit', async () => {
+            const baseDate = new Date('2024-01-01T12:00:00Z');
+            
+            // Create fewer than limit events
+            const mockMessageEvents = Array.from({ length: 30 }, (_, i) => ({
+                id: `message${i}`,
+                userId: 'user1',
+                username: 'Test User',
+                channelId: 'channel1',
+                channel: 'general',
+                guildId: 'guild1',
+                content: `Test message ${i}`,
+                metadata: null,
+                createdAt: new Date(baseDate.getTime() - i * 1000),
+            }));
+
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessageEvents);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.roleChangeEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.joinEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.deletedMessageEvent.findMany as jest.Mock).mockResolvedValue([]);
+
+            (db.presenceEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.messageEvent.count as jest.Mock).mockResolvedValue(30);
+            (db.typingEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.roleChangeEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.joinEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.deletedMessageEvent.count as jest.Mock).mockResolvedValue(0);
+
+            const result = await getUserTimeline({
+                userId: 'user1',
+                guildId: 'guild1',
+                limit: 50,
+            });
+
+            // Should return all 30 events
+            expect(result.events).toHaveLength(30);
+            // Should indicate there are no more results
+            expect(result.hasMore).toBe(false);
+            expect(result.nextCursor).toBeNull();
+        });
     });
 });

@@ -67,7 +67,8 @@ export async function getUserTimeline(query: TimelineQuery): Promise<TimelineRes
         ...dateFilter,
     };
 
-    // Fetch events in parallel
+    // Fetch events in parallel (fetch limit + 1 to detect if there are more results)
+    const fetchLimit = limit + 1;
     const [
         presenceEvents,
         messageEvents,
@@ -80,42 +81,42 @@ export async function getUserTimeline(query: TimelineQuery): Promise<TimelineRes
             ? prisma.presenceEvent.findMany({
                   where: baseFilter,
                   orderBy: { createdAt: 'desc' },
-                  take: limit,
+                  take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('message')
             ? prisma.messageEvent.findMany({
                   where: guildFilter,
                   orderBy: { createdAt: 'desc' },
-                  take: limit,
+                  take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('typing')
             ? prisma.typingEvent.findMany({
                   where: guildFilter,
                   orderBy: { createdAt: 'desc' },
-                  take: limit,
+                  take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('role')
             ? prisma.roleChangeEvent.findMany({
                   where: guildFilter,
                   orderBy: { createdAt: 'desc' },
-                  take: limit,
+                  take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('join')
             ? prisma.joinEvent.findMany({
                   where: guildFilter,
                   orderBy: { createdAt: 'desc' },
-                  take: limit,
+                  take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('deleted_message')
             ? prisma.deletedMessageEvent.findMany({
                   where: guildFilter,
                   orderBy: { createdAt: 'desc' },
-                  take: limit,
+                  take: fetchLimit,
               })
             : Promise.resolve([]),
     ]);
@@ -202,14 +203,16 @@ export async function getUserTimeline(query: TimelineQuery): Promise<TimelineRes
     // Sort by timestamp descending
     timeline.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
+    // Check if there are more results than requested limit
+    const hasMore = timeline.length > limit;
+
     // Take only requested limit
     const limitedTimeline = timeline.slice(0, limit);
 
     // Detect patterns and mark anomalous events
     const enrichedTimeline = detectPatterns(limitedTimeline);
 
-    // Determine next cursor and hasMore
-    const hasMore = limitedTimeline.length === limit && timeline.length > limit;
+    // Determine next cursor
     const nextCursor = hasMore
         ? limitedTimeline[limitedTimeline.length - 1].timestamp.toISOString()
         : null;
