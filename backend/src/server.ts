@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import { createServer } from 'http';
 
 import { env } from './utils/env';
 import { sanitizeForLog } from './utils/security';
@@ -149,12 +150,25 @@ const allowedOrigins =
         return;
     }
 
-    app.listen(PORT, () => {
+    // Create HTTP server
+    const httpServer = createServer(app);
+
+    // Initialize WebSocket server
+    try {
+        const { websocketService } = await import('./services/websocket');
+        websocketService.setupWebSocket(httpServer);
+        console.log('✅ WebSocket server initialized');
+    } catch (err) {
+        console.error('🔥 Failed to initialize WebSocket server:', err);
+    }
+
+    httpServer.listen(PORT, () => {
         console.log(
             `🔐 Starting server with bot in guild(s):`,
             env.BOT_GUILD_IDS
         );
         console.log(`🔐 Spywatcher API running at http://localhost:${PORT}`);
+        console.log(`🌐 WebSocket server available`);
         console.log(`🛡️  Security headers enabled`);
         console.log(
             `🛡️  Rate limiting: ${env.ENABLE_RATE_LIMITING ? 'enabled' : 'disabled'}`

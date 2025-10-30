@@ -30,8 +30,9 @@ const client = new Client({
 client.on('presenceUpdate', async (oldPresence, newPresence) => {
     const user = newPresence?.user;
     const clientStatus = newPresence?.clientStatus;
+    const guildId = newPresence?.guild?.id;
 
-    if (!user || !clientStatus) return;
+    if (!user || !clientStatus || !guildId) return;
 
     const platforms = Object.keys(clientStatus); // desktop, mobile, web
 
@@ -47,6 +48,15 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
                 username: user.tag,
                 clients: platforms,
             },
+        });
+
+        // Emit WebSocket event for multi-client detection
+        const { websocketService } = await import('./services/websocket');
+        websocketService.emitMultiClientAlert(guildId, {
+            userId: user.id,
+            username: user.tag,
+            platforms,
+            timestamp: new Date(),
         });
     }
 });
@@ -120,6 +130,22 @@ client.on('messageCreate', async (message) => {
     // Invalidate analytics caches after message creation
     await cacheInvalidation.onMessageCreated(message.guild.id);
 
+    // Emit WebSocket event for new message
+    const { websocketService } = await import('./services/websocket');
+    websocketService.emitNewMessage(message.guild.id, {
+        userId: message.author.id,
+        username: message.author.tag ?? message.author.id,
+        channelId: message.channel.id,
+        channelName,
+        timestamp: new Date(),
+    });
+
+    // Broadcast throttled analytics update
+    const { analyticsBroadcaster } = await import(
+        './services/analyticsBroadcaster'
+    );
+    await analyticsBroadcaster.broadcastAnalyticsUpdate(message.guild.id);
+
     console.log(
         `[💬 MESSAGE] ${sanitizeForLog(message.author.tag)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
     );
@@ -139,6 +165,15 @@ client.on('guildMemberAdd', async (member) => {
             guildId: member.guild.id,
             accountAgeDays,
         },
+    });
+
+    // Emit WebSocket event for user join
+    const { websocketService } = await import('./services/websocket');
+    websocketService.emitUserJoin(member.guild.id, {
+        userId: member.user.id,
+        username: member.user.tag ?? member.user.id,
+        accountAgeDays,
+        timestamp: new Date(),
     });
 
     console.log(
@@ -182,6 +217,15 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
             guildId: newMember.guild.id,
             addedRoles: addedRoleNames,
         },
+    });
+
+    // Emit WebSocket event for role change
+    const { websocketService } = await import('./services/websocket');
+    websocketService.emitRoleChange(newMember.guild.id, {
+        userId: newMember.id,
+        username: newMember.user.tag ?? newMember.id,
+        addedRoles: addedRoleNames,
+        timestamp: new Date(),
     });
 
     console.log(
