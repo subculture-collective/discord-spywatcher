@@ -143,10 +143,12 @@ async function getUserActivityData(
     });
 
     // Calculate hourly message distribution
-    const hourlyDistribution = new Array(24).fill(0);
+    const hourlyDistribution = new Array<number>(24).fill(0);
     for (const msg of messages) {
         const hour = msg.createdAt.getHours();
-        hourlyDistribution[hour]++;
+        if (hour >= 0 && hour < 24) {
+            hourlyDistribution[hour]++;
+        }
     }
 
     // Get username from most recent message or join event
@@ -353,13 +355,17 @@ function calculateContentSimilarity(userData: UserActivityData): number {
     let similarPairs = 0;
     let totalPairs = 0;
 
-    for (let i = 0; i < Math.min(messages.length, 20); i++) {
-        for (let j = i + 1; j < Math.min(messages.length, 20); j++) {
+    const maxMessages = Math.min(messages.length, 20);
+    for (let i = 0; i < maxMessages; i++) {
+        const messageI = messages[i];
+        if (!messageI) continue;
+        
+        for (let j = i + 1; j < maxMessages; j++) {
+            const messageJ = messages[j];
+            if (!messageJ) continue;
+            
             totalPairs++;
-            const similarity = calculateStringSimilarity(
-                messages[i],
-                messages[j]
-            );
+            const similarity = calculateStringSimilarity(messageI, messageJ);
             if (similarity > 0.8) {
                 similarPairs++;
             }
