@@ -5,6 +5,7 @@ import {
     getGhostScores,
     getLurkerFlags,
 } from '../analytics';
+
 import { websocketService } from './websocket';
 
 /**
@@ -13,14 +14,13 @@ import { websocketService } from './websocket';
 export class AnalyticsBroadcaster {
     private throttledBroadcasters: Map<
         string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ReturnType<typeof throttle>
     > = new Map();
 
     /**
      * Broadcast analytics update for a guild (throttled to 30 seconds)
      */
-    async broadcastAnalyticsUpdate(guildId: string): Promise<void> {
+    broadcastAnalyticsUpdate(guildId: string): void {
         // Get or create throttled function for this guild
         let throttledFn = this.throttledBroadcasters.get(guildId);
 
@@ -37,7 +37,7 @@ export class AnalyticsBroadcaster {
         }
 
         // Call the throttled function
-        throttledFn(guildId);
+        void throttledFn(guildId);
     }
 
     /**

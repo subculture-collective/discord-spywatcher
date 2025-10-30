@@ -1,5 +1,6 @@
-import { createAdapter } from '@socket.io/redis-adapter';
 import { Server as HttpServer } from 'http';
+
+import { createAdapter } from '@socket.io/redis-adapter';
 import { Server as SocketServer, Socket } from 'socket.io';
 
 import { AuthPayload, verifyAccessToken } from '../utils/auth';
@@ -54,7 +55,7 @@ export class WebSocketService {
         }
 
         // Authentication middleware
-        this.io.use(async (socket, next) => {
+        this.io.use((socket, next) => {
             try {
                 const token = socket.handshake.auth.token as string;
 
@@ -278,13 +279,10 @@ export class WebSocketService {
     /**
      * Close WebSocket server
      */
-    async close(): Promise<void> {
+    close(): void {
         if (this.io) {
-            await new Promise<void>((resolve) => {
-                this.io?.close(() => {
-                    console.log('✅ WebSocket server closed');
-                    resolve();
-                });
+            void this.io.close(() => {
+                console.log('✅ WebSocket server closed');
             });
             this.io = null;
         }

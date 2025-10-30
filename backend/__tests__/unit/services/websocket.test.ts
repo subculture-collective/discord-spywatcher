@@ -38,7 +38,7 @@ describe('WebSocketService', () => {
         if (clientSocket) {
             clientSocket.disconnect();
         }
-        await websocketService.close();
+        websocketService.close();
     });
 
     describe('setupWebSocket', () => {

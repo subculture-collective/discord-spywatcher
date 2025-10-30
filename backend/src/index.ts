@@ -144,7 +144,7 @@ client.on('messageCreate', async (message) => {
     const { analyticsBroadcaster } = await import(
         './services/analyticsBroadcaster'
     );
-    await analyticsBroadcaster.broadcastAnalyticsUpdate(message.guild.id);
+    analyticsBroadcaster.broadcastAnalyticsUpdate(message.guild.id);
 
     console.log(
         `[💬 MESSAGE] ${sanitizeForLog(message.author.tag)} in #${sanitizeForLog(channelName)}: ${sanitizeForLog(message.content)}`
