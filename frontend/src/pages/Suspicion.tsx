@@ -129,12 +129,21 @@ function Suspicion() {
                                         {user.accountAgeDays} days
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                                        <Link
-                                            to={`/suspicion/${user.userId}`}
-                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                        >
-                                            View Details →
-                                        </Link>
+                                        <div className="flex items-center justify-center gap-2">
+                                            <Link
+                                                to={`/suspicion/${user.userId}`}
+                                                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                            >
+                                                Details
+                                            </Link>
+                                            <span className="text-gray-400">|</span>
+                                            <Link
+                                                to={`/timeline/${user.userId}`}
+                                                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                            >
+                                                Timeline
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))

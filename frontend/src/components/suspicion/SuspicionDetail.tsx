@@ -256,6 +256,12 @@ function SuspicionDetail() {
                     </h2>
                     <div className="space-y-3">
                         <button
+                            onClick={() => navigate(`/timeline/${suspicion.userId}`)}
+                            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                        >
+                            View Activity Timeline
+                        </button>
+                        <button
                             onClick={handleBanUser}
                             className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
                         >

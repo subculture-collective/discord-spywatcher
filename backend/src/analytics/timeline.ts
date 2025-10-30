@@ -325,5 +325,5 @@ async function getApproximateEventCount(
             : 0,
     ]);
 
-    return counts.reduce((sum, count) => sum + count, 0);
+    return counts.reduce((sum: number, count: number) => sum + count, 0);
 }

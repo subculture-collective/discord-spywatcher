@@ -42,7 +42,7 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
         if (!queryResult.success) {
             return res.status(400).json({
                 error: 'Invalid query parameters',
-                details: queryResult.error.errors,
+                details: queryResult.error.issues,
             });
         }
 
