@@ -31,9 +31,9 @@ if [ -n "$PGBOUNCER_ADMIN_USER" ] && [ -n "$PGBOUNCER_ADMIN_PASSWORD" ]; then
   echo "\"${PGBOUNCER_ADMIN_USER}\" \"${ADMIN_MD5_PASSWORD}\"" >> /etc/pgbouncer/userlist.txt
 fi
 
-# Set proper permissions
+# Set proper permissions (run as root before switching users)
 chmod 600 /etc/pgbouncer/userlist.txt
-chmod 644 /etc/pgbouncer/pgbouncer.ini
+chown pgbouncer:pgbouncer /etc/pgbouncer/userlist.txt
 
 echo "PgBouncer configuration initialized"
 echo "User: ${DB_USER}"
@@ -41,5 +41,5 @@ echo "Pool mode: transaction"
 echo "Default pool size: 25"
 echo "Max client connections: 100"
 
-# Start PgBouncer
-exec pgbouncer /etc/pgbouncer/pgbouncer.ini
+# Switch to pgbouncer user and start PgBouncer
+exec su-exec pgbouncer pgbouncer /etc/pgbouncer/pgbouncer.ini

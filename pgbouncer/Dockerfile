@@ -4,6 +4,7 @@ FROM alpine:3.19
 RUN apk add --no-cache \
     pgbouncer \
     postgresql-client \
+    su-exec \
     && rm -rf /var/cache/apk/*
 
 # Create pgbouncer user and directories
@@ -20,18 +21,16 @@ COPY entrypoint.sh /entrypoint.sh
 # Make entrypoint executable
 RUN chmod +x /entrypoint.sh
 
-# Set proper permissions
-RUN chown pgbouncer:pgbouncer /etc/pgbouncer/pgbouncer.ini /etc/pgbouncer/userlist.txt.template
+# Set proper permissions for config files
+RUN chown pgbouncer:pgbouncer /etc/pgbouncer/pgbouncer.ini /etc/pgbouncer/userlist.txt.template \
+    && chmod 644 /etc/pgbouncer/pgbouncer.ini
 
 # Expose PgBouncer port
 EXPOSE 6432
 
-# Switch to pgbouncer user
-USER pgbouncer
-
-# Health check
+# Health check with proper authentication
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
-  CMD psql -h 127.0.0.1 -p 6432 -U $DB_USER -d pgbouncer -c "SHOW POOLS;" || exit 1
+  CMD PGPASSWORD="$DB_PASSWORD" psql -h 127.0.0.1 -p 6432 -U $DB_USER -d pgbouncer -c "SHOW POOLS;" || exit 1
 
-# Run entrypoint script
+# Run entrypoint script as root to allow chmod, then switch to pgbouncer user within
 ENTRYPOINT ["/entrypoint.sh"]

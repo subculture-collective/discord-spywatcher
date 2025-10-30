@@ -158,14 +158,8 @@ export async function closeRedisConnection(): Promise<void> {
     }
 }
 
-// Graceful shutdown handlers for Redis
-const gracefulShutdown = async (signal: string) => {
-    console.log(`Redis: Received ${signal}, closing connections...`);
-    await closeRedisConnection();
-};
-
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+// Note: Shutdown handlers are registered in db.ts to avoid conflicts
+// Redis cleanup is called from the main shutdown handler
 
 /**
  * Scan Redis keys matching a pattern using SCAN command (non-blocking)

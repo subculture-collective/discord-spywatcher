@@ -130,7 +130,7 @@ export async function getConnectionPoolStats(): Promise<ConnectionPoolStats> {
             utilizationPercent: parseFloat(dbMetrics.utilizationPercent),
             activeConnections: dbMetrics.active,
             maxConnections: dbMetrics.max,
-            isHealthy: !dbMetrics.error && dbMetrics.utilizationPercent !== '0',
+            isHealthy: !dbMetrics.error,
         },
         redis: {
             available: redisMetrics.available,

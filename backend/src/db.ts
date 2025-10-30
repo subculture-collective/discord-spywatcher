@@ -4,7 +4,14 @@ import { PrismaClient } from '@prisma/client';
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 // Determine if using PgBouncer based on connection string
-const isPgBouncer = process.env.DATABASE_URL?.includes('pgbouncer=true') ?? false;
+const isPgBouncer = (() => {
+  try {
+    const url = new URL(process.env.DATABASE_URL ?? '');
+    return url.searchParams.get('pgbouncer') === 'true';
+  } catch {
+    return false;
+  }
+})();
 
 // Configure connection pooling and logging based on environment
 // When using PgBouncer (transaction pooling mode):
@@ -128,11 +135,16 @@ const gracefulShutdown = async (signal: string) => {
   console.log(`Received ${signal}, initiating graceful shutdown...`);
   
   try {
+    // Close database connections
     console.log('Closing database connections...');
     await db.$disconnect();
     console.log('✅ Database connections closed successfully');
+    
+    // Close Redis connections
+    const { closeRedisConnection } = await import('./utils/redis');
+    await closeRedisConnection();
   } catch (error) {
-    console.error('❌ Error during database disconnect:', error);
+    console.error('❌ Error during graceful shutdown:', error);
   } finally {
     process.exit(0);
   }
@@ -148,6 +160,8 @@ process.on('uncaughtException', async (err) => {
     isShuttingDown = true;
     try {
       await db.$disconnect();
+      const { closeRedisConnection } = await import('./utils/redis');
+      await closeRedisConnection();
     } catch (disconnectError) {
       console.error('Error during emergency disconnect:', disconnectError);
     }
@@ -161,6 +175,8 @@ process.on('unhandledRejection', async (reason) => {
     isShuttingDown = true;
     try {
       await db.$disconnect();
+      const { closeRedisConnection } = await import('./utils/redis');
+      await closeRedisConnection();
     } catch (disconnectError) {
       console.error('Error during emergency disconnect:', disconnectError);
     }
