@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import {
-    socketService,
+import { socketService } from '../lib/socket';
+import type {
     AnalyticsUpdateData,
     NewMessageData,
     MultiClientAlertData,
@@ -24,12 +24,22 @@ export function LiveAnalytics({ guildId }: LiveAnalyticsProps) {
 
     useEffect(() => {
         if (!accessToken) {
-            return;
+            return undefined;
         }
+
+        let socket;
+        let handleAnalyticsUpdate: ((data: AnalyticsUpdateData) => void) | null =
+            null;
+        let handleNewMessage: ((message: NewMessageData) => void) | null =
+            null;
+        let handleMultiClientAlert:
+            | ((alert: MultiClientAlertData) => void)
+            | null = null;
+        let handleUserJoin: ((event: UserJoinData) => void) | null = null;
 
         try {
             // Connect to WebSocket
-            const socket = socketService.connect();
+            socket = socketService.connect();
 
             // Set up connection status listeners
             socket.on('connect', () => {
@@ -43,32 +53,34 @@ export function LiveAnalytics({ guildId }: LiveAnalyticsProps) {
             });
 
             // Subscribe to analytics updates
-            socketService.subscribeToAnalytics(guildId, (data) => {
+            handleAnalyticsUpdate = (data: AnalyticsUpdateData) => {
                 setAnalytics(data);
-            });
+            };
+            socketService.subscribeToAnalytics(guildId, handleAnalyticsUpdate);
 
             // Subscribe to guild events
             socketService.subscribeToGuild(guildId);
 
             // Listen for new messages
-            const handleNewMessage = (message: NewMessageData) => {
+            handleNewMessage = (message: NewMessageData) => {
                 setRecentMessages((prev) => [message, ...prev].slice(0, 20));
             };
             socketService.onNewMessage(handleNewMessage);
 
             // Listen for multi-client alerts
-            const handleMultiClientAlert = (alert: MultiClientAlertData) => {
-                toast.warning(
+            handleMultiClientAlert = (alert: MultiClientAlertData) => {
+                toast(
                     `🚨 Multi-client: ${alert.username} on ${alert.platforms.join(', ')}`,
                     {
                         duration: 5000,
+                        icon: '⚠️',
                     }
                 );
             };
             socketService.onMultiClientAlert(handleMultiClientAlert);
 
             // Listen for user joins
-            const handleUserJoin = (event: UserJoinData) => {
+            handleUserJoin = (event: UserJoinData) => {
                 const message =
                     event.accountAgeDays < 7
                         ? `⚠️ New user: ${event.username} (${event.accountAgeDays}d old account)`
@@ -80,22 +92,31 @@ export function LiveAnalytics({ guildId }: LiveAnalyticsProps) {
                 });
             };
             socketService.onUserJoin(handleUserJoin);
-
-            // Cleanup
-            return () => {
-                socketService.unsubscribeFromAnalytics(guildId, (data) => {
-                    setAnalytics(data);
-                });
-                socketService.unsubscribeFromGuild(guildId);
-                socketService.offNewMessage(handleNewMessage);
-                socketService.offMultiClientAlert(handleMultiClientAlert);
-                socketService.offUserJoin(handleUserJoin);
-                socketService.disconnect();
-            };
         } catch (error) {
             console.error('Failed to connect to WebSocket:', error);
             toast.error('Failed to connect to live updates');
         }
+
+        // Cleanup
+        return () => {
+            if (handleAnalyticsUpdate) {
+                socketService.unsubscribeFromAnalytics(
+                    guildId,
+                    handleAnalyticsUpdate
+                );
+            }
+            socketService.unsubscribeFromGuild(guildId);
+            if (handleNewMessage) {
+                socketService.offNewMessage(handleNewMessage);
+            }
+            if (handleMultiClientAlert) {
+                socketService.offMultiClientAlert(handleMultiClientAlert);
+            }
+            if (handleUserJoin) {
+                socketService.offUserJoin(handleUserJoin);
+            }
+            socketService.disconnect();
+        };
     }, [guildId, accessToken]);
 
     return (

@@ -18,11 +18,12 @@ export interface AnalyticsUpdateData {
             userId: string;
             username: string;
             lurkerScore: number;
+            channelCount: number;
         }>;
-        channelActivity: Array<{
-            channelId: string;
-            channelName: string;
-            messageCount: number;
+        channelDiversity: Array<{
+            userId: string;
+            username: string;
+            channelCount: number;
         }>;
         timestamp: string;
     };
