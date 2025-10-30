@@ -100,7 +100,10 @@ export class SpywatcherClient {
   /**
    * Make a GET request
    */
-  protected async get<T>(url: string, params?: unknown): Promise<T> {
+  protected async get<T>(
+    url: string,
+    params?: Record<string, string | number | boolean | string[] | undefined>
+  ): Promise<T> {
     const response = await this.axiosInstance.get<T>(url, { params });
     return response.data;
   }

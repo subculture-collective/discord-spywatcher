@@ -169,11 +169,13 @@ export interface BannedUser {
 export interface PaginationOptions {
   page?: number;
   perPage?: number;
+  [key: string]: string | number | boolean | string[] | undefined;
 }
 
 export interface DateRangeOptions {
   startDate?: string;
   endDate?: string;
+  [key: string]: string | number | boolean | string[] | undefined;
 }
 
 export interface AnalyticsQueryOptions extends PaginationOptions, DateRangeOptions {
