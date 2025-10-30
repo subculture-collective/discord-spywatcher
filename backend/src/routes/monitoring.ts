@@ -17,6 +17,11 @@ import {
     analyzeAllTables,
 } from '../utils/databaseMaintenance';
 import { getRedisClient } from '../utils/redis';
+import {
+    getSystemHealth,
+    getConnectionPoolStats,
+    getConnectionPoolAlerts,
+} from '../utils/connectionPoolMonitor';
 
 const router = Router();
 const redis = getRedisClient();
@@ -297,6 +302,58 @@ router.get('/database/health', async (_req: Request, res: Response) => {
         res.status(500).json({
             error: 'Failed to check database health',
             connected: false,
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/connections/health
+ * Get comprehensive system health including connection pools
+ */
+router.get('/connections/health', async (_req: Request, res: Response) => {
+    try {
+        const health = await getSystemHealth();
+        res.json(health);
+    } catch (error) {
+        console.error('Failed to get system health:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve system health',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/connections/pool
+ * Get connection pool statistics
+ */
+router.get('/connections/pool', async (_req: Request, res: Response) => {
+    try {
+        const stats = await getConnectionPoolStats();
+        res.json(stats);
+    } catch (error) {
+        console.error('Failed to get connection pool stats:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve connection pool statistics',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/connections/alerts
+ * Get connection pool alerts and warnings
+ */
+router.get('/connections/alerts', async (_req: Request, res: Response) => {
+    try {
+        const alerts = await getConnectionPoolAlerts();
+        res.json({
+            alerts,
+            count: alerts.length,
+            timestamp: new Date().toISOString(),
+        });
+    } catch (error) {
+        console.error('Failed to get connection pool alerts:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve connection pool alerts',
         });
     }
 });
