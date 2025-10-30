@@ -1,4 +1,5 @@
 export * from '../types/analytics';
+export * from './advancedSuspicion';
 export * from './channels';
 export * from './clients';
 export * from './ghosts';

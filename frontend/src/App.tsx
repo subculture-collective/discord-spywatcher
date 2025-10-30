@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import RequireAdmin from './components/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
+import SuspicionDetail from './components/suspicion/SuspicionDetail';
 import { AuthCallback, Bans, Dashboard, Login, Suspicion } from './pages';
 import { useAuth } from './store/auth';
 
@@ -23,6 +24,7 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/suspicion" element={<Suspicion />} />
+                    <Route path="/suspicion/:userId" element={<SuspicionDetail />} />
 
                     <Route element={<RequireAdmin />}>
                         <Route path="/bans" element={<Bans />} />
