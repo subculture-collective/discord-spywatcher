@@ -6,6 +6,7 @@ import {
     getSlowQueryStats,
     clearSlowQueryLogs,
 } from '../middleware/slowQueryLogger';
+import { cache } from '../services/cache';
 import {
     checkDatabaseHealth,
     getTableStats,
@@ -435,6 +436,118 @@ router.get('/database/report', async (_req: Request, res: Response) => {
         console.error('Failed to generate maintenance report:', error);
         res.status(500).json({
             error: 'Failed to generate maintenance report',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/cache/stats
+ * Get cache statistics and performance metrics
+ */
+router.get('/cache/stats', async (_req: Request, res: Response) => {
+    if (!redis) {
+        res.status(503).json({
+            error: 'Redis not available',
+            message: 'Cache monitoring requires Redis',
+        });
+        return;
+    }
+
+    try {
+        const stats = await cache.getStats();
+        
+        if (!stats) {
+            res.status(500).json({
+                error: 'Failed to retrieve cache statistics',
+            });
+            return;
+        }
+
+        res.json({
+            stats,
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+        });
+    } catch (error) {
+        console.error('Failed to get cache stats:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve cache statistics',
+        });
+    }
+});
+
+/**
+ * DELETE /api/admin/monitoring/cache/clear
+ * Clear all cache entries (admin only)
+ */
+router.delete('/cache/clear', async (_req: Request, res: Response) => {
+    if (!redis) {
+        res.status(503).json({
+            error: 'Redis not available',
+            message: 'Cache clearing requires Redis',
+        });
+        return;
+    }
+
+    try {
+        await cache.flushAll();
+        console.log('Cache cleared by admin');
+        
+        res.json({
+            message: 'Cache cleared successfully',
+            timestamp: new Date().toISOString(),
+        });
+    } catch (error) {
+        console.error('Failed to clear cache:', error);
+        res.status(500).json({
+            error: 'Failed to clear cache',
+        });
+    }
+});
+
+/**
+ * DELETE /api/admin/monitoring/cache/invalidate/:tag
+ * Invalidate cache entries by tag
+ */
+router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
+    if (!redis) {
+        res.status(503).json({
+            error: 'Redis not available',
+            message: 'Cache invalidation requires Redis',
+        });
+        return;
+    }
+
+    try {
+        const { tag } = req.params;
+        
+        // Validate tag format - disallow Redis pattern special characters
+        // to prevent unintended key matching
+        if (
+            !tag ||
+            !/^[a-zA-Z0-9:_-]+$/.test(tag) ||
+            /^[*?[\]{}()|\\]/.test(tag) ||
+            /[*?[\]{}()|\\]/.test(tag)
+        ) {
+            res.status(400).json({ 
+                error: 'Invalid tag format',
+                message: 'Tag must contain only alphanumeric characters, colons, underscores, and hyphens, and must not contain Redis pattern special characters (*, ?, [, ], {, }, (, ), |, \\)'
+            });
+            return;
+        }
+
+        const invalidatedCount = await cache.invalidateByTag(tag);
+        
+        res.json({
+            message: 'Cache invalidated successfully',
+            tag,
+            invalidatedCount,
+            timestamp: new Date().toISOString(),
+        });
+    } catch (error) {
+        console.error('Failed to invalidate cache:', error);
+        res.status(500).json({
+            error: 'Failed to invalidate cache',
         });
     }
 });

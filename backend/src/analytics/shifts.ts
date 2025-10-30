@@ -1,6 +1,31 @@
 import { db } from '../db';
+import { cache } from '../services/cache';
 
+/**
+ * Get behavior shift flags for users with changing activity patterns
+ * This function is cached for 5 minutes to reduce database load
+ */
 export async function getBehaviorShiftFlags(guildId: string, _since?: Date) {
+    // Generate cache key based on parameters
+    const cacheKey = `analytics:shifts:${guildId}:${_since?.getTime() || 'all'}`;
+    
+    // Use cache.remember pattern - returns cached data or executes callback
+    return cache.remember(
+        cacheKey,
+        300, // 5 minutes TTL
+        async () => {
+            return getBehaviorShiftFlagsUncached(guildId, _since);
+        },
+        {
+            tags: [`guild:${guildId}`, 'analytics:shifts']
+        }
+    );
+}
+
+/**
+ * Internal uncached implementation
+ */
+async function getBehaviorShiftFlagsUncached(guildId: string, _since?: Date) {
     const now = Date.now();
     const oneWeek = 1000 * 60 * 60 * 24 * 7;
     const twoWeeksAgo = new Date(now - oneWeek * 2);
