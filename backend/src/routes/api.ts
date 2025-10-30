@@ -8,6 +8,7 @@ import ipManagementRoutes from './ipManagement';
 import monitoringRoutes from './monitoring';
 import privacyRoutes from './privacy';
 import suspicionRoutes from './suspicion';
+import timelineRoutes from './timeline';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/admin/monitoring', monitoringRoutes);
 router.use(analyticsRoutes);
 router.use(suspicionRoutes);
 router.use(banRoutes);
+router.use(timelineRoutes);
 
 export default router;
