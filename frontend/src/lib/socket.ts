@@ -122,12 +122,11 @@ class SocketService {
 
             this.socket.on('connect_error', (error) => {
                 console.error('[WebSocket] Connection error:', error.message);
-                this.reconnectAttempts++;
-
-                if (
-                    this.reconnectAttempts >= this.maxReconnectAttempts &&
-                    error.message.includes('Invalid token')
-                ) {
+                
+                // Only disconnect on authentication errors, not general connection errors
+                // Socket.io's built-in reconnection will handle transient failures
+                if (error.message.includes('Invalid token') || 
+                    error.message.includes('Authentication required')) {
                     console.error('[WebSocket] Authentication failed');
                     this.disconnect();
                 }

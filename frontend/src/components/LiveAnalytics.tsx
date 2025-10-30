@@ -115,7 +115,7 @@ export function LiveAnalytics({ guildId }: LiveAnalyticsProps) {
             if (handleUserJoin) {
                 socketService.offUserJoin(handleUserJoin);
             }
-            socketService.disconnect();
+            // Don't disconnect the shared singleton - let app lifecycle manage it
         };
     }, [guildId, accessToken]);
 

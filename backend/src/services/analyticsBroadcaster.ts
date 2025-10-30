@@ -60,7 +60,7 @@ export class AnalyticsBroadcaster {
             websocketService.emitAnalyticsUpdate(guildId, {
                 ghosts: ghosts.slice(0, 10), // Top 10 only
                 lurkers: lurkers.slice(0, 10), // Top 10 only
-                channelDiversity: channelDiversity.slice(0, 20), // Top 20 channels
+                channelDiversity: channelDiversity.slice(0, 20), // Top 20 users
                 timestamp: new Date().toISOString(),
             });
 
