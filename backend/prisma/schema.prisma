@@ -197,6 +197,9 @@ model User {
   // Subscription tier for rate limiting and quotas
   subscriptionTier SubscriptionTier @default(FREE)
 
+  // Analytics consent for GDPR compliance
+  analyticsConsent Boolean @default(false)
+
   guilds          Guild[]
   refreshTokens   RefreshToken[]
   sessions        Session[]
@@ -396,4 +399,83 @@ model AlertLog {
 
   @@index([severity])
   @@index([sentAt])
+}
+
+// User Analytics & Metrics Models
+
+model UserAnalyticsEvent {
+  id           String   @id @default(cuid())
+  userId       String?
+  sessionId    String?
+  eventType    String // PAGE_VIEW, BUTTON_CLICK, FEATURE_USED, API_CALL, etc.
+  eventName    String // Specific event name
+  category     String? // analytics, auth, admin, etc.
+  properties   Json?    @db.JsonB // Event-specific properties
+  ipAddress    String?
+  userAgent    String?
+  referrer     String?
+  pathname     String?
+  consentGiven Boolean  @default(false) // GDPR consent flag
+  anonymized   Boolean  @default(false) // Whether data was anonymized
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([eventName])
+  @@index([category])
+  @@index([createdAt])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@index([consentGiven])
+}
+
+model FeatureUsageMetric {
+  id           String   @id @default(cuid())
+  featureName  String // Name of the feature (e.g., "ghost_analysis", "lurker_detection")
+  userId       String?
+  usageCount   Int      @default(1)
+  lastUsedAt   DateTime @default(now()) @db.Timestamptz
+  metadata     Json?    @db.JsonB
+  consentGiven Boolean  @default(false)
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  @@index([featureName])
+  @@index([userId])
+  @@index([lastUsedAt])
+  @@index([featureName, createdAt(sort: Desc)])
+}
+
+model PerformanceMetric {
+  id            String   @id @default(cuid())
+  metricType    String // API_RESPONSE_TIME, PAGE_LOAD, DB_QUERY, etc.
+  metricName    String // Specific metric name
+  value         Float // Metric value (e.g., milliseconds, bytes)
+  unit          String // Unit of measurement (ms, bytes, count)
+  endpoint      String? // API endpoint if applicable
+  userId        String?
+  sessionId     String?
+  metadata      Json?    @db.JsonB
+  createdAt     DateTime @default(now()) @db.Timestamptz
+
+  @@index([metricType])
+  @@index([metricName])
+  @@index([endpoint])
+  @@index([createdAt])
+  @@index([metricType, createdAt(sort: Desc)])
+}
+
+model AnalyticsSummary {
+  id              String   @id @default(cuid())
+  summaryDate     DateTime @db.Date // Date for daily/weekly/monthly aggregation
+  summaryType     String // DAILY, WEEKLY, MONTHLY
+  metric          String // active_users, feature_usage, etc.
+  value           Float
+  metadata        Json?    @db.JsonB
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  @@unique([summaryDate, summaryType, metric])
+  @@index([summaryDate])
+  @@index([summaryType])
+  @@index([metric])
 }

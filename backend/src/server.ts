@@ -53,6 +53,7 @@ const allowedOrigins =
             cacheControlHeaders,
             etagMiddleware,
             securityLoggingMiddleware,
+            trackApiRequest,
         } = await import('./middleware');
         console.log('✅ middleware loaded');
 
@@ -128,6 +129,10 @@ const allowedOrigins =
 
         // Metrics middleware
         app.use(metricsMiddleware);
+
+        // Analytics tracking middleware
+        app.use(trackApiRequest);
+        console.log('✅ Analytics tracking enabled');
 
         // Caching headers for better performance
         app.use(cacheControlHeaders);
