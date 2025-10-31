@@ -17,6 +17,12 @@ enum Role {
   BANNED
 }
 
+enum SubscriptionTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
 model PresenceEvent {
   id        String   @id @default(uuid())
   userId    String
@@ -188,6 +194,9 @@ model User {
   // New role field
   role Role @default(USER)
 
+  // Subscription tier for rate limiting and quotas
+  subscriptionTier SubscriptionTier @default(FREE)
+
   guilds          Guild[]
   refreshTokens   RefreshToken[]
   sessions        Session[]
@@ -199,6 +208,7 @@ model User {
   @@index([discordId])
   @@index([email])
   @@index([role]) // Index for role-based queries
+  @@index([subscriptionTier]) // Index for tier-based queries
   @@index([lastSeenAt(sort: Desc)]) // Index for last seen queries
   @@index([role, lastSeenAt(sort: Desc)]) // Composite index for role + last seen queries
 }

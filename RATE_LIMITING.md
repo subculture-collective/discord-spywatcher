@@ -29,11 +29,16 @@ All API responses include the following rate limit headers:
 
 ### User-Based Rate Limiting
 
-Authenticated users have different rate limits based on their role:
+Authenticated users have different rate limits based on their subscription tier and role:
 
+**By Subscription Tier:**
+- **FREE**: 30 requests/minute, 100 requests/15 minutes
+- **PRO**: 100 requests/minute, 1,000 requests/15 minutes
+- **ENTERPRISE**: 300 requests/minute, 5,000 requests/15 minutes
+
+**By Role (overrides tier limits):**
 - **Admin**: 200 requests/minute
 - **Moderator**: 100 requests/minute
-- **Regular User**: 60 requests/minute
 - **Unauthenticated**: 30 requests/minute
 
 ### Rate Limit Response
@@ -47,6 +52,243 @@ When rate limited, the API returns a `429 Too Many Requests` response:
   "retryAfter": 600
 }
 ```
+
+## Quota Management
+
+### Overview
+
+In addition to rate limiting, the API implements a quota system that tracks daily request limits based on subscription tiers. Quotas are tracked per endpoint category and reset daily at midnight UTC.
+
+### Quota Headers
+
+All authenticated API responses include quota-related headers:
+
+- `X-Quota-Limit`: Maximum number of requests allowed per day for this category
+- `X-Quota-Remaining`: Number of requests remaining in the current day
+- `X-Quota-Reset`: Seconds until quota resets (at midnight UTC)
+- `X-Quota-Category`: Endpoint category (analytics, api, admin, public)
+
+### Subscription Tiers
+
+#### FREE Tier
+
+| Category | Daily Limit |
+|----------|-------------|
+| Analytics | 100 requests |
+| API | 1,000 requests |
+| Public | 500 requests |
+| Admin | No access |
+| **Total** | **1,000 requests** |
+
+#### PRO Tier
+
+| Category | Daily Limit |
+|----------|-------------|
+| Analytics | 1,000 requests |
+| API | 10,000 requests |
+| Public | 5,000 requests |
+| Admin | No access |
+| **Total** | **10,000 requests** |
+
+#### ENTERPRISE Tier
+
+| Category | Daily Limit |
+|----------|-------------|
+| Analytics | 10,000 requests |
+| API | 100,000 requests |
+| Public | 50,000 requests |
+| Admin | 50,000 requests |
+| **Total** | **100,000 requests** |
+
+### Endpoint Categories
+
+Quotas are tracked by endpoint category:
+
+- **Analytics**: `/api/analytics/*` - Data and statistics endpoints
+- **Admin**: `/api/admin/*` - Administrative endpoints
+- **Public**: `/api/public/*` - Public API endpoints
+- **API**: All other `/api/*` endpoints
+
+### Quota Exceeded Response
+
+When quota is exceeded, the API returns a `429 Too Many Requests` response:
+
+```json
+{
+  "error": "Quota exceeded",
+  "message": "You have exceeded your analytics quota for the day. Please upgrade your subscription or try again tomorrow.",
+  "quota": {
+    "limit": 100,
+    "remaining": 0,
+    "reset": 43200,
+    "category": "analytics"
+  }
+}
+```
+
+### Quota Management Endpoints
+
+#### Get Personal Quota Usage
+
+View your current quota usage across all categories.
+
+**Endpoint**: `GET /api/quota/usage`
+
+**Authentication**: Required (JWT or API key)
+
+**Response**:
+```json
+{
+  "tier": "FREE",
+  "usage": {
+    "analytics": {
+      "used": 50,
+      "limit": 100,
+      "remaining": 50
+    },
+    "api": {
+      "used": 200,
+      "limit": 1000,
+      "remaining": 800
+    },
+    "total": {
+      "used": 250,
+      "limit": 1000,
+      "remaining": 750
+    }
+  },
+  "limits": {
+    "analytics": { "requests": 100, "window": "daily" },
+    "api": { "requests": 1000, "window": "daily" },
+    "total": { "requests": 1000, "window": "daily" }
+  },
+  "rateLimits": {
+    "requestsPerMinute": 30,
+    "requestsPer15Minutes": 100
+  }
+}
+```
+
+#### Get All Tier Limits
+
+View quota and rate limits for all subscription tiers.
+
+**Endpoint**: `GET /api/quota/limits`
+
+**Authentication**: None required
+
+**Response**:
+```json
+{
+  "FREE": {
+    "quotas": {
+      "analytics": { "requests": 100, "window": "daily" },
+      "api": { "requests": 1000, "window": "daily" },
+      "total": { "requests": 1000, "window": "daily" }
+    },
+    "rateLimits": {
+      "requestsPerMinute": 30,
+      "requestsPer15Minutes": 100
+    }
+  },
+  "PRO": {
+    "quotas": { ... },
+    "rateLimits": { ... }
+  },
+  "ENTERPRISE": {
+    "quotas": { ... },
+    "rateLimits": { ... }
+  }
+}
+```
+
+#### Get User Quota Usage (Admin Only)
+
+View quota usage for a specific user.
+
+**Endpoint**: `GET /api/quota/users/:userId`
+
+**Authentication**: Required (Admin role)
+
+**Response**:
+```json
+{
+  "user": {
+    "id": "user123",
+    "username": "johndoe",
+    "tier": "PRO",
+    "role": "USER"
+  },
+  "usage": {
+    "analytics": {
+      "used": 500,
+      "limit": 1000,
+      "remaining": 500
+    },
+    "total": {
+      "used": 5000,
+      "limit": 10000,
+      "remaining": 5000
+    }
+  },
+  "limits": { ... }
+}
+```
+
+#### Update User Subscription Tier (Admin Only)
+
+Change a user's subscription tier.
+
+**Endpoint**: `PUT /api/quota/users/:userId/tier`
+
+**Authentication**: Required (Admin role)
+
+**Request Body**:
+```json
+{
+  "tier": "PRO"
+}
+```
+
+**Response**:
+```json
+{
+  "message": "User tier updated successfully",
+  "user": {
+    "id": "user123",
+    "username": "johndoe",
+    "subscriptionTier": "PRO"
+  }
+}
+```
+
+#### Reset User Quota (Admin Only)
+
+Reset quota usage for a user. Optionally specify a category to reset only that category.
+
+**Endpoint**: `DELETE /api/quota/users/:userId/reset?category=analytics`
+
+**Authentication**: Required (Admin role)
+
+**Query Parameters**:
+- `category` (optional): Specific category to reset (analytics, api, admin, public, total)
+
+**Response**:
+```json
+{
+  "message": "Quota reset for category: analytics",
+  "userId": "user123",
+  "username": "johndoe",
+  "category": "analytics"
+}
+```
+
+### Quota Tracking
+
+- Quotas are tracked in Redis for fast access
+- Counters automatically expire at midnight UTC
+- Both category-specific and total quotas are enforced
+- Only successful requests (status < 400) count against quotas
 
 ## IP Management
 
@@ -479,19 +721,26 @@ Service temporarily unavailable due to high load or maintenance.
 
 ### For API Consumers
 
-1. **Respect Rate Limits**: Monitor rate limit headers and adjust request frequency
-2. **Implement Exponential Backoff**: When rate limited, wait before retrying
-3. **Use Caching**: Leverage ETags and Cache-Control headers
-4. **Handle 429 Gracefully**: Don't retry immediately when rate limited
-5. **Monitor Your IP**: Check `/api/admin/monitoring/rate-limits/:ip` periodically
+1. **Monitor Headers**: Check both rate limit (`X-RateLimit-*`) and quota (`X-Quota-*`) headers
+2. **Track Quota Usage**: Regularly check `/api/quota/usage` to monitor your daily consumption
+3. **Implement Exponential Backoff**: When rate limited or quota exceeded, wait before retrying
+4. **Use Caching**: Leverage ETags and Cache-Control headers to reduce API calls
+5. **Handle 429 Gracefully**: Don't retry immediately when rate limited or quota exceeded
+6. **Plan for Limits**: Design your application around your tier's quota limits
+7. **Upgrade When Needed**: Monitor usage patterns and upgrade tier if approaching limits
+8. **Distribute Load**: Spread requests throughout the day to avoid hitting rate limits
 
 ### For Administrators
 
 1. **Monitor Violations**: Regularly check `/api/admin/monitoring/rate-limits`
-2. **Whitelist Trusted IPs**: Add office/server IPs to whitelist
-3. **Review Blocked IPs**: Periodically review and clean up blocks
-4. **Set Up Alerts**: Monitor system health via `/api/admin/monitoring/system`
-5. **Document Blocks**: Always provide a reason when blocking IPs
+2. **Track User Quotas**: Use `/api/quota/users/:userId` to monitor high-volume users
+3. **Manage Tiers**: Assign appropriate subscription tiers based on user needs
+4. **Reset Quotas**: Use quota reset sparingly and only when justified
+5. **Whitelist Trusted IPs**: Add office/server IPs to whitelist
+6. **Review Blocked IPs**: Periodically review and clean up blocks
+7. **Set Up Alerts**: Monitor system health via `/api/admin/monitoring/system`
+8. **Document Changes**: Always provide a reason when blocking IPs or changing tiers
+9. **Analyze Usage**: Review quota usage patterns to identify optimization opportunities
 
 ## Configuration
 

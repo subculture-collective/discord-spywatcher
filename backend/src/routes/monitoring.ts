@@ -8,6 +8,11 @@ import {
 } from '../middleware/slowQueryLogger';
 import { cache } from '../services/cache';
 import {
+    getSystemHealth,
+    getConnectionPoolStats,
+    getConnectionPoolAlerts,
+} from '../utils/connectionPoolMonitor';
+import {
     checkDatabaseHealth,
     getTableStats,
     getIndexUsageStats,
@@ -17,11 +22,6 @@ import {
     analyzeAllTables,
 } from '../utils/databaseMaintenance';
 import { getRedisClient } from '../utils/redis';
-import {
-    getSystemHealth,
-    getConnectionPoolStats,
-    getConnectionPoolAlerts,
-} from '../utils/connectionPoolMonitor';
 
 const router = Router();
 const redis = getRedisClient();

@@ -6,6 +6,7 @@
  */
 
 import { checkDatabaseHealth, getConnectionPoolMetrics } from '../db';
+
 import { getRedisMetrics, isRedisAvailable } from './redis';
 
 /**

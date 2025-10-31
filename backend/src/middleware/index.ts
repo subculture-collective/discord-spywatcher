@@ -6,6 +6,7 @@ export * from './filterBannedUsers';
 export * from './ipBlock';
 export * from './loadShedding';
 export * from './logger';
+export * from './quotaMiddleware';
 export * from './rateLimiter';
 export * from './requestId';
 export * from './security';

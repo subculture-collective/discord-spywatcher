@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 
+import { db } from '../db';
+import { getRateLimitsForTier } from '../utils/quotaManager';
 import { getRedisClient } from '../utils/redis';
 
 const redis = getRedisClient();
@@ -156,20 +158,80 @@ export const refreshLimiter = createRateLimiter({
 });
 
 /**
- * User-based rate limiter with role-based limits
- * Dynamically adjusts based on user role
+ * Get user metadata (tier and role) with Redis caching
+ * Caches for 5 minutes to reduce database load
+ */
+async function getUserMetadata(userId: string): Promise<{ subscriptionTier: any; role: any } | null> {
+    const cacheKey = `user:meta:${userId}`;
+
+    // Try to get from Redis cache first
+    if (redis) {
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                return JSON.parse(cached);
+            }
+        } catch (error) {
+            console.error('Error reading user metadata from cache:', error);
+        }
+    }
+
+    // Fetch from database
+    try {
+        const dbUser = await db.user.findUnique({
+            where: { id: userId },
+            select: { subscriptionTier: true, role: true },
+        });
+
+        if (!dbUser) {
+            return null;
+        }
+
+        // Cache in Redis for 5 minutes
+        if (redis) {
+            try {
+                await redis.set(cacheKey, JSON.stringify(dbUser), 'EX', 300);
+            } catch (error) {
+                console.error('Error caching user metadata:', error);
+            }
+        }
+
+        return dbUser;
+    } catch (error) {
+        console.error('Error fetching user metadata:', error);
+        return null;
+    }
+}
+
+/**
+ * User-based rate limiter with tier and role-based limits
+ * Dynamically adjusts based on user subscription tier and role
  */
 export const userRateLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: (req: Request) => {
-        // Dynamic limits based on user role
+    max: async (req: Request) => {
         const user = (req as any).user;
         if (!user) return 30; // Unauthenticated users
         
-        // Role-based limits
-        if (user.role === 'ADMIN') return 200;
-        if (user.role === 'MODERATOR') return 100;
-        return 60; // Regular users
+        try {
+            // Fetch user's subscription tier and role (with caching)
+            const dbUser = await getUserMetadata(user.userId);
+
+            if (!dbUser) {
+                return 60; // Default for authenticated users
+            }
+
+            // Admin/Moderator roles override tier limits
+            if (dbUser.role === 'ADMIN') return 200;
+            if (dbUser.role === 'MODERATOR') return 100;
+
+            // Use tier-based limits
+            const tierLimits = getRateLimitsForTier(dbUser.subscriptionTier);
+            return tierLimits.requestsPerMinute;
+        } catch (error) {
+            console.error('Error fetching user tier for rate limiting:', error);
+            return 60; // Default fallback
+        }
     },
     message: 'Too many requests. Please try again later.',
     standardHeaders: true,
@@ -178,7 +240,7 @@ export const userRateLimiter = rateLimit({
     keyGenerator: (req: Request) => {
         const user = (req as any).user;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return user?.id || req.ip || 'unknown';
+        return user?.userId || req.ip || 'unknown';
     },
     ...(redis && {
         store: new RedisStore({

@@ -5,6 +5,7 @@
 import express from 'express';
 import request from 'supertest';
 
+import * as db from '../../../src/db';
 import monitoringRoutes from '../../../src/routes/monitoring';
 
 // Mock dependencies
@@ -62,7 +63,6 @@ jest.mock('../../../src/utils/databaseMaintenance', () => ({
     analyzeAllTables: jest.fn(),
 }));
 
-import * as db from '../../../src/db';
 import * as connectionPoolMonitor from '../../../src/utils/connectionPoolMonitor';
 
 describe('Connection Monitoring Routes', () => {
