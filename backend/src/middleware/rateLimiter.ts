@@ -158,6 +158,52 @@ export const refreshLimiter = createRateLimiter({
 });
 
 /**
+ * Get user metadata (tier and role) with Redis caching
+ * Caches for 5 minutes to reduce database load
+ */
+async function getUserMetadata(userId: string): Promise<{ subscriptionTier: any; role: any } | null> {
+    const cacheKey = `user:meta:${userId}`;
+
+    // Try to get from Redis cache first
+    if (redis) {
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                return JSON.parse(cached);
+            }
+        } catch (error) {
+            console.error('Error reading user metadata from cache:', error);
+        }
+    }
+
+    // Fetch from database
+    try {
+        const dbUser = await db.user.findUnique({
+            where: { id: userId },
+            select: { subscriptionTier: true, role: true },
+        });
+
+        if (!dbUser) {
+            return null;
+        }
+
+        // Cache in Redis for 5 minutes
+        if (redis) {
+            try {
+                await redis.set(cacheKey, JSON.stringify(dbUser), 'EX', 300);
+            } catch (error) {
+                console.error('Error caching user metadata:', error);
+            }
+        }
+
+        return dbUser;
+    } catch (error) {
+        console.error('Error fetching user metadata:', error);
+        return null;
+    }
+}
+
+/**
  * User-based rate limiter with tier and role-based limits
  * Dynamically adjusts based on user subscription tier and role
  */
@@ -168,11 +214,8 @@ export const userRateLimiter = rateLimit({
         if (!user) return 30; // Unauthenticated users
         
         try {
-            // Fetch user's subscription tier from database
-            const dbUser = await db.user.findUnique({
-                where: { id: user.userId },
-                select: { subscriptionTier: true, role: true },
-            });
+            // Fetch user's subscription tier and role (with caching)
+            const dbUser = await getUserMetadata(user.userId);
 
             if (!dbUser) {
                 return 60; // Default for authenticated users

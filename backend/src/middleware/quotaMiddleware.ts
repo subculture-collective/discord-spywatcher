@@ -2,11 +2,12 @@ import { SubscriptionTier } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { db } from '../db';
+import { getRedisClient } from '../utils/redis';
 import {
+    checkAndIncrementQuota,
     checkQuota,
     EndpointCategory,
     getEndpointCategory,
-    incrementQuota,
 } from '../utils/quotaManager';
 
 /**
@@ -27,22 +28,18 @@ export function quotaEnforcement() {
         }
 
         try {
-            // Get user's subscription tier from database
-            const user = await db.user.findUnique({
-                where: { id: req.user.userId },
-                select: { subscriptionTier: true },
-            });
+            // Get user's subscription tier (with Redis caching)
+            const tier = await getUserTier(req.user.userId);
 
-            if (!user) {
+            if (!tier) {
                 res.status(403).json({ error: 'User not found' });
                 return;
             }
 
-            const tier = user.subscriptionTier || SubscriptionTier.FREE;
             const category = getEndpointCategory(req.path);
 
-            // Check if user has quota remaining
-            const quotaCheck = await checkQuota(req.user.userId, tier, category);
+            // Atomically check and increment quota to prevent race conditions
+            const quotaCheck = await checkAndIncrementQuota(req.user.userId, tier, category);
 
             // Set quota headers
             res.setHeader('X-Quota-Limit', quotaCheck.limit);
@@ -63,17 +60,6 @@ export function quotaEnforcement() {
                 });
                 return;
             }
-
-            // Increment quota usage after successful check
-            // We do this in a non-blocking way after sending the response
-            res.on('finish', () => {
-                if (res.statusCode < 400) {
-                    // Only count successful requests
-                    incrementQuota(req.user!.userId, category).catch((err) => {
-                        console.error('Error incrementing quota:', err);
-                    });
-                }
-            });
 
             next();
         } catch (error) {
@@ -100,13 +86,9 @@ export function quotaHeaders() {
         }
 
         try {
-            const user = await db.user.findUnique({
-                where: { id: req.user.userId },
-                select: { subscriptionTier: true },
-            });
+            const tier = await getUserTier(req.user.userId);
 
-            if (user) {
-                const tier = user.subscriptionTier || SubscriptionTier.FREE;
+            if (tier) {
                 const category = getEndpointCategory(req.path);
                 const quotaCheck = await checkQuota(req.user.userId, tier, category);
 
@@ -121,6 +103,55 @@ export function quotaHeaders() {
 
         next();
     };
+}
+
+/**
+ * Get user's subscription tier with Redis caching
+ * Caches tier for 5 minutes to reduce database load
+ */
+async function getUserTier(userId: string): Promise<SubscriptionTier | null> {
+    const redis = getRedisClient();
+    const cacheKey = `user:tier:${userId}`;
+
+    // Try to get from Redis cache first
+    if (redis) {
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                return cached as SubscriptionTier;
+            }
+        } catch (error) {
+            console.error('Error reading user tier from cache:', error);
+        }
+    }
+
+    // Fetch from database
+    try {
+        const user = await db.user.findUnique({
+            where: { id: userId },
+            select: { subscriptionTier: true },
+        });
+
+        if (!user) {
+            return null;
+        }
+
+        const tier = user.subscriptionTier || SubscriptionTier.FREE;
+
+        // Cache in Redis for 5 minutes
+        if (redis) {
+            try {
+                await redis.set(cacheKey, tier, 'EX', 300);
+            } catch (error) {
+                console.error('Error caching user tier:', error);
+            }
+        }
+
+        return tier;
+    } catch (error) {
+        console.error('Error fetching user tier:', error);
+        return null;
+    }
 }
 
 /**

@@ -86,7 +86,103 @@ function getQuotaKeyTTL(): number {
 }
 
 /**
- * Check if user has quota remaining
+ * Check and atomically increment quota if allowed
+ * This prevents race conditions by combining check and increment operations
+ */
+export async function checkAndIncrementQuota(
+    userId: string,
+    tier: SubscriptionTier,
+    category: EndpointCategory
+): Promise<{
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+    reset: number;
+}> {
+    const redis = getRedisClient();
+
+    // Get quota limits for the user's tier
+    const quotaConfig = QUOTA_LIMITS[tier];
+    const categoryLimit = quotaConfig[category];
+    
+    // If limit is 0, access is not allowed
+    if (categoryLimit.requests === 0) {
+        return {
+            allowed: false,
+            remaining: 0,
+            limit: 0,
+            reset: getQuotaKeyTTL(),
+        };
+    }
+
+    // If Redis is not available, allow the request (fail open)
+    if (!redis) {
+        return {
+            allowed: true,
+            remaining: categoryLimit.requests,
+            limit: categoryLimit.requests,
+            reset: getQuotaKeyTTL(),
+        };
+    }
+
+    const key = getQuotaKey(userId, category);
+    const totalKey = getQuotaKey(userId, 'total');
+    const ttl = getQuotaKeyTTL();
+
+    try {
+        // Use Redis transaction with WATCH to atomically check and increment
+        // This prevents race conditions when multiple requests arrive simultaneously
+        const multi = redis.multi();
+        
+        // Increment both counters atomically
+        multi.incr(key);
+        multi.expire(key, ttl);
+        multi.incr(totalKey);
+        multi.expire(totalKey, ttl);
+        
+        const results = await multi.exec();
+        
+        if (!results) {
+            // Transaction failed, fail open
+            return {
+                allowed: true,
+                remaining: categoryLimit.requests,
+                limit: categoryLimit.requests,
+                reset: ttl,
+            };
+        }
+
+        // Get the new counts after increment
+        const categoryCount = results[0][1] as number;
+        const totalCount = results[2][1] as number;
+        const totalLimit = quotaConfig.total.requests;
+
+        // Check if limits were exceeded (counts are now post-increment)
+        const categoryAllowed = categoryCount <= categoryLimit.requests;
+        const totalAllowed = totalCount <= totalLimit;
+        const allowed = categoryAllowed && totalAllowed;
+
+        return {
+            allowed,
+            remaining: Math.max(0, categoryLimit.requests - categoryCount),
+            limit: categoryLimit.requests,
+            reset: ttl,
+        };
+    } catch (error) {
+        console.error('Error checking quota:', error);
+        // Fail open on error
+        return {
+            allowed: true,
+            remaining: categoryLimit.requests,
+            limit: categoryLimit.requests,
+            reset: getQuotaKeyTTL(),
+        };
+    }
+}
+
+/**
+ * Check if user has quota remaining (read-only, no increment)
+ * Use this for monitoring/display purposes only
  */
 export async function checkQuota(
     userId: string,

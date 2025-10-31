@@ -168,7 +168,16 @@ router.delete(
     async (req: Request, res: Response) => {
         try {
             const { userId } = req.params;
-            const { category } = req.query as { category?: EndpointCategory };
+            const { category } = req.query as { category?: string };
+
+            // Validate category parameter if provided
+            const allowedCategories: EndpointCategory[] = ['analytics', 'api', 'admin', 'public', 'total'];
+            if (category !== undefined && !allowedCategories.includes(category as EndpointCategory)) {
+                res.status(400).json({
+                    error: `Invalid category. Must be one of: ${allowedCategories.join(', ')}`,
+                });
+                return;
+            }
 
             const user = await db.user.findUnique({
                 where: { id: userId },
@@ -180,7 +189,7 @@ router.delete(
                 return;
             }
 
-            await resetQuota(userId, category);
+            await resetQuota(userId, category as EndpointCategory | undefined);
 
             res.json({
                 message: category

@@ -6,7 +6,6 @@ import ioClient from 'socket.io-client';
 import { WebSocketService } from '../../../src/services/websocket';
 import { generateAccessToken } from '../../../src/utils/auth';
 
- 
 type ClientSocket = any;
 
 describe('WebSocketService', () => {
@@ -142,7 +141,7 @@ describe('WebSocketService', () => {
 
                 clientSocket.on(
                     'analytics:update',
-                     
+
                     (data: any) => {
                         expect(data).toBeDefined();
                         expect(data.guildId).toBe(guildId);
@@ -170,7 +169,7 @@ describe('WebSocketService', () => {
 
                 clientSocket.on(
                     'message:new',
-                     
+
                     (data: any) => {
                         expect(data).toBeDefined();
                         expect(data.username).toBe('TestUser');
@@ -241,7 +240,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'message:new',
-                 
+
                 (data: any) => {
                     expect(data.username).toBe('TestUser');
                     expect(data.channelName).toBe('general');
@@ -280,7 +279,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'alert:multiClient',
-                 
+
                 (data: any) => {
                     expect(data.username).toBe('TestUser');
                     expect(data.platforms).toEqual(['desktop', 'mobile']);
@@ -319,7 +318,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'role:change',
-                 
+
                 (data: any) => {
                     expect(data.username).toBe('TestUser');
                     expect(data.addedRoles).toEqual(['Moderator']);
@@ -358,7 +357,7 @@ describe('WebSocketService', () => {
 
             clientSocket.on(
                 'user:join',
-                 
+
                 (data: any) => {
                     expect(data.username).toBe('NewUser');
                     expect(data.accountAgeDays).toBe(30);

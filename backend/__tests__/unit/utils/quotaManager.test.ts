@@ -1,13 +1,13 @@
 import { SubscriptionTier } from '@prisma/client';
 
 import {
+    checkAndIncrementQuota,
     checkQuota,
     getEndpointCategory,
     getQuotaLimitsForTier,
-    getRateLimitsForTier,
-    incrementQuota,
-    resetQuota,
     getQuotaUsage,
+    getRateLimitsForTier,
+    resetQuota,
 } from '../../../src/utils/quotaManager';
 
 // Mock Redis
@@ -18,6 +18,7 @@ const mockRedis = {
     expire: jest.fn(),
     del: jest.fn(),
     pipeline: jest.fn(),
+    multi: jest.fn(),
 };
 
 jest.mock('../../../src/utils/redis', () => ({
@@ -31,6 +32,16 @@ describe('Quota Manager', () => {
             incr: jest.fn().mockReturnThis(),
             expire: jest.fn().mockReturnThis(),
             exec: jest.fn().mockResolvedValue([]),
+        });
+        mockRedis.multi.mockReturnValue({
+            incr: jest.fn().mockReturnThis(),
+            expire: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue([
+                [null, 1],
+                [null, true],
+                [null, 1],
+                [null, true],
+            ]),
         });
     });
 
@@ -85,6 +96,56 @@ describe('Quota Manager', () => {
         });
     });
 
+    describe('checkAndIncrementQuota', () => {
+        it('should atomically check and increment quota when allowed', async () => {
+            const multi = {
+                incr: jest.fn().mockReturnThis(),
+                expire: jest.fn().mockReturnThis(),
+                exec: jest.fn().mockResolvedValue([
+                    [null, 51], // Category count after increment
+                    [null, true],
+                    [null, 251], // Total count after increment
+                    [null, true],
+                ]),
+            };
+            mockRedis.multi.mockReturnValue(multi);
+
+            const result = await checkAndIncrementQuota('user123', SubscriptionTier.FREE, 'analytics');
+
+            expect(result.allowed).toBe(true);
+            expect(result.remaining).toBe(49); // 100 - 51
+            expect(result.limit).toBe(100);
+            expect(multi.incr).toHaveBeenCalledTimes(2);
+            expect(multi.exec).toHaveBeenCalled();
+        });
+
+        it('should deny request when quota would be exceeded', async () => {
+            const multi = {
+                incr: jest.fn().mockReturnThis(),
+                expire: jest.fn().mockReturnThis(),
+                exec: jest.fn().mockResolvedValue([
+                    [null, 101], // Category count exceeds limit
+                    [null, true],
+                    [null, 1001], // Total also exceeds
+                    [null, true],
+                ]),
+            };
+            mockRedis.multi.mockReturnValue(multi);
+
+            const result = await checkAndIncrementQuota('user123', SubscriptionTier.FREE, 'analytics');
+
+            expect(result.allowed).toBe(false);
+            expect(result.remaining).toBe(0);
+        });
+
+        it('should deny access to admin endpoints for FREE tier', async () => {
+            const result = await checkAndIncrementQuota('user123', SubscriptionTier.FREE, 'admin');
+
+            expect(result.allowed).toBe(false);
+            expect(result.limit).toBe(0);
+        });
+    });
+
     describe('checkQuota', () => {
         it('should allow request when under quota', async () => {
             mockRedis.get.mockResolvedValue('50'); // 50 requests used
@@ -133,22 +194,7 @@ describe('Quota Manager', () => {
         });
     });
 
-    describe('incrementQuota', () => {
-        it('should increment both category and total counters', async () => {
-            const pipeline = {
-                incr: jest.fn().mockReturnThis(),
-                expire: jest.fn().mockReturnThis(),
-                exec: jest.fn().mockResolvedValue([]),
-            };
-            mockRedis.pipeline.mockReturnValue(pipeline);
 
-            await incrementQuota('user123', 'analytics');
-
-            expect(pipeline.incr).toHaveBeenCalledTimes(2); // Category + total
-            expect(pipeline.expire).toHaveBeenCalledTimes(2);
-            expect(pipeline.exec).toHaveBeenCalled();
-        });
-    });
 
     describe('getQuotaUsage', () => {
         it('should return usage for all categories', async () => {

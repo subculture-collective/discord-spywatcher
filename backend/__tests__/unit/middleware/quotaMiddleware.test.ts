@@ -12,10 +12,15 @@ jest.mock('../../../src/db', () => ({
     },
 }));
 
+// Mock Redis
+jest.mock('../../../src/utils/redis', () => ({
+    getRedisClient: jest.fn(() => null),
+}));
+
 // Mock quota manager
 jest.mock('../../../src/utils/quotaManager', () => ({
     checkQuota: jest.fn(),
-    incrementQuota: jest.fn().mockResolvedValue(undefined),
+    checkAndIncrementQuota: jest.fn(),
     getEndpointCategory: jest.fn((path: string) => {
         if (path.includes('analytics')) return 'analytics';
         return 'api';
@@ -26,10 +31,12 @@ describe('Quota Middleware', () => {
     let mockReq: Partial<Request>;
     let mockRes: Partial<Response>;
     let mockNext: NextFunction;
-     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockDb: any;
-     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockCheckQuota: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mockCheckAndIncrementQuota: any;
 
     beforeEach(() => {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -37,6 +44,7 @@ describe('Quota Middleware', () => {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const quotaManager = require('../../../src/utils/quotaManager');
         mockCheckQuota = quotaManager.checkQuota;
+        mockCheckAndIncrementQuota = quotaManager.checkAndIncrementQuota;
         mockReq = {
             user: {
                 userId: 'user123',
@@ -73,7 +81,7 @@ describe('Quota Middleware', () => {
                 subscriptionTier: SubscriptionTier.FREE,
             });
 
-            mockCheckQuota.mockResolvedValue({
+            mockCheckAndIncrementQuota.mockResolvedValue({
                 allowed: true,
                 remaining: 50,
                 limit: 100,
@@ -93,7 +101,7 @@ describe('Quota Middleware', () => {
                 subscriptionTier: SubscriptionTier.FREE,
             });
 
-            mockCheckQuota.mockResolvedValue({
+            mockCheckAndIncrementQuota.mockResolvedValue({
                 allowed: false,
                 remaining: 0,
                 limit: 100,
@@ -123,71 +131,15 @@ describe('Quota Middleware', () => {
             expect(mockNext).not.toHaveBeenCalled();
         });
 
-        it('should fail open on error', async () => {
-            mockDb.user.findUnique.mockRejectedValue(new Error('Database error'));
-
-            const middleware = quotaEnforcement();
-            await middleware(mockReq as Request, mockRes as Response, mockNext);
-
-            expect(mockNext).toHaveBeenCalled();
-        });
-
-        it('should increment quota after successful request', async () => {
+        it('should fail open when checkAndIncrementQuota throws error', async () => {
             mockDb.user.findUnique.mockResolvedValue({
                 subscriptionTier: SubscriptionTier.FREE,
             });
 
-            mockCheckQuota.mockResolvedValue({
-                allowed: true,
-                remaining: 50,
-                limit: 100,
-                reset: 86400,
-            });
-
-            const finishCallback = jest.fn();
-            mockRes.on = jest.fn((event, callback) => {
-                if (event === 'finish') {
-                    finishCallback.mockImplementation(callback);
-                }
-                return mockRes as Response;
-            }) as any;
-            mockRes.statusCode = 200;
+            mockCheckAndIncrementQuota.mockRejectedValue(new Error('Redis error'));
 
             const middleware = quotaEnforcement();
             await middleware(mockReq as Request, mockRes as Response, mockNext);
-
-            // Simulate response finish
-            finishCallback();
-
-            expect(mockNext).toHaveBeenCalled();
-        });
-
-        it('should not increment quota for failed requests', async () => {
-            mockDb.user.findUnique.mockResolvedValue({
-                subscriptionTier: SubscriptionTier.FREE,
-            });
-
-            mockCheckQuota.mockResolvedValue({
-                allowed: true,
-                remaining: 50,
-                limit: 100,
-                reset: 86400,
-            });
-
-            const finishCallback = jest.fn();
-            mockRes.on = jest.fn((event, callback) => {
-                if (event === 'finish') {
-                    finishCallback.mockImplementation(callback);
-                }
-                return mockRes as Response;
-            }) as any;
-            mockRes.statusCode = 500; // Error status
-
-            const middleware = quotaEnforcement();
-            await middleware(mockReq as Request, mockRes as Response, mockNext);
-
-            // Simulate response finish
-            finishCallback();
 
             expect(mockNext).toHaveBeenCalled();
         });
