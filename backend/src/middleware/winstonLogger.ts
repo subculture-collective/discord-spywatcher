@@ -28,6 +28,7 @@ const logger = createLogger({
     defaultMeta: { service: 'discord-spywatcher' },
     transports: [
         new transports.Console({
+            level: env.LOG_LEVEL,
             format: format.combine(
                 format.colorize(),
                 consoleFormat
@@ -40,6 +41,7 @@ const logger = createLogger({
         }),
         new transports.File({
             filename: path.join('logs', 'combined.log'),
+            level: env.LOG_LEVEL,
             format: jsonFormat,
         }),
     ],

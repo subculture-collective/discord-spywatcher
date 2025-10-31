@@ -2,7 +2,7 @@
 import express, { Application } from 'express';
 import request from 'supertest';
 
-import healthRoutes from '../../../src/routes/health';
+import healthRoutes, { resetDiscordApiCache } from '../../../src/routes/health';
 
 // Mock the database
 jest.mock('../../../src/db', () => ({
@@ -35,6 +35,7 @@ describe('Health Check Routes', () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        resetDiscordApiCache();
     });
 
     describe('GET /health/live', () => {

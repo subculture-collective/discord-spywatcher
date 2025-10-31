@@ -5,6 +5,13 @@ import { getRedisClient } from '../utils/redis';
 
 const router = Router();
 
+// Cache Discord API health check result to avoid rate limiting
+let discordApiCache: { healthy: boolean; timestamp: number } = {
+    healthy: true,
+    timestamp: 0,
+};
+const DISCORD_CACHE_TTL = 30000; // 30 seconds
+
 // Liveness probe - simple check that the service is running
 router.get('/live', (req: Request, res: Response) => {
     res.status(200).json({
@@ -46,11 +53,22 @@ router.get('/ready', async (req: Request, res: Response) => {
     }
 
     try {
-        // Check Discord API
-        const response = await fetch('https://discord.com/api/v10/gateway');
-        checks.discord = response.ok;
+        // Check Discord API with caching to avoid rate limits
+        const now = Date.now();
+        if (now - discordApiCache.timestamp > DISCORD_CACHE_TTL) {
+            const response = await fetch('https://discord.com/api/v10/gateway');
+            discordApiCache = {
+                healthy: response.ok,
+                timestamp: now,
+            };
+        }
+        checks.discord = discordApiCache.healthy;
     } catch (err) {
         console.error('Discord health check failed', err);
+        discordApiCache = {
+            healthy: false,
+            timestamp: Date.now(),
+        };
     }
 
     const allHealthy = Object.values(checks).every(Boolean);
@@ -61,5 +79,13 @@ router.get('/ready', async (req: Request, res: Response) => {
         timestamp: new Date().toISOString(),
     });
 });
+
+// Export function to reset cache for testing
+export function resetDiscordApiCache(): void {
+    discordApiCache = {
+        healthy: true,
+        timestamp: 0,
+    };
+}
 
 export default router;

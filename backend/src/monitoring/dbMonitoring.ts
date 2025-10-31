@@ -40,14 +40,13 @@ export function captureDatabaseError(
     model?: string,
     operation?: string
 ): void {
-    if (Sentry) {
-        Sentry.captureException(error, {
-            contexts: {
-                prisma: {
-                    model,
-                    operation,
-                },
+    // Sentry.captureException is safe to call even if Sentry isn't initialized
+    Sentry.captureException(error, {
+        contexts: {
+            prisma: {
+                model,
+                operation,
             },
-        });
-    }
+        },
+    });
 }

@@ -28,8 +28,6 @@ const allowedOrigins =
     // Initialize monitoring before any other middleware
     const {
         initSentry,
-        getSentryRequestHandler,
-        getSentryTracingHandler,
         getSentryErrorHandler,
         setupDatabaseMonitoring,
         metricsMiddleware,
@@ -67,13 +65,7 @@ const allowedOrigins =
             console.log('⚠️  Redis not available, using in-memory rate limiting');
         }
 
-        // Sentry request handler - must be first
-        if (env.SENTRY_DSN) {
-            app.use(getSentryRequestHandler());
-            app.use(getSentryTracingHandler());
-        }
-
-        // Security middleware - apply first
+        // Security middleware - apply first (after monitoring initialization)
         app.use(securityHeaders);
         app.use(additionalSecurityHeaders);
         // DDoS Protection Layer 1: Request validation
