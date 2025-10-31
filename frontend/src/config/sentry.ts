@@ -1,45 +1,88 @@
-import * as Sentry from '@sentry/node';
-import { Express, Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/react';
+import {
+    createRoutesFromChildren,
+    matchRoutes,
+    useLocation,
+    useNavigationType,
+} from 'react-router-dom';
+import { useEffect } from 'react';
 
-import { env } from '../utils/env';
+// Environment configuration
+const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
+const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT || import.meta.env.MODE;
+const RELEASE = import.meta.env.VITE_SENTRY_RELEASE;
+const TRACES_SAMPLE_RATE = parseFloat(
+    import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || '0.1'
+);
+const REPLAYS_SESSION_SAMPLE_RATE = parseFloat(
+    import.meta.env.VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE || '0.1'
+);
+const REPLAYS_ON_ERROR_SAMPLE_RATE = parseFloat(
+    import.meta.env.VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE || '1.0'
+);
 
-export function initSentry(_app: Express): void {
+/**
+ * Initialize Sentry for frontend error tracking and performance monitoring
+ */
+export function initSentry(): void {
     // Only initialize if DSN is provided
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         console.log('⚠️  Sentry DSN not configured, skipping Sentry initialization');
         return;
     }
 
     Sentry.init({
-        dsn: env.SENTRY_DSN,
-        environment: env.SENTRY_ENVIRONMENT || env.NODE_ENV,
-        release: env.SENTRY_RELEASE,
+        dsn: SENTRY_DSN,
+        environment: ENVIRONMENT,
+        release: RELEASE,
+
+        // Integrations
         integrations: [
-            Sentry.httpIntegration(),
-            Sentry.expressIntegration(),
-            Sentry.prismaIntegration(),
+            // Automatically instrument React components
+            Sentry.reactRouterV7BrowserTracingIntegration({
+                useEffect,
+                useLocation,
+                useNavigationType,
+                createRoutesFromChildren,
+                matchRoutes,
+            }),
+            // Session replay for debugging
+            Sentry.replayIntegration({
+                maskAllText: true,
+                blockAllMedia: true,
+            }),
+            // Breadcrumbs for console, DOM events, etc.
+            Sentry.breadcrumbsIntegration({
+                console: true,
+                dom: true,
+                fetch: true,
+                history: true,
+                sentry: true,
+                xhr: true,
+            }),
         ],
+
         // Performance Monitoring
-        tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
-        
-        // Error sampling
-        sampleRate: env.SENTRY_SAMPLE_RATE,
-        
-        // Maximum number of breadcrumbs
+        tracesSampleRate: TRACES_SAMPLE_RATE,
+
+        // Session Replay sampling
+        replaysSessionSampleRate: REPLAYS_SESSION_SAMPLE_RATE,
+        replaysOnErrorSampleRate: REPLAYS_ON_ERROR_SAMPLE_RATE,
+
+        // Maximum breadcrumbs
         maxBreadcrumbs: 50,
-        
+
         // Attach stack traces to messages
         attachStacktrace: true,
-        
-        // Before send hook for data sanitization and filtering
-        beforeSend(event, hint) {
-            // Filter out sensitive data
+
+        // Before send hook for data sanitization
+        beforeSend(event) {
+            // Remove sensitive data from the event
             if (event.request) {
                 delete event.request.cookies;
                 if (event.request.headers) {
                     delete event.request.headers.authorization;
                     delete event.request.headers.cookie;
-                    delete event.request.headers['x-auth-token'];
                 }
             }
 
@@ -55,18 +98,11 @@ export function initSentry(_app: Express): void {
                 }
             }
 
-            // Enrich error with additional context
-            if (hint.originalException instanceof Error) {
-                event.extra = event.extra || {};
-                event.extra.errorName = hint.originalException.name;
-                event.extra.errorMessage = hint.originalException.message;
-            }
-
             return event;
         },
 
-        // Before breadcrumb hook for filtering and sanitization
-        beforeBreadcrumb(breadcrumb, hint) {
+        // Before breadcrumb hook for filtering
+        beforeBreadcrumb(breadcrumb) {
             // Filter out sensitive data from breadcrumbs
             if (breadcrumb.data) {
                 delete breadcrumb.data.authorization;
@@ -76,7 +112,7 @@ export function initSentry(_app: Express): void {
             }
 
             // Filter console breadcrumbs in production
-            if (env.NODE_ENV === 'production' && breadcrumb.category === 'console') {
+            if (ENVIRONMENT === 'production' && breadcrumb.category === 'console') {
                 return null;
             }
 
@@ -85,57 +121,53 @@ export function initSentry(_app: Express): void {
 
         // Ignore specific errors
         ignoreErrors: [
-            // Ignore network errors
+            // Browser extensions
+            'top.GLOBALS',
+            // Random plugins/extensions
+            'originalCreateNotification',
+            'canvas.contentDocument',
+            'MyApp_RemoveAllHighlights',
+            // Facebook
+            'fb_xd_fragment',
+            // Network errors
             'NetworkError',
             'Network request failed',
-            // Ignore abort errors
+            'Failed to fetch',
+            // Abort errors
             'AbortError',
             'Request aborted',
-            // Ignore rate limit errors (handled separately)
-            'Too Many Requests',
-            // Ignore expected validation errors
-            'ValidationError',
+            // ResizeObserver errors (non-critical)
+            'ResizeObserver loop limit exceeded',
+            'ResizeObserver loop completed with undelivered notifications',
         ],
 
         // Deny URLs - don't report errors from these URLs
         denyUrls: [
-            // Ignore errors from browser extensions
+            // Browser extensions
             /extensions\//i,
             /^chrome:\/\//i,
             /^moz-extension:\/\//i,
+            // Facebook flakiness
+            /graph\.facebook\.com/i,
+            // Facebook blocked
+            /connect\.facebook\.net\/en_US\/all\.js/i,
         ],
     });
 
-    console.log(`✅ Sentry initialized (env: ${env.SENTRY_ENVIRONMENT || env.NODE_ENV}, release: ${env.SENTRY_RELEASE || 'not set'})`);
-}
-
-export function getSentryRequestHandler() {
-    // In Sentry v10, request handling is done automatically by expressIntegration()
-    // This is a no-op for backwards compatibility
-    return (req: Request, res: Response, next: NextFunction) => next();
-}
-
-export function getSentryTracingHandler() {
-    // In Sentry v10, tracing is handled automatically by the integrations
-    return (req: Request, res: Response, next: NextFunction) => next();
-}
-
-export function getSentryErrorHandler() {
-    return Sentry.expressErrorHandler();
+    console.log(
+        `✅ Sentry initialized (env: ${ENVIRONMENT}, release: ${RELEASE || 'not set'})`
+    );
 }
 
 /**
  * Captures an exception with additional context
- * @param error - The error to capture
- * @param context - Additional context to attach to the error
- * @param level - The severity level (optional)
  */
 export function captureException(
     error: Error,
     context?: Record<string, unknown>,
-    level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+    level?: Sentry.SeverityLevel
 ): string | undefined {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return undefined;
     }
 
@@ -151,16 +183,13 @@ export function captureException(
 
 /**
  * Captures a message with additional context
- * @param message - The message to capture
- * @param context - Additional context to attach to the message
- * @param level - The severity level (optional)
  */
 export function captureMessage(
     message: string,
     context?: Record<string, unknown>,
-    level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
+    level?: Sentry.SeverityLevel
 ): string | undefined {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return undefined;
     }
 
@@ -176,15 +205,13 @@ export function captureMessage(
 
 /**
  * Sets user context for error tracking
- * @param user - User information to set
  */
 export function setUser(user: {
     id: string;
     username?: string;
     email?: string;
-    ip_address?: string;
 }): void {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return;
     }
 
@@ -195,7 +222,7 @@ export function setUser(user: {
  * Clears the current user context
  */
 export function clearUser(): void {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return;
     }
 
@@ -204,15 +231,14 @@ export function clearUser(): void {
 
 /**
  * Adds a breadcrumb for tracking user actions
- * @param breadcrumb - Breadcrumb information
  */
 export function addBreadcrumb(breadcrumb: {
     message: string;
     category?: string;
-    level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug';
+    level?: Sentry.SeverityLevel;
     data?: Record<string, unknown>;
 }): void {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return;
     }
 
@@ -221,11 +247,9 @@ export function addBreadcrumb(breadcrumb: {
 
 /**
  * Sets a tag for filtering and searching errors
- * @param key - Tag key
- * @param value - Tag value
  */
 export function setTag(key: string, value: string): void {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return;
     }
 
@@ -234,10 +258,9 @@ export function setTag(key: string, value: string): void {
 
 /**
  * Sets multiple tags at once
- * @param tags - Object with tag key-value pairs
  */
 export function setTags(tags: Record<string, string>): void {
-    if (!env.SENTRY_DSN) {
+    if (!SENTRY_DSN) {
         return;
     }
 
@@ -246,33 +269,17 @@ export function setTags(tags: Record<string, string>): void {
 
 /**
  * Sets context data that will be merged with error events
- * @param name - Context name
- * @param context - Context data
  */
-export function setContext(name: string, context: Record<string, unknown> | null): void {
-    if (!env.SENTRY_DSN) {
+export function setContext(
+    name: string,
+    context: Record<string, unknown> | null
+): void {
+    if (!SENTRY_DSN) {
         return;
     }
 
     Sentry.setContext(name, context);
 }
 
-/**
- * Starts a new span for performance monitoring
- * @param name - Span name
- * @param op - Operation name
- * @param callback - Function to execute within the span
- */
-export function withSpan<T>(
-    name: string,
-    op: string,
-    callback: () => T | Promise<T>
-): T | Promise<T> {
-    if (!env.SENTRY_DSN) {
-        return callback();
-    }
-
-    return Sentry.startSpan({ name, op }, callback);
-}
-
+// Re-export Sentry for direct access if needed
 export { Sentry };

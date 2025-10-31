@@ -1,0 +1,295 @@
+# Sentry Alert Rules Configuration Example
+# This file provides example alert rule configurations for Sentry
+# Alert rules should be configured in the Sentry UI, but this file serves as documentation
+
+# ==============================================================================
+# Critical Error Alerts
+# ==============================================================================
+
+critical_error_spike:
+  name: "Critical Error Spike"
+  description: "Alert when there's a sudden spike in critical errors"
+  conditions:
+    - type: "event_frequency"
+      value: 10
+      interval: "5m"
+  filters:
+    - type: "level"
+      match: "error,fatal"
+  actions:
+    - type: "slack"
+      workspace: "your-workspace"
+      channel: "#alerts-critical"
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "engineering"
+  severity: "critical"
+  owner: "engineering-team"
+
+# ==============================================================================
+# Error Rate Monitoring
+# ==============================================================================
+
+high_error_rate:
+  name: "High Error Rate"
+  description: "Alert when error rate exceeds threshold"
+  conditions:
+    - type: "error_rate"
+      value: 5  # 5% error rate
+      interval: "15m"
+  filters: []
+  actions:
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "engineering"
+  severity: "high"
+  owner: "engineering-team"
+
+# ==============================================================================
+# New Issue Detection
+# ==============================================================================
+
+new_error_detected:
+  name: "New Error Type Detected"
+  description: "Alert when a new type of error is first seen"
+  conditions:
+    - type: "first_seen_event"
+  filters:
+    - type: "level"
+      match: "error,fatal"
+  actions:
+    - type: "slack"
+      workspace: "your-workspace"
+      channel: "#alerts-new-issues"
+  severity: "medium"
+  owner: "engineering-team"
+
+# ==============================================================================
+# Performance Degradation
+# ==============================================================================
+
+slow_transactions:
+  name: "Slow Transaction Performance"
+  description: "Alert when average transaction duration is too high"
+  conditions:
+    - type: "avg_transaction_duration"
+      value: 3000  # 3 seconds
+      interval: "10m"
+  filters:
+    - type: "transaction"
+      match: "/api/*"
+  actions:
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "backend-team"
+  severity: "medium"
+  owner: "backend-team"
+
+high_p95_latency:
+  name: "High P95 Latency"
+  description: "Alert when 95th percentile latency is too high"
+  conditions:
+    - type: "p95_transaction_duration"
+      value: 5000  # 5 seconds
+      interval: "15m"
+  filters: []
+  actions:
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "backend-team"
+  severity: "medium"
+  owner: "backend-team"
+
+# ==============================================================================
+# Database Issues
+# ==============================================================================
+
+database_errors:
+  name: "Database Connection Errors"
+  description: "Alert on database-related errors"
+  conditions:
+    - type: "event_frequency"
+      value: 5
+      interval: "5m"
+  filters:
+    - type: "message"
+      match: "database,prisma,connection"
+    - type: "level"
+      match: "error,fatal"
+  actions:
+    - type: "slack"
+      workspace: "your-workspace"
+      channel: "#alerts-database"
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "backend-team"
+    - type: "pagerduty"
+      service: "database-service"
+  severity: "critical"
+  owner: "backend-team"
+
+# ==============================================================================
+# Authentication Issues
+# ==============================================================================
+
+auth_failures:
+  name: "High Authentication Failure Rate"
+  description: "Alert when authentication failures spike"
+  conditions:
+    - type: "event_frequency"
+      value: 20
+      interval: "5m"
+  filters:
+    - type: "tags.endpoint"
+      match: "/api/auth/*"
+    - type: "level"
+      match: "error"
+  actions:
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "security-team"
+  severity: "high"
+  owner: "security-team"
+
+# ==============================================================================
+# Discord Bot Issues
+# ==============================================================================
+
+discord_bot_errors:
+  name: "Discord Bot Connection Issues"
+  description: "Alert when the Discord bot encounters errors"
+  conditions:
+    - type: "event_frequency"
+      value: 5
+      interval: "10m"
+  filters:
+    - type: "message"
+      match: "discord,bot,websocket"
+    - type: "level"
+      match: "error,fatal"
+  actions:
+    - type: "slack"
+      workspace: "your-workspace"
+      channel: "#alerts-bot"
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "backend-team"
+  severity: "high"
+  owner: "backend-team"
+
+# ==============================================================================
+# Frontend Specific Alerts
+# ==============================================================================
+
+frontend_error_spike:
+  name: "Frontend Error Spike"
+  description: "Alert when frontend errors spike"
+  conditions:
+    - type: "event_frequency"
+      value: 20
+      interval: "5m"
+  filters:
+    - type: "platform"
+      match: "javascript"
+    - type: "level"
+      match: "error,fatal"
+  actions:
+    - type: "slack"
+      workspace: "your-workspace"
+      channel: "#alerts-frontend"
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "frontend-team"
+  severity: "high"
+  owner: "frontend-team"
+
+unhandled_promise_rejections:
+  name: "Unhandled Promise Rejections"
+  description: "Alert on unhandled promise rejections in frontend"
+  conditions:
+    - type: "event_frequency"
+      value: 10
+      interval: "10m"
+  filters:
+    - type: "message"
+      match: "promise,rejection,unhandled"
+    - type: "platform"
+      match: "javascript"
+  actions:
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "frontend-team"
+  severity: "medium"
+  owner: "frontend-team"
+
+# ==============================================================================
+# Business Logic Alerts
+# ==============================================================================
+
+suspicious_activity:
+  name: "Suspicious Activity Detected"
+  description: "Alert when suspicious user activity is detected"
+  conditions:
+    - type: "event_frequency"
+      value: 3
+      interval: "5m"
+  filters:
+    - type: "tags.suspicious"
+      match: "true"
+  actions:
+    - type: "slack"
+      workspace: "your-workspace"
+      channel: "#alerts-security"
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "security-team"
+    - type: "pagerduty"
+      service: "security-service"
+  severity: "critical"
+  owner: "security-team"
+
+# ==============================================================================
+# Rate Limiting Alerts
+# ==============================================================================
+
+rate_limit_violations:
+  name: "High Rate Limit Violations"
+  description: "Alert when rate limiting is frequently triggered"
+  conditions:
+    - type: "event_frequency"
+      value: 50
+      interval: "10m"
+  filters:
+    - type: "message"
+      match: "rate limit,too many requests"
+  actions:
+    - type: "email"
+      targetType: "team"
+      targetIdentifier: "backend-team"
+  severity: "medium"
+  owner: "backend-team"
+
+# ==============================================================================
+# Notes
+# ==============================================================================
+# 
+# Alert Rule Setup:
+# 1. Log into Sentry
+# 2. Navigate to Alerts > Create Alert Rule
+# 3. Configure using the values from this file
+# 4. Test the alert rule
+# 5. Enable the alert rule
+#
+# Integration Setup:
+# - Slack: Settings > Integrations > Slack
+# - Email: Settings > Teams > Configure email recipients
+# - PagerDuty: Settings > Integrations > PagerDuty
+#
+# Best Practices:
+# - Start with conservative thresholds and adjust based on actual data
+# - Use different severity levels for different types of alerts
+# - Route alerts to appropriate channels/teams
+# - Review and adjust alert rules regularly
+# - Test alerts before enabling in production
+#
+# ==============================================================================

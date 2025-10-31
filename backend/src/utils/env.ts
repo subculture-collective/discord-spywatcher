@@ -89,6 +89,10 @@ const envSchema = z.object({
 
     // Monitoring (optional)
     SENTRY_DSN: z.string().url().optional(),
+    SENTRY_ENVIRONMENT: z.string().optional(),
+    SENTRY_RELEASE: z.string().optional(),
+    SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
+    SENTRY_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(1.0),
 });
 
 // Export the inferred type
