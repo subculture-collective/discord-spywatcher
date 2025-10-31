@@ -53,17 +53,31 @@ function HeatmapChart({ data }: HeatmapChartProps) {
     return (
         <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#313244" />
                 <XAxis
                     dataKey="channel"
                     angle={-45}
                     textAnchor="end"
                     height={100}
+                    stroke="#a6adc8"
+                    style={{ fontSize: '12px', fill: '#a6adc8' }}
                 />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="activity" fill="#3b82f6" name="Activity Count" />
+                <YAxis 
+                    stroke="#a6adc8"
+                    style={{ fontSize: '12px', fill: '#a6adc8' }}
+                />
+                <Tooltip
+                    contentStyle={{
+                        backgroundColor: '#1e1e2e',
+                        border: '1px solid #313244',
+                        borderRadius: '8px',
+                        color: '#cdd6f4',
+                    }}
+                />
+                <Legend 
+                    wrapperStyle={{ color: '#cdd6f4' }}
+                />
+                <Bar dataKey="activity" fill="#89b4fa" name="Activity Count" />
             </BarChart>
         </ResponsiveContainer>
     );
