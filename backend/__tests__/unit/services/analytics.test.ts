@@ -194,12 +194,12 @@ describe('Analytics Service', () => {
             prisma.featureUsageMetric.groupBy.mockResolvedValue([
                 {
                     featureName: 'ghost_analysis',
-                    _count: { _all: 5 },
+                    _count: { userId: 5 },
                     _sum: { usageCount: 10 },
                 },
                 {
                     featureName: 'lurker_detection',
-                    _count: { _all: 3 },
+                    _count: { userId: 3 },
                     _sum: { usageCount: 8 },
                 },
             ]);

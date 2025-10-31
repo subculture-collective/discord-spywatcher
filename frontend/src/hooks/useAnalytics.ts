@@ -2,7 +2,7 @@
  * React Hook for Analytics Tracking
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import {
@@ -33,6 +33,21 @@ export function usePageTracking(): void {
  * Hook to provide analytics tracking functions
  */
 export function useAnalytics() {
+    const [hasConsent, setHasConsent] = useState(hasAnalyticsConsent());
+    const [consentStatus, setConsentStatus] = useState(getAnalyticsConsentStatus());
+
+    const grantConsent = useCallback(() => {
+        setAnalyticsConsent(true);
+        setHasConsent(true);
+        setConsentStatus('granted');
+    }, []);
+
+    const denyConsent = useCallback(() => {
+        setAnalyticsConsent(false);
+        setHasConsent(false);
+        setConsentStatus('denied');
+    }, []);
+
     return {
         trackPageView,
         trackButtonClick,
@@ -41,9 +56,9 @@ export function useAnalytics() {
         trackError,
         trackSearch,
         trackExport,
-        hasConsent: hasAnalyticsConsent(),
-        consentStatus: getAnalyticsConsentStatus(),
-        grantConsent: () => setAnalyticsConsent(true),
-        denyConsent: () => setAnalyticsConsent(false),
+        hasConsent,
+        consentStatus,
+        grantConsent,
+        denyConsent,
     };
 }

@@ -167,11 +167,10 @@ router.post('/event', async (req: Request, res: Response) => {
         const { eventType, eventName, properties } = req.body;
 
         if (!eventType || !eventName) {
-            res.status(400).json({
+            return res.status(400).json({
                 success: false,
                 error: 'eventType and eventName are required',
             });
-            return;
         }
 
         const consentGiven = req.cookies?.analyticsConsent === 'true';

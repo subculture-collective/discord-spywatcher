@@ -85,7 +85,8 @@ function Analytics() {
         } finally {
             setLoading(false);
         }
-    }, [dateRange, trackFeatureUsage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dateRange]);
 
     useEffect(() => {
         fetchData();

@@ -245,7 +245,7 @@ export async function getFeatureUsageStats(
         by: ['featureName'],
         where,
         _count: {
-            _all: true,
+            userId: true,
         },
         _sum: {
             usageCount: true,
@@ -255,7 +255,7 @@ export async function getFeatureUsageStats(
     return results.map((result) => ({
         featureName: result.featureName,
         totalUsage: result._sum.usageCount || 0,
-        uniqueUsers: result._count._all,
+        uniqueUsers: result._count.userId,
     }));
 }
 
