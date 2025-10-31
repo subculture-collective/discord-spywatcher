@@ -3,7 +3,7 @@ import { Express, Request, Response, NextFunction } from 'express';
 
 import { env } from '../utils/env';
 
-export function initSentry(app: Express): void {
+export function initSentry(_app: Express): void {
     // Only initialize if DSN is provided
     if (!env.SENTRY_DSN) {
         console.log('⚠️  Sentry DSN not configured, skipping Sentry initialization');
