@@ -35,7 +35,9 @@ export function initSentry(_app: Express): void {
 }
 
 export function getSentryRequestHandler() {
-    return Sentry.expressErrorHandler();
+    // In Sentry v10, request handling is done automatically by expressIntegration()
+    // This is a no-op for backwards compatibility
+    return (req: Request, res: Response, next: NextFunction) => next();
 }
 
 export function getSentryTracingHandler() {

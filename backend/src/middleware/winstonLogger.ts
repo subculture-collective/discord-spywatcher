@@ -19,7 +19,7 @@ const jsonFormat = format.combine(
 );
 
 const logger = createLogger({
-    level: env.LOG_LEVEL || 'info',
+    level: env.LOG_LEVEL,
     format: format.combine(
         format.timestamp(),
         format.errors({ stack: true }),
