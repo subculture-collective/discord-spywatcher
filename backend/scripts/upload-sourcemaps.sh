@@ -43,11 +43,15 @@ sentry-cli releases new "$SENTRY_RELEASE" --org "$SENTRY_ORG" --project "$SENTRY
 
 # Upload source maps
 echo "📤 Uploading source maps from ./dist"
+
+# Determine strip prefix - use custom path if provided, otherwise use current directory
+STRIP_PREFIX="${SENTRY_STRIP_PREFIX:-$(pwd)}"
+
 sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps ./dist \
     --org "$SENTRY_ORG" \
     --project "$SENTRY_PROJECT" \
     --rewrite \
-    --strip-prefix /home/runner/work/discord-spywatcher/discord-spywatcher/backend
+    --strip-prefix "$STRIP_PREFIX"
 
 # Finalize the release
 echo "✅ Finalizing release"

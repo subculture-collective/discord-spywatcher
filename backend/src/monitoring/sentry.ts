@@ -91,8 +91,6 @@ export function initSentry(_app: Express): void {
             // Ignore abort errors
             'AbortError',
             'Request aborted',
-            // Ignore rate limit errors (handled separately)
-            'Too Many Requests',
             // Ignore expected validation errors
             'ValidationError',
         ],
