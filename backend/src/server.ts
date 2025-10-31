@@ -25,6 +25,17 @@ const allowedOrigins =
         : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
 (async () => {
+    // Initialize monitoring before any other middleware
+    const {
+        initSentry,
+        getSentryRequestHandler,
+        getSentryTracingHandler,
+        getSentryErrorHandler,
+        setupDatabaseMonitoring,
+        metricsMiddleware,
+    } = await import('./monitoring');
+    initSentry(app);
+    setupDatabaseMonitoring();
     try {
         const {
             attachRequestId,
@@ -54,6 +65,12 @@ const allowedOrigins =
             console.log('✅ Redis rate limiting enabled');
         } else {
             console.log('⚠️  Redis not available, using in-memory rate limiting');
+        }
+
+        // Sentry request handler - must be first
+        if (env.SENTRY_DSN) {
+            app.use(getSentryRequestHandler());
+            app.use(getSentryTracingHandler());
         }
 
         // Security middleware - apply first
@@ -117,6 +134,9 @@ const allowedOrigins =
         app.use(securityLoggingMiddleware);
         console.log('✅ Security logging enabled');
 
+        // Metrics middleware
+        app.use(metricsMiddleware);
+
         // Caching headers for better performance
         app.use(cacheControlHeaders);
         app.use(etagMiddleware);
@@ -142,6 +162,23 @@ const allowedOrigins =
         return;
     }
 
+    // Health and metrics routes (before rate limiting)
+    try {
+        const healthRoutes = (await import('./routes/health')).default;
+        app.use('/health', healthRoutes);
+        console.log('✅ health routes loaded');
+    } catch (err) {
+        console.error('🔥 Failed to load health routes:', err);
+    }
+
+    try {
+        const { metricsHandler } = await import('./monitoring');
+        app.get('/metrics', metricsHandler);
+        console.log('✅ metrics endpoint loaded');
+    } catch (err) {
+        console.error('🔥 Failed to load metrics endpoint:', err);
+    }
+
     try {
         const apiRoutes = (await import('./routes/api')).default;
         app.use('/api', apiRoutes);
@@ -149,6 +186,11 @@ const allowedOrigins =
     } catch (err) {
         console.error('🔥 Failed to load routes:', err);
         return;
+    }
+
+    // Sentry error handler - must be after all routes and before other error handlers
+    if (env.SENTRY_DSN) {
+        app.use(getSentryErrorHandler());
     }
 
     // Create HTTP server

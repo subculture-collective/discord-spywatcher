@@ -86,6 +86,9 @@ const envSchema = z.object({
     // Alert Webhooks (optional)
     DISCORD_ALERT_WEBHOOK: z.string().url().optional(),
     SLACK_ALERT_WEBHOOK: z.string().url().optional(),
+
+    // Monitoring (optional)
+    SENTRY_DSN: z.string().url().optional(),
 });
 
 // Export the inferred type
