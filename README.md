@@ -242,6 +242,23 @@ Additional database documentation:
 - [DATABASE_OPTIMIZATION.md](./DATABASE_OPTIMIZATION.md) - Query optimization and indexing
 - [docs/PGBOUNCER_SETUP.md](./docs/PGBOUNCER_SETUP.md) - Quick reference guide
 
+## 📊 Monitoring & Observability
+
+Spywatcher includes comprehensive monitoring and observability features:
+
+- **Sentry** - Error tracking and Application Performance Monitoring (APM)
+- **Prometheus** - Metrics collection for system and application metrics
+- **Winston** - Structured JSON logging with request correlation
+- **Health checks** - Liveness and readiness probes for orchestrators
+
+See [MONITORING.md](./MONITORING.md) for detailed documentation on:
+- Sentry configuration and error tracking
+- Prometheus metrics and custom instrumentation
+- Health check endpoints
+- Structured logging best practices
+- Alert configuration examples
+- Grafana dashboard creation
+
 ## 🌐 Endpoints
 
 Available at `http://localhost:3001`
