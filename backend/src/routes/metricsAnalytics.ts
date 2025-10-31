@@ -178,7 +178,7 @@ router.post('/event', async (req: Request, res: Response) => {
 
         await trackEvent({
             userId: req.user?.id,
-            sessionId: req.sessionID || req.headers['x-session-id'] as string,
+            sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
             eventType: eventType as AnalyticsEventType,
             eventName,
             properties,

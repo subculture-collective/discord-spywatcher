@@ -19,6 +19,7 @@ process.env.ENABLE_RATE_LIMITING = 'true';
 process.env.ENABLE_IP_BLOCKING = 'true';
 process.env.LOG_LEVEL = 'info';
 process.env.FRONTEND_URL = 'http://localhost:5173';
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
 
 // Increase timeout for integration tests
 jest.setTimeout(10000);

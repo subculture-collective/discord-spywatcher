@@ -12,6 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { CardSkeleton, ChartSkeleton } from '../components/ui/LoadingSkeleton';
 import { StatCard } from '../components/ui/StatCard';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { useAnalytics } from '../hooks/useAnalytics';
 import api from '../lib/api';
 
 interface HeatmapData {
@@ -51,6 +52,7 @@ function Analytics() {
     const [loading, setLoading] = useState(true);
     const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(null);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+    const { trackFeatureUsage } = useAnalytics();
 
     // State for different data types
     const [heatmapData, setHeatmapData] = useState<HeatmapData[]>([]);
@@ -75,12 +77,15 @@ function Analytics() {
             setSuspicionData(suspicionRes.data);
             setLurkerData(lurkerRes.data);
             setLastUpdated(new Date());
+            
+            // Track feature usage
+            trackFeatureUsage('analytics_dashboard_view');
         } catch {
             toast.error('Failed to fetch analytics data');
         } finally {
             setLoading(false);
         }
-    }, [dateRange]);
+    }, [dateRange, trackFeatureUsage]);
 
     useEffect(() => {
         fetchData();

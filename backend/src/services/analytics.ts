@@ -114,7 +114,7 @@ export async function trackEvent(options: TrackEventOptions): Promise<void> {
                 eventType,
                 eventName,
                 category,
-                properties: properties || {},
+                properties: properties ? JSON.parse(JSON.stringify(properties)) : {},
                 ipAddress: shouldAnonymize ? anonymizeData(ipAddress) : ipAddress,
                 userAgent: shouldAnonymize ? anonymizeData(userAgent) : userAgent,
                 referrer: shouldAnonymize ? anonymizeData(referrer) : referrer,
@@ -141,7 +141,7 @@ export async function trackFeatureUsage(options: TrackFeatureOptions): Promise<v
                 featureName,
                 userId: !consentGiven ? anonymizeData(userId) : userId,
                 usageCount: 1,
-                metadata: metadata || {},
+                metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : {},
                 consentGiven,
             },
         });
@@ -167,7 +167,7 @@ export async function trackPerformance(options: TrackPerformanceOptions): Promis
                 endpoint,
                 userId,
                 sessionId,
-                metadata: metadata || {},
+                metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : {},
             },
         });
     } catch (error) {
@@ -205,10 +205,18 @@ export async function getAnalyticsSummary(
         where.metric = metric;
     }
 
-    return prisma.analyticsSummary.findMany({
+    const results = await prisma.analyticsSummary.findMany({
         where,
         orderBy: { summaryDate: 'desc' },
     });
+    
+    return results.map(r => ({
+        summaryDate: r.summaryDate,
+        summaryType: r.summaryType,
+        metric: r.metric,
+        value: r.value,
+        metadata: r.metadata as Record<string, unknown> | undefined,
+    }));
 }
 
 /**

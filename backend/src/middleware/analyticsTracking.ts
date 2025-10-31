@@ -54,7 +54,7 @@ export function trackApiRequest(req: Request, res: Response, next: NextFunction)
         // Track the API call event
         trackEvent({
             userId: req.user?.id,
-            sessionId: req.sessionID || req.headers['x-session-id'] as string,
+            sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
             eventType: AnalyticsEventType.API_CALL,
             eventName: `${req.method} ${req.path}`,
             category: getCategoryFromPath(req.path),
@@ -80,7 +80,7 @@ export function trackApiRequest(req: Request, res: Response, next: NextFunction)
             unit: 'ms',
             endpoint: req.path,
             userId: req.user?.id,
-            sessionId: req.sessionID || req.headers['x-session-id'] as string,
+            sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
             metadata: {
                 method: req.method,
                 statusCode: res.statusCode,
@@ -106,7 +106,7 @@ export function trackErrorEvent(
 
     trackEvent({
         userId: req.user?.id,
-        sessionId: req.sessionID || req.headers['x-session-id'] as string,
+        sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
         eventType: AnalyticsEventType.ERROR,
         eventName: error.name || 'UnknownError',
         category: getCategoryFromPath(req.path),
@@ -136,7 +136,7 @@ export function trackCustomEvent(req: Request, eventName: string, properties?: R
 
     trackEvent({
         userId: req.user?.id,
-        sessionId: req.sessionID || req.headers['x-session-id'] as string,
+        sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
         eventType: AnalyticsEventType.FEATURE_USED,
         eventName,
         category: getCategoryFromPath(req.path),

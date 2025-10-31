@@ -1,22 +1,20 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import AnalyticsConsentBanner from './components/AnalyticsConsentBanner';
 import RequireAdmin from './components/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
 import SuspicionDetail from './components/suspicion/SuspicionDetail';
+import { usePageTracking } from './hooks/useAnalytics';
 import { Analytics, AuthCallback, Bans, Dashboard, Login, Suspicion, UserTimeline } from './pages';
+import MetricsDashboard from './pages/MetricsDashboard';
 import { useAuth } from './store/auth';
 
-function App() {
-    const setToken = useAuth((s) => s.setToken);
-
-    useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        if (token) setToken(token);
-    }, [setToken]);
+function AppContent() {
+    usePageTracking();
 
     return (
-        <BrowserRouter>
+        <>
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
@@ -24,6 +22,7 @@ function App() {
                 <Route element={<RequireAuth />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/metrics" element={<MetricsDashboard />} />
                     <Route path="/suspicion" element={<Suspicion />} />
                     <Route path="/suspicion/:userId" element={<SuspicionDetail />} />
                     <Route path="/timeline/:userId" element={<UserTimeline />} />
@@ -35,6 +34,22 @@ function App() {
 
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
+            <AnalyticsConsentBanner />
+        </>
+    );
+}
+
+function App() {
+    const setToken = useAuth((s) => s.setToken);
+
+    useEffect(() => {
+        const token = localStorage.getItem('accessToken');
+        if (token) setToken(token);
+    }, [setToken]);
+
+    return (
+        <BrowserRouter>
+            <AppContent />
         </BrowserRouter>
     );
 }
