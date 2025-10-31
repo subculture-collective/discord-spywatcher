@@ -89,6 +89,7 @@ services:
       - ./backend:/app
       - /app/node_modules
       - /app/dist
+      - logs-backend:/app/logs
     environment:
       # Use PgBouncer for application connections, direct for migrations
       DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD:-spywatcher_dev_password}@pgbouncer:6432/spywatcher?pgbouncer=true
@@ -114,6 +115,8 @@ services:
         condition: service_healthy
     networks:
       - spywatcher-network
+    labels:
+      com.docker.compose.project: "discord-spywatcher"
     command: sh -c "DATABASE_URL=$DATABASE_URL_DIRECT npx prisma migrate dev && npm run dev:api"
 
   frontend:
@@ -133,10 +136,65 @@ services:
       - backend
     networks:
       - spywatcher-network
+    labels:
+      com.docker.compose.project: "discord-spywatcher"
+
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: spywatcher-loki-dev
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - spywatcher-network
+    labels:
+      com.docker.compose.project: "discord-spywatcher"
+
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: spywatcher-promtail-dev
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - logs-backend:/logs/backend:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - spywatcher-network
+    labels:
+      com.docker.compose.project: "discord-spywatcher"
+
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: spywatcher-grafana-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=
+    depends_on:
+      - loki
+    networks:
+      - spywatcher-network
+    labels:
+      com.docker.compose.project: "discord-spywatcher"
 
 volumes:
   postgres-data:
   redis-data:
+  loki-data:
+  grafana-data:
+  logs-backend:
 
 networks:
   spywatcher-network:

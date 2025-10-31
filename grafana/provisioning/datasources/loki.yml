@@ -1,0 +1,25 @@
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: "traceID=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
+    editable: true
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://backend:3001/metrics
+    isDefault: false
+    jsonData:
+      httpMethod: GET
+    editable: true
