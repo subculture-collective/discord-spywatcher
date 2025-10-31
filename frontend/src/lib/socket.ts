@@ -112,7 +112,7 @@ class SocketService {
             });
 
             this.socket.on('connect', () => {
-                console.log('[WebSocket] Connected');
+                console.log('[WebSocket] Connected after', this.reconnectAttempts, 'attempts');
                 this.reconnectAttempts = 0;
             });
 

@@ -1,12 +1,17 @@
+import { Users, Activity, AlertTriangle, TrendingUp } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import DateRangeSelector from '../components/analytics/DateRangeSelector';
 import ExportButton from '../components/analytics/ExportButton';
 import HeatmapChart from '../components/analytics/HeatmapChart';
-import MetricCard from '../components/analytics/MetricCard';
 import TimelineChart from '../components/analytics/TimelineChart';
 import VolumeChart from '../components/analytics/VolumeChart';
+import { Button } from '../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
+import { CardSkeleton, ChartSkeleton } from '../components/ui/LoadingSkeleton';
+import { StatCard } from '../components/ui/StatCard';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import api from '../lib/api';
 
 interface HeatmapData {
@@ -97,121 +102,146 @@ function Analytics() {
     const activeLurkers = lurkerData.length;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            Analytics Dashboard
-                        </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Last updated: {lastUpdated.toLocaleTimeString()}
-                        </p>
+        <div className="min-h-screen bg-ctp-base p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-ctp-text">
+                                Analytics Dashboard
+                            </h1>
+                            <p className="text-sm text-ctp-subtext0 mt-1">
+                                Last updated: {lastUpdated.toLocaleTimeString()}
+                            </p>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                            <Button
+                                onClick={fetchData}
+                                disabled={loading}
+                                isLoading={loading}
+                                variant="primary"
+                                size="md"
+                            >
+                                {loading ? 'Refreshing...' : 'Refresh'}
+                            </Button>
+                            <ExportButton
+                                data={suspicionData}
+                                filename="analytics_suspicion"
+                            />
+                            <ThemeToggle />
+                        </div>
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={fetchData}
-                            disabled={loading}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                            {loading ? 'Refreshing...' : 'Refresh'}
-                        </button>
-                        <ExportButton
-                            data={suspicionData}
-                            filename="analytics_suspicion"
-                        />
-                    </div>
+
+                    <DateRangeSelector onRangeChange={setDateRange} />
                 </div>
 
-                <DateRangeSelector onRangeChange={setDateRange} />
-            </div>
-
-            {loading && !heatmapData.length ? (
-                <div className="flex items-center justify-center h-64">
-                    <div className="text-gray-500">Loading analytics...</div>
-                </div>
-            ) : (
-                <>
-                    {/* Key Metrics Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                        <MetricCard
-                            title="Total Users"
-                            value={totalUsers}
-                            subtitle="Unique users tracked"
-                        />
-                        <MetricCard
-                            title="Total Activity"
-                            value={totalActivity.toLocaleString()}
-                            subtitle="Channel interactions"
-                        />
-                        <MetricCard
-                            title="High Suspicion"
-                            value={highSuspicionUsers}
-                            subtitle="Users with score > 50"
-                        />
-                        <MetricCard
-                            title="Ghost Users"
-                            value={totalGhosts}
-                            subtitle="High ghost score (>5)"
-                        />
-                    </div>
+                {loading && !heatmapData.length ? (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <CardSkeleton />
+                            <CardSkeleton />
+                            <CardSkeleton />
+                            <CardSkeleton />
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <ChartSkeleton />
+                            <ChartSkeleton />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        {/* Key Metrics Overview */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <StatCard
+                                title="Total Users"
+                                value={totalUsers}
+                                subtitle="Unique users tracked"
+                                icon={Users}
+                            />
+                            <StatCard
+                                title="Total Activity"
+                                value={totalActivity.toLocaleString()}
+                                subtitle="Channel interactions"
+                                icon={Activity}
+                            />
+                            <StatCard
+                                title="High Suspicion"
+                                value={highSuspicionUsers}
+                                subtitle="Users with score > 50"
+                                icon={AlertTriangle}
+                                trend={highSuspicionUsers > 0 ? 'up' : 'down'}
+                            />
+                            <StatCard
+                                title="Ghost Users"
+                                value={totalGhosts}
+                                subtitle="High ghost score (>5)"
+                                icon={TrendingUp}
+                            />
+                        </div>
 
                     {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         {/* Channel Activity Heatmap */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                    Channel Activity Heatmap
-                                </h2>
-                                <ExportButton
-                                    data={heatmapData}
-                                    filename="analytics_heatmap"
-                                    label="Export"
-                                />
-                            </div>
-                            <HeatmapChart data={heatmapData} />
-                        </div>
+                        <Card hover>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle>Channel Activity Heatmap</CardTitle>
+                                    <ExportButton
+                                        data={heatmapData}
+                                        filename="analytics_heatmap"
+                                        label="Export"
+                                    />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <HeatmapChart data={heatmapData} />
+                            </CardContent>
+                        </Card>
 
                         {/* User Activity Volume */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                    User Activity Volume
-                                </h2>
-                                <ExportButton
-                                    data={ghostData}
-                                    filename="analytics_volume"
-                                    label="Export"
-                                />
-                            </div>
-                            <VolumeChart data={ghostData} />
-                        </div>
+                        <Card hover>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle>User Activity Volume</CardTitle>
+                                    <ExportButton
+                                        data={ghostData}
+                                        filename="analytics_volume"
+                                        label="Export"
+                                    />
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <VolumeChart data={ghostData} />
+                            </CardContent>
+                        </Card>
                     </div>
 
                     {/* Suspicion Timeline */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700 mb-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                Top Suspicion Scores
-                            </h2>
-                            <ExportButton
-                                data={suspicionData}
-                                filename="analytics_suspicion"
-                                label="Export"
-                            />
-                        </div>
-                        <TimelineChart data={suspicionData} />
-                    </div>
+                    <Card hover className="mb-6">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <CardTitle>Top Suspicion Scores</CardTitle>
+                                <ExportButton
+                                    data={suspicionData}
+                                    filename="analytics_suspicion"
+                                    label="Export"
+                                />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <TimelineChart data={suspicionData} />
+                        </CardContent>
+                    </Card>
 
                     {/* Additional Metrics */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <MetricCard
+                        <StatCard
                             title="Active Lurkers"
                             value={activeLurkers}
                             subtitle="Users reading but not posting"
+                            icon={Activity}
                         />
-                        <MetricCard
+                        <StatCard
                             title="Avg Ghost Score"
                             value={
                                 ghostData.length > 0
@@ -219,8 +249,9 @@ function Analytics() {
                                     : '0'
                             }
                             subtitle="Mean ghost behavior score"
+                            icon={AlertTriangle}
                         />
-                        <MetricCard
+                        <StatCard
                             title="Avg Suspicion Score"
                             value={
                                 suspicionData.length > 0
@@ -228,10 +259,12 @@ function Analytics() {
                                     : '0'
                             }
                             subtitle="Mean suspicion score"
+                            icon={TrendingUp}
                         />
                     </div>
                 </>
             )}
+            </div>
         </div>
     );
 }
