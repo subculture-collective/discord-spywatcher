@@ -12,7 +12,7 @@ export function Card({ children, hover = false, className = '' }: CardProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className={`bg-white dark:bg-surface rounded-lg p-6 shadow-lg border border-gray-200 dark:border-surface-light ${
+            className={`bg-white dark:bg-ctp-surface0 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-ctp-surface1 ${
                 hover ? 'hover:shadow-xl transition-shadow duration-300' : ''
             } ${className}`}
         >
@@ -41,7 +41,7 @@ interface CardTitleProps {
 
 export function CardTitle({ children, className = '' }: CardTitleProps) {
     return (
-        <h2 className={`text-xl font-semibold text-gray-900 dark:text-foreground ${className}`}>
+        <h2 className={`text-xl font-semibold text-gray-900 dark:text-ctp-text ${className}`}>
             {children}
         </h2>
     );

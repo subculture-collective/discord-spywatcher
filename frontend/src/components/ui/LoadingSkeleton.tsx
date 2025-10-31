@@ -4,13 +4,13 @@ interface SkeletonProps {
 
 export function Skeleton({ className = '' }: SkeletonProps) {
     return (
-        <div className={`animate-pulse bg-gray-300 dark:bg-surface-light rounded ${className}`} />
+        <div className={`animate-pulse bg-gray-300 dark:bg-ctp-surface1 rounded ${className}`} />
     );
 }
 
 export function CardSkeleton() {
     return (
-        <div className="bg-white dark:bg-surface rounded-lg p-6 shadow-lg border border-gray-200 dark:border-surface-light">
+        <div className="bg-white dark:bg-ctp-surface0 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-ctp-surface1">
             <div className="flex items-start justify-between">
                 <div className="flex-1 space-y-3">
                     <Skeleton className="h-4 w-1/3" />
@@ -35,7 +35,7 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
 
 export function ChartSkeleton() {
     return (
-        <div className="bg-white dark:bg-surface rounded-lg p-6 shadow-lg border border-gray-200 dark:border-surface-light">
+        <div className="bg-white dark:bg-ctp-surface0 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-ctp-surface1">
             <Skeleton className="h-6 w-1/3 mb-4" />
             <Skeleton className="h-64 w-full" />
         </div>

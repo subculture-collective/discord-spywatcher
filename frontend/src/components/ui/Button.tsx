@@ -13,10 +13,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         const baseStyles = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
         
         const variants = {
-            primary: 'bg-primary-500 hover:bg-primary-600 text-white focus:ring-primary-500',
-            secondary: 'bg-gray-200 dark:bg-surface-light hover:bg-gray-300 dark:hover:bg-surface-lighter text-gray-900 dark:text-foreground focus:ring-gray-500',
-            danger: 'bg-error hover:bg-error/90 text-white focus:ring-error',
-            ghost: 'bg-transparent hover:bg-gray-100 dark:hover:bg-surface-light text-gray-900 dark:text-foreground focus:ring-gray-500',
+            primary: 'bg-ctp-blue hover:bg-ctp-blue/90 text-white focus:ring-ctp-blue',
+            secondary: 'bg-gray-200 dark:bg-ctp-surface1 hover:bg-gray-300 dark:hover:bg-ctp-surface2 text-gray-900 dark:text-ctp-text focus:ring-gray-500',
+            danger: 'bg-ctp-red hover:bg-ctp-red/90 text-white focus:ring-ctp-red',
+            ghost: 'bg-transparent hover:bg-gray-100 dark:hover:bg-ctp-surface1 text-gray-900 dark:text-ctp-text focus:ring-gray-500',
         };
 
         const sizes = {
