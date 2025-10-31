@@ -114,7 +114,7 @@ export async function trackEvent(options: TrackEventOptions): Promise<void> {
                 eventType,
                 eventName,
                 category,
-                properties: properties ? JSON.parse(JSON.stringify(properties)) : {},
+                properties: (properties || {}) as any,
                 ipAddress: shouldAnonymize ? anonymizeData(ipAddress) : ipAddress,
                 userAgent: shouldAnonymize ? anonymizeData(userAgent) : userAgent,
                 referrer: shouldAnonymize ? anonymizeData(referrer) : referrer,
@@ -141,7 +141,7 @@ export async function trackFeatureUsage(options: TrackFeatureOptions): Promise<v
                 featureName,
                 userId: !consentGiven ? anonymizeData(userId) : userId,
                 usageCount: 1,
-                metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : {},
+                metadata: (metadata || {}) as any,
                 consentGiven,
             },
         });
@@ -167,7 +167,7 @@ export async function trackPerformance(options: TrackPerformanceOptions): Promis
                 endpoint,
                 userId,
                 sessionId,
-                metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : {},
+                metadata: (metadata || {}) as any,
             },
         });
     } catch (error) {

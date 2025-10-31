@@ -133,7 +133,9 @@ export default function MetricsDashboard() {
                             {data.activity.consentedUsers.toLocaleString()}
                         </p>
                         <p className="text-sm text-gray-500 mt-1">
-                            {((data.activity.consentedUsers / data.activity.uniqueUsers) * 100).toFixed(1)}% consent rate
+                            {data.activity.uniqueUsers > 0 
+                                ? `${((data.activity.consentedUsers / data.activity.uniqueUsers) * 100).toFixed(1)}% consent rate`
+                                : 'No users yet'}
                         </p>
                     </div>
 
@@ -228,7 +230,9 @@ export default function MetricsDashboard() {
                                             {feature.uniqueUsers.toLocaleString()}
                                         </td>
                                         <td className="py-3 px-4 text-right text-gray-400">
-                                            {(feature.totalUsage / feature.uniqueUsers).toFixed(1)}
+                                            {feature.uniqueUsers > 0 
+                                                ? (feature.totalUsage / feature.uniqueUsers).toFixed(1)
+                                                : '0.0'}
                                         </td>
                                     </tr>
                                 ))}
