@@ -31,7 +31,19 @@ export function initSentry(_app: Express): void {
         // Attach stack traces to messages
         attachStacktrace: true,
         
-        // Before send hook for data sanitization and filtering
+        /**
+         * Before send hook for data sanitization, filtering, and error enrichment.
+         * 
+         * @param event - The Sentry event to be sent
+         * @param hint - Additional context about the original exception or event.
+         *   The hint object is provided by Sentry and may contain:
+         *   - originalException: The original Error object (if available)
+         *   - syntheticException: A synthetic Error object for stack traces
+         *   - other context depending on the event source
+         * 
+         * Used here to access the original exception and add its name and message
+         * to the event's extra context for improved error reporting.
+         */
         beforeSend(event, hint) {
             // Filter out sensitive data
             if (event.request) {

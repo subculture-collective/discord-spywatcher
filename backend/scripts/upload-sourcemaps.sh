@@ -31,15 +31,18 @@ echo "   Organization: $SENTRY_ORG"
 echo "   Project: $SENTRY_PROJECT"
 echo "   Release: $SENTRY_RELEASE"
 
-# Install Sentry CLI if not already installed
+# Check if Sentry CLI is available
 if ! command -v sentry-cli &> /dev/null; then
-    echo "📥 Installing Sentry CLI..."
-    npm install -g @sentry/cli
+    echo "⚠️  Sentry CLI not found. Using npx to run @sentry/cli"
+    echo "   To install globally: npm install -g @sentry/cli"
+    SENTRY_CLI="npx @sentry/cli"
+else
+    SENTRY_CLI="sentry-cli"
 fi
 
 # Create a new release
 echo "🏷️  Creating release: $SENTRY_RELEASE"
-sentry-cli releases new "$SENTRY_RELEASE" --org "$SENTRY_ORG" --project "$SENTRY_PROJECT"
+$SENTRY_CLI releases new "$SENTRY_RELEASE" --org "$SENTRY_ORG" --project "$SENTRY_PROJECT"
 
 # Upload source maps
 echo "📤 Uploading source maps from ./dist"
@@ -47,7 +50,7 @@ echo "📤 Uploading source maps from ./dist"
 # Determine strip prefix - use custom path if provided, otherwise use current directory
 STRIP_PREFIX="${SENTRY_STRIP_PREFIX:-$(pwd)}"
 
-sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps ./dist \
+$SENTRY_CLI releases files "$SENTRY_RELEASE" upload-sourcemaps ./dist \
     --org "$SENTRY_ORG" \
     --project "$SENTRY_PROJECT" \
     --rewrite \
@@ -55,12 +58,12 @@ sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps ./dist \
 
 # Finalize the release
 echo "✅ Finalizing release"
-sentry-cli releases finalize "$SENTRY_RELEASE" --org "$SENTRY_ORG" --project "$SENTRY_PROJECT"
+$SENTRY_CLI releases finalize "$SENTRY_RELEASE" --org "$SENTRY_ORG" --project "$SENTRY_PROJECT"
 
 # Optional: Set deployment
 if [ -n "$SENTRY_ENVIRONMENT" ]; then
     echo "🚀 Setting deployment for environment: $SENTRY_ENVIRONMENT"
-    sentry-cli releases deploys "$SENTRY_RELEASE" new --env "$SENTRY_ENVIRONMENT" \
+    $SENTRY_CLI releases deploys "$SENTRY_RELEASE" new --env "$SENTRY_ENVIRONMENT" \
         --org "$SENTRY_ORG" \
         --project "$SENTRY_PROJECT"
 fi
