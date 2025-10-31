@@ -1,5 +1,5 @@
-import type { HTMLAttributes, ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
     children: ReactNode;

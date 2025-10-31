@@ -1,6 +1,6 @@
+import { motion } from 'framer-motion';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
-import { motion } from 'framer-motion';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost';

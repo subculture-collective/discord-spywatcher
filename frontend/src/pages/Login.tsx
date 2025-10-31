@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { LogIn, Shield, Activity, TrendingUp } from 'lucide-react';
+
 import { config } from '../config/env';
 
 function Login() {
