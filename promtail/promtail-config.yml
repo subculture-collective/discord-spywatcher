@@ -10,7 +10,7 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  # Backend application logs
+  # Backend application logs (excludes security.log to avoid duplication)
   - job_name: backend
     static_configs:
       - targets:
@@ -18,7 +18,7 @@ scrape_configs:
         labels:
           job: backend
           service: spywatcher-backend
-          __path__: /logs/backend/*.log
+          __path__: /logs/backend/{combined,error,exceptions}.log
     pipeline_stages:
       - json:
           expressions:
@@ -36,7 +36,7 @@ scrape_configs:
       - output:
           source: message
 
-  # Security logs
+  # Security logs (separate from general backend logs to avoid duplication)
   - job_name: security
     static_configs:
       - targets:
@@ -44,7 +44,7 @@ scrape_configs:
         labels:
           job: security
           service: spywatcher-security
-          __path__: /logs/backend/security*.log
+          __path__: /logs/backend/security.log
     pipeline_stages:
       - json:
           expressions:

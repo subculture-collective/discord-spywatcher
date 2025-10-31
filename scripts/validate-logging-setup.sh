@@ -123,13 +123,20 @@ fi
 
 # Validate docker-compose files
 if command -v docker &> /dev/null; then
-    if docker compose -f "$PROJECT_ROOT/docker-compose.dev.yml" config --quiet 2>/dev/null; then
+    # Try docker compose (v2) first, then fall back to docker-compose (v1)
+    if command -v docker-compose &> /dev/null; then
+        COMPOSE_CMD="docker-compose"
+    else
+        COMPOSE_CMD="docker compose"
+    fi
+    
+    if $COMPOSE_CMD -f "$PROJECT_ROOT/docker-compose.dev.yml" config --quiet 2>/dev/null; then
         print_success "docker-compose.dev.yml is valid"
     else
         print_error "docker-compose.dev.yml has syntax errors"
     fi
     
-    if docker compose -f "$PROJECT_ROOT/docker-compose.prod.yml" config --quiet 2>/dev/null; then
+    if $COMPOSE_CMD -f "$PROJECT_ROOT/docker-compose.prod.yml" config --quiet 2>/dev/null; then
         print_success "docker-compose.prod.yml is valid"
     else
         print_error "docker-compose.prod.yml has syntax errors"

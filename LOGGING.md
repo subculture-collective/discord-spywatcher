@@ -461,6 +461,9 @@ Search in Loki:
 2. **Enable HTTPS** - Configure SSL/TLS for Grafana
 3. **Network isolation** - Keep Loki/Promtail in private network
 4. **Authentication** - Enable OAuth or LDAP authentication in Grafana
+5. **Enable Loki authentication** - For production, set `auth_enabled: true` in `loki/loki-config.yml` and configure authentication methods
+
+**Note:** Loki authentication is disabled by default for development/testing. For production deployments, enable authentication to prevent unauthorized access to log data. See [Loki authentication documentation](https://grafana.com/docs/loki/latest/configuration/#server).
 
 ### Log Sanitization
 

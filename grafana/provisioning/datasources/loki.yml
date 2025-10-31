@@ -8,11 +8,6 @@ datasources:
     isDefault: true
     jsonData:
       maxLines: 1000
-      derivedFields:
-        - datasourceUid: tempo
-          matcherRegex: "traceID=(\\w+)"
-          name: TraceID
-          url: "$${__value.raw}"
     editable: true
 
   - name: Prometheus
