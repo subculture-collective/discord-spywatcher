@@ -14,6 +14,8 @@ router.get('/live', (req: Request, res: Response) => {
 });
 
 // Readiness probe - check if service is ready to handle requests
+// Note: Health checks are intentionally not rate-limited as they need to be
+// accessible by orchestrators (Kubernetes, Docker, etc.) and monitoring systems
 router.get('/ready', async (req: Request, res: Response) => {
     const checks = {
         database: false,
