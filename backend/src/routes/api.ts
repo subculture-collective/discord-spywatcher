@@ -1,5 +1,7 @@
 import { Router } from 'express';
+import swaggerUi from 'swagger-ui-express';
 
+import { swaggerSpec } from '../config/openapi';
 import adminPrivacyRoutes from './adminPrivacy';
 import analyticsRoutes from './analytics';
 import authRoutes from './auth';
@@ -20,6 +22,19 @@ const router = Router();
 // Health check endpoint
 router.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// OpenAPI/Swagger documentation endpoints
+router.use('/docs', swaggerUi.serve);
+router.get('/docs', swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: 'Spywatcher API Documentation',
+    customCss: '.swagger-ui .topbar { display: none }',
+}));
+
+// Serve OpenAPI spec as JSON
+router.get('/openapi.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
 });
 
 // Public API documentation routes

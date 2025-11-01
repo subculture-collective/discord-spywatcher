@@ -47,6 +47,46 @@ const router = express.Router();
 // Use environment variable for allowed Discord IDs instead of hardcoding
 const ALLOWED_DISCORD_IDS = env.ADMIN_DISCORD_IDS || [];
 
+/**
+ * @openapi
+ * /auth/discord:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Discord OAuth2 callback
+ *     description: Handles the Discord OAuth2 callback and creates a user session
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Authorization code from Discord
+ *       - in: query
+ *         name: state
+ *         schema:
+ *           type: string
+ *         description: CSRF protection state parameter
+ *     responses:
+ *       200:
+ *         description: Successfully authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: JWT access token
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
+ */
 router.get(
     '/discord',
     authLimiter,
@@ -398,6 +438,27 @@ router.post(
     }
 );
 
+/**
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Logout user
+ *     description: Revokes the user's refresh token and clears session
+ *     responses:
+ *       200:
+ *         description: Successfully logged out
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
+ */
 router.post('/logout', authLimiter, async (req, res): Promise<void> => {
     const token = req.cookies?.refreshToken || req.body?.token;
 
@@ -433,6 +494,28 @@ router.post('/logout', authLimiter, async (req, res): Promise<void> => {
     res.status(200).json({ message: 'Logged out' });
 });
 
+/**
+ * @openapi
+ * /auth/me:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Get current user
+ *     description: Returns the currently authenticated user's information
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
 router.get('/me', requireAuth, async (req, res): Promise<void> => {
     if (!req.user) {
         res.status(401).json({ error: 'No user in request' });
