@@ -118,7 +118,7 @@ Location: `promtail/promtail-config.yml`
 
 **Log sources configured:**
 - Backend application logs (`/logs/backend/*.log`)
-- Security logs (`/logs/backend/security*.log`)
+- Security logs (`/logs/backend/security.log`)
 - PostgreSQL logs (`/var/log/postgresql/*.log`)
 - Docker container logs (via Docker socket)
 
