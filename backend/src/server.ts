@@ -235,5 +235,15 @@ const allowedOrigins =
             .catch((err) => {
                 console.error('Failed to start scheduled tasks:', err);
             });
+        
+        // Start status check job
+        import('./services/statusCheck')
+            .then(({ startStatusCheckJob }) => {
+                startStatusCheckJob(5); // Check every 5 minutes
+                console.log('✅ Status check job started');
+            })
+            .catch((err) => {
+                console.error('Failed to start status check job:', err);
+            });
     });
 })();
