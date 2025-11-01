@@ -200,6 +200,9 @@ export default function Status() {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
+                // Clear error state on retry
+                setError(null);
+                
                 const [statusRes, incidentsRes] = await Promise.all([
                     fetch(`${apiUrl}/status`),
                     fetch(`${apiUrl}/status/incidents?resolved=false`),

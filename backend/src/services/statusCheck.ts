@@ -14,6 +14,14 @@ interface ServiceHealthStatus {
     overall: boolean;
 }
 
+// Cache Discord API health check to reduce load on Discord's API
+let discordApiCache: { healthy: boolean; latency: number; timestamp: number } = {
+    healthy: true,
+    latency: 0,
+    timestamp: 0,
+};
+const DISCORD_CACHE_TTL = 60000; // 60 seconds
+
 /**
  * Check database health and measure latency
  */
@@ -60,8 +68,19 @@ async function checkRedisHealth(): Promise<HealthCheckResult> {
 
 /**
  * Check Discord API health and measure latency
+ * Uses caching to reduce load on Discord's API
  */
 async function checkDiscordHealth(): Promise<HealthCheckResult> {
+    const now = Date.now();
+    
+    // Return cached result if still valid
+    if (now - discordApiCache.timestamp < DISCORD_CACHE_TTL) {
+        return {
+            healthy: discordApiCache.healthy,
+            latency: discordApiCache.latency,
+        };
+    }
+
     const start = Date.now();
     try {
         const response = await fetch('https://discord.com/api/v10/gateway', {
@@ -70,8 +89,10 @@ async function checkDiscordHealth(): Promise<HealthCheckResult> {
         const latency = Date.now() - start;
 
         if (response.ok) {
+            discordApiCache = { healthy: true, latency, timestamp: now };
             return { healthy: true, latency };
         } else {
+            discordApiCache = { healthy: false, latency, timestamp: now };
             return {
                 healthy: false,
                 latency,
@@ -80,6 +101,7 @@ async function checkDiscordHealth(): Promise<HealthCheckResult> {
         }
     } catch (error) {
         const latency = Date.now() - start;
+        discordApiCache = { healthy: false, latency, timestamp: now };
         return {
             healthy: false,
             latency,
