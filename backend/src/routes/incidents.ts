@@ -22,7 +22,14 @@ router.post('/', async (req: Request, res: Response) => {
             status,
             affectedServices,
             initialUpdate,
-        } = req.body;
+        } = req.body as {
+            title?: string;
+            description?: string;
+            severity?: string;
+            status?: string;
+            affectedServices?: string[];
+            initialUpdate?: string;
+        };
 
         // Validate required fields
         if (!title || !description) {
@@ -115,7 +122,15 @@ router.patch('/:id', async (req: Request, res: Response) => {
             affectedServices,
             resolvedAt,
             updateMessage,
-        } = req.body;
+        } = req.body as {
+            title?: string;
+            description?: string;
+            severity?: string;
+            status?: string;
+            affectedServices?: string[];
+            resolvedAt?: string;
+            updateMessage?: string;
+        };
 
         // Check if incident exists
         const existingIncident = await db.incident.findUnique({
@@ -229,7 +244,10 @@ router.patch('/:id', async (req: Request, res: Response) => {
 router.post('/:id/updates', async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { message, status } = req.body;
+        const { message, status } = req.body as {
+            message?: string;
+            status?: string;
+        };
 
         if (!message) {
             res.status(400).json({ error: 'Update message is required' });
@@ -361,15 +379,15 @@ router.get('/', async (req: Request, res: Response) => {
         }
 
         const where: {
-            status?: string;
-            severity?: string;
+            status?: 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED';
+            severity?: 'MINOR' | 'MAJOR' | 'CRITICAL';
         } = {};
 
         if (status) {
-            where.status = status as string;
+            where.status = status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED';
         }
         if (severity) {
-            where.severity = severity as string;
+            where.severity = severity as 'MINOR' | 'MAJOR' | 'CRITICAL';
         }
 
         const incidents = await db.incident.findMany({

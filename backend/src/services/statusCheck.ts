@@ -244,20 +244,19 @@ export function startStatusCheckJob(intervalMinutes = 5): NodeJS.Timeout {
         `Starting status check job (every ${intervalMinutes} minutes)`
     );
 
-    const interval = setInterval(
-        async () => {
+    const interval = setInterval(() => {
+        void (async () => {
             try {
                 const healthStatus = await performHealthCheck();
                 await recordStatusCheck(healthStatus);
             } catch (error) {
                 console.error('Status check job failed:', error);
             }
-        },
-        intervalMinutes * 60 * 1000
-    );
+        })();
+    }, intervalMinutes * 60 * 1000);
 
     // Run immediately on start
-    (async () => {
+    void (async () => {
         try {
             const healthStatus = await performHealthCheck();
             await recordStatusCheck(healthStatus);
