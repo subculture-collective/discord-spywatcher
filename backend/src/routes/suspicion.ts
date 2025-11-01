@@ -11,6 +11,33 @@ const router = Router();
 router.use(validateGuild);
 router.use(apiLimiter);
 
+/**
+ * @openapi
+ * /suspicion:
+ *   get:
+ *     tags:
+ *       - Suspicion
+ *     summary: Get suspicion scores
+ *     description: Returns suspicion scores for users based on behavior analysis
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/SinceQuery'
+ *       - $ref: '#/components/parameters/FilterBannedQuery'
+ *     responses:
+ *       200:
+ *         description: Successful response with suspicion scores
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
+ */
 router.get('/suspicion', requireAuth, async (req, res) => {
     const since = req.query.since
         ? new Date(req.query.since as string)
@@ -25,6 +52,38 @@ router.get('/suspicion', requireAuth, async (req, res) => {
     res.json(data);
 });
 
+/**
+ * @openapi
+ * /suspicion/{userId}:
+ *   get:
+ *     tags:
+ *       - Suspicion
+ *     summary: Get detailed suspicion analysis for a user
+ *     description: Returns detailed suspicion analysis for a specific user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID to analyze
+ *       - $ref: '#/components/parameters/SinceQuery'
+ *     responses:
+ *       200:
+ *         description: Detailed suspicion analysis
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
+ *       500:
+ *         description: Internal server error
+ */
 // New endpoint for detailed suspicion analysis of a specific user
 router.get('/suspicion/:userId', requireAuth, async (req, res) => {
     const { userId } = req.params;

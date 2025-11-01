@@ -12,6 +12,29 @@ let discordApiCache: { healthy: boolean; timestamp: number } = {
 };
 const DISCORD_CACHE_TTL = 30000; // 30 seconds
 
+/**
+ * @openapi
+ * /health/live:
+ *   get:
+ *     tags:
+ *       - Status
+ *     summary: Liveness probe
+ *     description: Simple check that the service is running (for orchestrators)
+ *     responses:
+ *       200:
+ *         description: Service is alive
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
 // Liveness probe - simple check that the service is running
 router.get('/live', (req: Request, res: Response) => {
     res.status(200).json({
@@ -20,6 +43,40 @@ router.get('/live', (req: Request, res: Response) => {
     });
 });
 
+/**
+ * @openapi
+ * /health/ready:
+ *   get:
+ *     tags:
+ *       - Status
+ *     summary: Readiness probe
+ *     description: Check if service is ready to handle requests (checks database, redis, discord API)
+ *     responses:
+ *       200:
+ *         description: Service is ready
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [healthy, unhealthy]
+ *                 checks:
+ *                   type: object
+ *                   properties:
+ *                     database:
+ *                       type: boolean
+ *                     redis:
+ *                       type: boolean
+ *                     discord:
+ *                       type: boolean
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       503:
+ *         description: Service is not ready
+ */
 // Readiness probe - check if service is ready to handle requests
 // Note: Health checks are intentionally not rate-limited as they need to be
 // accessible by orchestrators (Kubernetes, Docker, etc.) and monitoring systems
