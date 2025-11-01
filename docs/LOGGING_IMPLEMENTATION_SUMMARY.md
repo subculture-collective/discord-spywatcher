@@ -43,7 +43,7 @@ October 31, 2024
 The following services have their logs aggregated:
 
 - **Backend** - Application logs, errors, info (`/logs/backend/*.log`)
-- **Security** - Auth events, security incidents (`/logs/backend/security*.log`)
+- **Security** - Auth events, security incidents (`/logs/backend/security.log`)
 - **PostgreSQL** - Database logs (`/var/log/postgresql/*.log`)
 - **Redis** - Cache operations (Docker logs)
 - **PgBouncer** - Connection pooling (Docker logs)
