@@ -69,29 +69,33 @@ function TimelineChart({ data }: TimelineChartProps) {
                 </ResponsiveContainer>
             </div>
             {/* Screen reader accessible data table */}
-            <details className="sr-only">
-                <summary>View suspicion data as table</summary>
-                <table>
-                    <caption>User Suspicion and Ghost Score Data</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Rank</th>
-                            <th scope="col">Username</th>
-                            <th scope="col">Suspicion Score</th>
-                            <th scope="col">Ghost Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {topUsers.map((user, index) => (
-                            <tr key={user.userId}>
-                                <td>{index + 1}</td>
-                                <td>{user.username}</td>
-                                <td>{user.suspicionScore}</td>
-                                <td>{user.ghostScore}</td>
+            <details className="mt-4">
+                <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                    View suspicion data as table
+                </summary>
+                <div className="mt-2 overflow-x-auto">
+                    <table className="min-w-full text-sm border border-gray-300 dark:border-gray-700">
+                        <caption className="sr-only">User Suspicion and Ghost Score Data</caption>
+                        <thead className="bg-gray-100 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" className="px-4 py-2 text-left">Rank</th>
+                                <th scope="col" className="px-4 py-2 text-left">Username</th>
+                                <th scope="col" className="px-4 py-2 text-right">Suspicion Score</th>
+                                <th scope="col" className="px-4 py-2 text-right">Ghost Score</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {topUsers.map((user, index) => (
+                                <tr key={user.userId}>
+                                    <td className="px-4 py-2">{index + 1}</td>
+                                    <td className="px-4 py-2">{user.username}</td>
+                                    <td className="px-4 py-2 text-right">{user.suspicionScore}</td>
+                                    <td className="px-4 py-2 text-right">{user.ghostScore}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </details>
         </div>
     );

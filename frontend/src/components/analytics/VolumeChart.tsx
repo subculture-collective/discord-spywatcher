@@ -82,27 +82,31 @@ function VolumeChart({ data }: VolumeChartProps) {
                 </ResponsiveContainer>
             </div>
             {/* Screen reader accessible data table */}
-            <details className="sr-only">
-                <summary>View volume data as table</summary>
-                <table>
-                    <caption>User Activity Volume Data</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Username</th>
-                            <th scope="col">Typing Events</th>
-                            <th scope="col">Messages</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {topUsers.map((user) => (
-                            <tr key={user.userId}>
-                                <td>{user.username}</td>
-                                <td>{user.typingCount}</td>
-                                <td>{user.messageCount}</td>
+            <details className="mt-4">
+                <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                    View volume data as table
+                </summary>
+                <div className="mt-2 overflow-x-auto">
+                    <table className="min-w-full text-sm border border-gray-300 dark:border-gray-700">
+                        <caption className="sr-only">User Activity Volume Data</caption>
+                        <thead className="bg-gray-100 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" className="px-4 py-2 text-left">Username</th>
+                                <th scope="col" className="px-4 py-2 text-right">Typing Events</th>
+                                <th scope="col" className="px-4 py-2 text-right">Messages</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {topUsers.map((user) => (
+                                <tr key={user.userId}>
+                                    <td className="px-4 py-2">{user.username}</td>
+                                    <td className="px-4 py-2 text-right">{user.typingCount}</td>
+                                    <td className="px-4 py-2 text-right">{user.messageCount}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </details>
         </div>
     );

@@ -110,18 +110,20 @@ function Dashboard() {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <CardTitle id="users-heading">User Suspicion List</CardTitle>
-                                <label htmlFor="filter-banned" className="flex items-center gap-2 text-sm text-ctp-subtext0">
-                                    <input
-                                        id="filter-banned"
-                                        type="checkbox"
-                                        checked={filterBanned}
-                                        onChange={(e) => setFilterBanned(e.target.checked)}
-                                        className="rounded border-ctp-surface1"
-                                        aria-describedby="filter-help"
-                                    />
-                                    Hide banned users
-                                </label>
-                                <span id="filter-help" className="sr-only">Toggle to show or hide banned users from the list</span>
+                                <div>
+                                    <label htmlFor="filter-banned" className="flex items-center gap-2 text-sm text-ctp-subtext0">
+                                        <input
+                                            id="filter-banned"
+                                            type="checkbox"
+                                            checked={filterBanned}
+                                            onChange={(e) => setFilterBanned(e.target.checked)}
+                                            className="rounded border-ctp-surface1"
+                                            aria-describedby="filter-help"
+                                        />
+                                        Hide banned users
+                                    </label>
+                                    <span id="filter-help" className="sr-only">Toggle to show or hide banned users from the list</span>
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -138,8 +140,8 @@ function Dashboard() {
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Ghost</th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Clients</th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Channels</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Fast Reaction Time">Fast RT</abbr></th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Account Age in Days">Age</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text" aria-label="Fast Reaction Time"><abbr title="Fast Reaction Time">Fast RT</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text" aria-label="Account Age in Days"><abbr title="Account Age in Days">Age</abbr></th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Actions</th>
                                             </tr>
                                         </thead>
