@@ -17,19 +17,23 @@ function Login() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="max-w-md w-full mx-4"
+                role="main"
+                aria-labelledby="login-heading"
             >
                 <div className="bg-ctp-surface0 rounded-2xl shadow-2xl p-8 border border-ctp-surface1">
                     {/* Logo/Header */}
-                    <div className="text-center mb-8">
+                    <header className="text-center mb-8">
                         <motion.div
                             initial={{ y: -20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
                             className="inline-flex items-center justify-center w-16 h-16 bg-ctp-blue/20 rounded-full mb-4"
+                            aria-hidden="true"
                         >
                             <Shield className="w-8 h-8 text-ctp-blue" />
                         </motion.div>
                         <motion.h1
+                            id="login-heading"
                             initial={{ y: -20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.3 }}
@@ -45,28 +49,29 @@ function Login() {
                         >
                             Advanced user behavior analytics
                         </motion.p>
-                    </div>
+                    </header>
 
                     {/* Features */}
-                    <motion.div
+                    <motion.ul
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.5 }}
                         className="space-y-3 mb-8"
+                        aria-label="Features"
                     >
-                        <div className="flex items-center gap-3 text-ctp-subtext1">
-                            <Activity className="w-5 h-5 text-ctp-green" />
+                        <li className="flex items-center gap-3 text-ctp-subtext1">
+                            <Activity className="w-5 h-5 text-ctp-green" aria-hidden="true" />
                             <span className="text-sm">Real-time monitoring</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-ctp-subtext1">
-                            <Shield className="w-5 h-5 text-ctp-blue" />
+                        </li>
+                        <li className="flex items-center gap-3 text-ctp-subtext1">
+                            <Shield className="w-5 h-5 text-ctp-blue" aria-hidden="true" />
                             <span className="text-sm">Ghost detection</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-ctp-subtext1">
-                            <TrendingUp className="w-5 h-5 text-ctp-pink" />
+                        </li>
+                        <li className="flex items-center gap-3 text-ctp-subtext1">
+                            <TrendingUp className="w-5 h-5 text-ctp-pink" aria-hidden="true" />
                             <span className="text-sm">Advanced analytics</span>
-                        </div>
-                    </motion.div>
+                        </li>
+                    </motion.ul>
 
                     {/* Login Button */}
                     <motion.a
@@ -76,9 +81,10 @@ function Login() {
                         transition={{ delay: 0.6 }}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center justify-center gap-3 w-full bg-ctp-blue hover:bg-ctp-blue/90 text-ctp-base px-6 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg"
+                        className="flex items-center justify-center gap-3 w-full bg-ctp-blue hover:bg-ctp-blue/90 text-ctp-base px-6 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-offset-2"
+                        aria-label="Login with Discord"
                     >
-                        <LogIn className="w-5 h-5" />
+                        <LogIn className="w-5 h-5" aria-hidden="true" />
                         Login with Discord
                     </motion.a>
 
