@@ -14,7 +14,7 @@ Promtail collects logs from:
    - JSON formatted logs
    - Labels: job, service, level
 
-2. **Security Logs** (`/logs/backend/security*.log`)
+2. **Security Logs** (`/logs/backend/security.log`)
    - Security events
    - Labels: job, level, action, result
 
