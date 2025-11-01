@@ -55,7 +55,7 @@ function VolumeChart({ data }: VolumeChartProps) {
                     <span className="font-semibold">{totalMessages.toLocaleString()}</span>
                 </div>
             </div>
-            <div role="img" aria-label={`Volume chart showing top ${topUsers.length} users by activity. Total typing events: ${totalTyping}, Total messages: ${totalMessages}`}>
+            <div role="region" aria-label={`Volume chart showing top ${topUsers.length} users by activity. Total typing events: ${totalTyping}, Total messages: ${totalMessages}`}>
                 <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />

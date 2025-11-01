@@ -43,12 +43,12 @@ describe('Button Accessibility', () => {
         const { getByRole } = render(<Button isLoading>Loading</Button>);
         const button = getByRole('button');
         expect(button).toHaveAttribute('aria-busy', 'true');
-        expect(button).toHaveAttribute('aria-disabled', 'true');
+        expect(button).toBeDisabled();
     });
 
-    it('should have proper ARIA attributes when disabled', () => {
+    it('should have proper disabled attribute when disabled', () => {
         const { getByRole } = render(<Button disabled>Disabled</Button>);
         const button = getByRole('button');
-        expect(button).toHaveAttribute('aria-disabled', 'true');
+        expect(button).toBeDisabled();
     });
 });

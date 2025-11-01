@@ -47,7 +47,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 type={type}
                 title={title}
                 aria-busy={isLoading}
-                aria-disabled={isDisabled}
                 {...ariaProps}
             >
                 {isLoading ? (
@@ -61,7 +60,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ) : (
                     <>
                         {icon && <span aria-hidden="true">{icon}</span>}
-                        <span>{children}</span>
+                        {children}
                     </>
                 )}
             </motion.button>

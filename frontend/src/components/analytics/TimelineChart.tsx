@@ -43,7 +43,7 @@ function TimelineChart({ data }: TimelineChartProps) {
 
     return (
         <div>
-            <div role="img" aria-label={`Timeline chart showing top ${topUsers.length} users by suspicion score`}>
+            <div>
                 <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" />

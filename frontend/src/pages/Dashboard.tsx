@@ -140,8 +140,8 @@ function Dashboard() {
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Ghost</th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Clients</th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Channels</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text" aria-label="Fast Reaction Time"><abbr title="Fast Reaction Time">Fast RT</abbr></th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text" aria-label="Account Age in Days"><abbr title="Account Age in Days">Age</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Fast Reaction Time">Fast RT</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Account Age in Days">Age</abbr></th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Actions</th>
                                             </tr>
                                         </thead>
