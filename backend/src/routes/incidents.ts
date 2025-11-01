@@ -5,6 +5,10 @@ import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
+// Validation constants
+const VALID_SEVERITIES = ['MINOR', 'MAJOR', 'CRITICAL'] as const;
+const VALID_STATUSES = ['INVESTIGATING', 'IDENTIFIED', 'MONITORING', 'RESOLVED'] as const;
+
 // All routes require authentication and admin role
 router.use(requireAuth);
 router.use(requireRole(['ADMIN']));
@@ -40,25 +44,17 @@ router.post('/', async (req: Request, res: Response) => {
         }
 
         // Validate severity
-        if (
-            severity &&
-            !['MINOR', 'MAJOR', 'CRITICAL'].includes(severity)
-        ) {
+        if (severity && !VALID_SEVERITIES.includes(severity as typeof VALID_SEVERITIES[number])) {
             res.status(400).json({
-                error: 'Invalid severity. Must be MINOR, MAJOR, or CRITICAL',
+                error: `Invalid severity. Must be one of: ${VALID_SEVERITIES.join(', ')}`,
             });
             return;
         }
 
         // Validate status
-        if (
-            status &&
-            !['INVESTIGATING', 'IDENTIFIED', 'MONITORING', 'RESOLVED'].includes(
-                status
-            )
-        ) {
+        if (status && !VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
             res.status(400).json({
-                error: 'Invalid status. Must be INVESTIGATING, IDENTIFIED, MONITORING, or RESOLVED',
+                error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
             });
             return;
         }
@@ -143,25 +139,17 @@ router.patch('/:id', async (req: Request, res: Response) => {
         }
 
         // Validate severity if provided
-        if (
-            severity &&
-            !['MINOR', 'MAJOR', 'CRITICAL'].includes(severity)
-        ) {
+        if (severity && !VALID_SEVERITIES.includes(severity as typeof VALID_SEVERITIES[number])) {
             res.status(400).json({
-                error: 'Invalid severity. Must be MINOR, MAJOR, or CRITICAL',
+                error: `Invalid severity. Must be one of: ${VALID_SEVERITIES.join(', ')}`,
             });
             return;
         }
 
         // Validate status if provided
-        if (
-            status &&
-            !['INVESTIGATING', 'IDENTIFIED', 'MONITORING', 'RESOLVED'].includes(
-                status
-            )
-        ) {
+        if (status && !VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
             res.status(400).json({
-                error: 'Invalid status. Must be INVESTIGATING, IDENTIFIED, MONITORING, or RESOLVED',
+                error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
             });
             return;
         }
@@ -255,14 +243,9 @@ router.post('/:id/updates', async (req: Request, res: Response) => {
         }
 
         // Validate status if provided
-        if (
-            status &&
-            !['INVESTIGATING', 'IDENTIFIED', 'MONITORING', 'RESOLVED'].includes(
-                status
-            )
-        ) {
+        if (status && !VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
             res.status(400).json({
-                error: 'Invalid status. Must be INVESTIGATING, IDENTIFIED, MONITORING, or RESOLVED',
+                error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
             });
             return;
         }

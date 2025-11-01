@@ -238,6 +238,24 @@ export async function cleanupOldStatusChecks(): Promise<number> {
 
 /**
  * Start periodic status check job
+ * 
+ * Starts a background job that periodically checks the health of all services
+ * and records the results in the database for historical tracking.
+ * 
+ * @param intervalMinutes - Interval between checks in minutes (default: 5)
+ * @returns NodeJS.Timeout - The interval timer that can be cleared to stop the job
+ * 
+ * @example
+ * ```typescript
+ * // Start status checks every 5 minutes
+ * const timer = startStatusCheckJob();
+ * 
+ * // Start status checks every 10 minutes
+ * const timer = startStatusCheckJob(10);
+ * 
+ * // Stop the status check job
+ * clearInterval(timer);
+ * ```
  */
 export function startStatusCheckJob(intervalMinutes = 5): NodeJS.Timeout {
     console.log(
