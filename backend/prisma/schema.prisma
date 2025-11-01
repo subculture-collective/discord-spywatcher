@@ -479,3 +479,67 @@ model AnalyticsSummary {
   @@index([summaryType])
   @@index([metric])
 }
+
+// Service Health & Status Page Models
+
+model StatusCheck {
+  id              String   @id @default(cuid())
+  timestamp       DateTime @default(now()) @db.Timestamptz
+  status          String // healthy, degraded, down
+  database        Boolean
+  databaseLatency Int? // ms
+  redis           Boolean
+  redisLatency    Int? // ms
+  discord         Boolean
+  discordLatency  Int? // ms
+  overall         Boolean
+  metadata        Json?    @db.JsonB
+
+  @@index([timestamp(sort: Desc)])
+  @@index([status])
+  @@index([overall])
+}
+
+enum IncidentStatus {
+  INVESTIGATING
+  IDENTIFIED
+  MONITORING
+  RESOLVED
+}
+
+enum IncidentSeverity {
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+model Incident {
+  id          String           @id @default(cuid())
+  title       String
+  description String           @db.Text
+  status      IncidentStatus   @default(INVESTIGATING)
+  severity    IncidentSeverity @default(MINOR)
+  startedAt   DateTime         @default(now()) @db.Timestamptz
+  resolvedAt  DateTime?        @db.Timestamptz
+  updates     IncidentUpdate[]
+  affectedServices String[] // e.g., ["database", "api", "discord"]
+  metadata    Json?            @db.JsonB
+  createdAt   DateTime         @default(now()) @db.Timestamptz
+  updatedAt   DateTime         @updatedAt @db.Timestamptz
+
+  @@index([status])
+  @@index([severity])
+  @@index([startedAt(sort: Desc)])
+}
+
+model IncidentUpdate {
+  id         String   @id @default(cuid())
+  incidentId String
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  message    String   @db.Text
+  status     IncidentStatus?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+
+  @@index([incidentId])
+  @@index([createdAt(sort: Desc)])
+}

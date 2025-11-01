@@ -4,12 +4,14 @@ import adminPrivacyRoutes from './adminPrivacy';
 import analyticsRoutes from './analytics';
 import authRoutes from './auth';
 import banRoutes from './bans';
+import incidentsRoutes from './incidents';
 import ipManagementRoutes from './ipManagement';
 import metricsAnalyticsRoutes from './metricsAnalytics';
 import monitoringRoutes from './monitoring';
 import privacyRoutes from './privacy';
 import publicApiRoutes from './publicApi';
 import quotaManagementRoutes from './quotaManagement';
+import statusRoutes from './status';
 import suspicionRoutes from './suspicion';
 import timelineRoutes from './timeline';
 
@@ -23,11 +25,15 @@ router.get('/health', (_req, res) => {
 // Public API documentation routes
 router.use('/public', publicApiRoutes);
 
+// Public status page routes
+router.use('/status', statusRoutes);
+
 router.use('/auth', authRoutes);
 router.use('/privacy', privacyRoutes);
 router.use('/admin/privacy', adminPrivacyRoutes);
 router.use('/admin/ip-management', ipManagementRoutes);
 router.use('/admin/monitoring', monitoringRoutes);
+router.use('/admin/incidents', incidentsRoutes);
 router.use('/quota', quotaManagementRoutes);
 router.use('/metrics', metricsAnalyticsRoutes);
 router.use(analyticsRoutes);
