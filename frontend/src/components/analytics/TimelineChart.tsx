@@ -42,29 +42,58 @@ function TimelineChart({ data }: TimelineChartProps) {
     }
 
     return (
-        <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                    type="monotone"
-                    dataKey="suspicion"
-                    stroke="#ef4444"
-                    name="Suspicion Score"
-                    strokeWidth={2}
-                />
-                <Line
-                    type="monotone"
-                    dataKey="ghost"
-                    stroke="#8b5cf6"
-                    name="Ghost Score"
-                    strokeWidth={2}
-                />
-            </LineChart>
-        </ResponsiveContainer>
+        <div>
+            <div role="img" aria-label={`Timeline chart showing top ${topUsers.length} users by suspicion score`}>
+                <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line
+                            type="monotone"
+                            dataKey="suspicion"
+                            stroke="#ef4444"
+                            name="Suspicion Score"
+                            strokeWidth={2}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="ghost"
+                            stroke="#8b5cf6"
+                            name="Ghost Score"
+                            strokeWidth={2}
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+            {/* Screen reader accessible data table */}
+            <details className="sr-only">
+                <summary>View suspicion data as table</summary>
+                <table>
+                    <caption>User Suspicion and Ghost Score Data</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Rank</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Suspicion Score</th>
+                            <th scope="col">Ghost Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {topUsers.map((user, index) => (
+                            <tr key={user.userId}>
+                                <td>{index + 1}</td>
+                                <td>{user.username}</td>
+                                <td>{user.suspicionScore}</td>
+                                <td>{user.ghostScore}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </details>
+        </div>
     );
 }
 
