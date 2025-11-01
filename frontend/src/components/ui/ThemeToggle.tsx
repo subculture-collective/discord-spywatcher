@@ -17,12 +17,13 @@ export function ThemeToggle() {
             size="sm"
             onClick={toggleTheme}
             className="w-10 h-10 p-0 flex items-center justify-center"
-            aria-label="Toggle theme"
+            aria-label={`Switch to ${effectiveTheme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${effectiveTheme === 'dark' ? 'light' : 'dark'} mode`}
         >
             {effectiveTheme === 'dark' ? (
-                <Sun className="h-5 w-5" />
+                <Sun className="h-5 w-5" aria-hidden="true" />
             ) : (
-                <Moon className="h-5 w-5" />
+                <Moon className="h-5 w-5" aria-hidden="true" />
             )}
         </Button>
     );
