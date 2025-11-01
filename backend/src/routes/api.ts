@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { redoc } from 'redoc-express';
+import redoc from 'redoc-express';
 import swaggerUi from 'swagger-ui-express';
 
 import { swaggerSpec } from '../config/openapi';

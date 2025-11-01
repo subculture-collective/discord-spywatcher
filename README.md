@@ -332,6 +332,10 @@ const suspicions = await client.getSuspicionData();
 
 ### API Documentation
 
+- **[Interactive API Documentation](./docs/API_DOCUMENTATION.md)** - OpenAPI/Swagger docs with screenshots
+  - **Swagger UI**: `/api/docs` - Interactive testing interface
+  - **ReDoc**: `/api/redoc` - Clean, professional documentation view
+  - **OpenAPI Spec**: `/api/openapi.json` - Raw OpenAPI 3.0 specification
 - **[Public API Reference](./docs/PUBLIC_API.md)** - Complete API documentation with examples
 - **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Step-by-step guide for building integrations
 - **[SDK Documentation](./sdk/README.md)** - TypeScript/JavaScript SDK usage guide

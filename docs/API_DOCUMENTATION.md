@@ -2,6 +2,9 @@
 
 This document describes how to access and use the Spywatcher API documentation.
 
+![Swagger UI](./images/swagger-ui-screenshot.png)
+*Screenshot of Swagger UI - Interactive API documentation interface*
+
 ## Interactive Documentation
 
 ### Swagger UI (Recommended for Testing)
@@ -28,6 +31,9 @@ http://localhost:3001/api/docs
 
 ### ReDoc (Clean Documentation View)
 
+![ReDoc](./images/redoc-screenshot.png)
+*Screenshot of ReDoc - Clean, professional documentation view*
+
 An alternative, cleaner documentation view is available at:
 
 ```
@@ -42,6 +48,9 @@ http://localhost:3001/api/redoc
 - Three-panel design with navigation
 
 ## OpenAPI Specification
+
+![OpenAPI JSON](./images/openapi-json-screenshot.png)
+*Screenshot of OpenAPI JSON specification*
 
 The raw OpenAPI 3.0 specification is available at:
 
