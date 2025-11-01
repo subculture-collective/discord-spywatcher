@@ -75,14 +75,14 @@ router.post('/', async (req: Request, res: Response) => {
             data: {
                 title,
                 description,
-                severity: severity || 'MINOR',
-                status: status || 'INVESTIGATING',
+                severity: (severity as 'MINOR' | 'MAJOR' | 'CRITICAL') || 'MINOR',
+                status: (status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED') || 'INVESTIGATING',
                 affectedServices: affectedServices || [],
                 updates: initialUpdate
                     ? {
                           create: {
                               message: initialUpdate,
-                              status: status || 'INVESTIGATING',
+                              status: (status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED') || 'INVESTIGATING',
                           },
                       }
                     : undefined,
@@ -192,8 +192,8 @@ router.patch('/:id', async (req: Request, res: Response) => {
 
         if (title !== undefined) updateData.title = title;
         if (description !== undefined) updateData.description = description;
-        if (severity !== undefined) updateData.severity = severity;
-        if (status !== undefined) updateData.status = status;
+        if (severity !== undefined) updateData.severity = severity as 'MINOR' | 'MAJOR' | 'CRITICAL';
+        if (status !== undefined) updateData.status = status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED';
         if (affectedServices !== undefined)
             updateData.affectedServices = affectedServices;
 
@@ -209,7 +209,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
             updateData.updates = {
                 create: {
                     message: updateMessage,
-                    status: status || existingIncident.status,
+                    status: (status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED') || existingIncident.status,
                 },
             };
         }
@@ -282,7 +282,7 @@ router.post('/:id/updates', async (req: Request, res: Response) => {
             data: {
                 incidentId: id,
                 message,
-                status,
+                status: status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED' | undefined,
             },
         });
 
@@ -291,7 +291,7 @@ router.post('/:id/updates', async (req: Request, res: Response) => {
             await db.incident.update({
                 where: { id },
                 data: {
-                    status,
+                    status: status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED',
                     resolvedAt:
                         status === 'RESOLVED' && !incident.resolvedAt
                             ? new Date()
