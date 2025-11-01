@@ -6,7 +6,7 @@ import RequireAdmin from './components/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
 import SuspicionDetail from './components/suspicion/SuspicionDetail';
 import { usePageTracking } from './hooks/useAnalytics';
-import { Analytics, AuthCallback, Bans, Dashboard, Login, Suspicion, UserTimeline } from './pages';
+import { Analytics, AuthCallback, Bans, Dashboard, Login, Status, Suspicion, UserTimeline } from './pages';
 import MetricsDashboard from './pages/MetricsDashboard';
 import { useAuth } from './store/auth';
 
@@ -18,6 +18,7 @@ function AppContent() {
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/status" element={<Status />} />
 
                 <Route element={<RequireAuth />}>
                     <Route path="/" element={<Dashboard />} />
