@@ -9,8 +9,41 @@ import {
 const router = Router();
 
 /**
- * GET /api/status
- * Public endpoint for current system status
+ * @openapi
+ * /status:
+ *   get:
+ *     tags:
+ *       - Status
+ *     summary: Get system status
+ *     description: Returns current system status, uptime, and active incidents (public endpoint)
+ *     responses:
+ *       200:
+ *         description: System status information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [operational, degraded, down]
+ *                   description: Overall system status
+ *                 health:
+ *                   type: object
+ *                   description: Health check results
+ *                 uptime:
+ *                   type: object
+ *                   properties:
+ *                     last24h:
+ *                       type: number
+ *                     last7d:
+ *                       type: number
+ *                     last30d:
+ *                       type: number
+ *                 incidents:
+ *                   type: array
+ *                   items:
+ *                     type: object
  */
 router.get('/', async (_req: Request, res: Response) => {
     try {

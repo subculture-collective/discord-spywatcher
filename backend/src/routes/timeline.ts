@@ -28,8 +28,71 @@ const timelineQuerySchema = z.object({
 });
 
 /**
- * GET /timeline/:userId
- * Fetches comprehensive timeline of user activity with all event types
+ * @openapi
+ * /timeline/{userId}:
+ *   get:
+ *     tags:
+ *       - Timeline
+ *     summary: Get user activity timeline
+ *     description: Fetches comprehensive timeline of user activity with all event types
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID to fetch timeline for
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Number of events to return
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Cursor for pagination
+ *       - in: query
+ *         name: eventTypes
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of event types to filter
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for timeline
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for timeline
+ *     responses:
+ *       200:
+ *         description: User timeline events
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 events:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 nextCursor:
+ *                   type: string
+ *                   nullable: true
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get('/timeline/:userId', requireAuth, async (req, res) => {
     try {
