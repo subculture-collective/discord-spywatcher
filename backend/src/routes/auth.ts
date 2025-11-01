@@ -362,6 +362,41 @@ router.get(
     }
 );
 
+/**
+ * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Refresh access token
+ *     description: Generates a new access token using a valid refresh token
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Refresh token (can also be sent via cookie)
+ *     responses:
+ *       200:
+ *         description: Successfully refreshed token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: New JWT access token
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
+ */
 router.post(
     '/refresh',
     refreshLimiter,
@@ -584,6 +619,49 @@ router.get('/settings', requireAuth, async (req, res): Promise<void> => {
 // Session Management Routes
 // ============================================================================
 
+/**
+ * @openapi
+ * /auth/sessions:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Get user sessions
+ *     description: Returns all active sessions for the authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user sessions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       userAgent:
+ *                         type: string
+ *                       ipAddress:
+ *                         type: string
+ *                       lastActivity:
+ *                         type: string
+ *                         format: date-time
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       expiresAt:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/sessions', requireAuth, async (req, res): Promise<void> => {
     try {
         const sessions = await getUserSessions(req.user!.userId);
@@ -604,6 +682,38 @@ router.get('/sessions', requireAuth, async (req, res): Promise<void> => {
     }
 });
 
+/**
+ * @openapi
+ * /auth/sessions/{sessionId}:
+ *   delete:
+ *     tags:
+ *       - Authentication
+ *     summary: Revoke a session
+ *     description: Revokes a specific user session
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Session ID to revoke
+ *     responses:
+ *       200:
+ *         description: Session revoked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         description: Internal server error
+ */
 router.delete(
     '/sessions/:sessionId',
     requireAuth,

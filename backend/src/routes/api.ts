@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { redoc } from 'redoc-express';
 import swaggerUi from 'swagger-ui-express';
 
 import { swaggerSpec } from '../config/openapi';
@@ -36,6 +37,21 @@ router.get('/openapi.json', (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
 });
+
+// ReDoc documentation - alternative clean view
+router.get('/redoc', redoc({
+    title: 'Spywatcher API Documentation',
+    specUrl: '/api/openapi.json',
+    redocOptions: {
+        theme: {
+            colors: {
+                primary: {
+                    main: '#5865F2' // Discord blue
+                }
+            }
+        }
+    }
+}));
 
 // Public API documentation routes
 router.use('/public', publicApiRoutes);
