@@ -92,4 +92,8 @@ backend/logs/
 # Nginx SSL certificates
 nginx/ssl/
 
+# Loki and Grafana data
+loki/data/
+grafana/data/
+
 *.zip

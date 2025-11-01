@@ -250,6 +250,9 @@ Spywatcher includes comprehensive monitoring and observability features:
 - **Prometheus** - Metrics collection for system and application metrics
 - **Winston** - Structured JSON logging with request correlation
 - **Health checks** - Liveness and readiness probes for orchestrators
+- **Grafana Loki** - Centralized log aggregation and analysis
+- **Promtail** - Log collection and shipping from all services
+- **Grafana** - Unified dashboards for logs and metrics
 
 See [MONITORING.md](./MONITORING.md) for detailed documentation on:
 - Sentry configuration and error tracking
@@ -258,6 +261,13 @@ See [MONITORING.md](./MONITORING.md) for detailed documentation on:
 - Structured logging best practices
 - Alert configuration examples
 - Grafana dashboard creation
+
+See [LOGGING.md](./LOGGING.md) for centralized logging documentation:
+- Log aggregation with Grafana Loki
+- Log search and filtering with LogQL
+- Log retention policies (30-day default)
+- Security event tracking
+- Performance tuning and troubleshooting
 
 ## 🌐 Endpoints
 
