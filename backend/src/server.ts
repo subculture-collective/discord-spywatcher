@@ -228,9 +228,12 @@ const allowedOrigins =
         
         // Start scheduled privacy tasks
         import('./utils/scheduledTasks')
-            .then(({ startScheduledPrivacyTasks }) => {
+            .then(({ startScheduledPrivacyTasks, startBackupHealthChecks }) => {
                 startScheduledPrivacyTasks();
                 console.log('✅ Scheduled privacy tasks started');
+                
+                startBackupHealthChecks();
+                console.log('✅ Backup health checks started');
             })
             .catch((err) => {
                 console.error('Failed to start scheduled tasks:', err);

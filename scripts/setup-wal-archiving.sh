@@ -74,7 +74,8 @@ if [ -n "$S3_BUCKET" ]; then
     echo -e "${YELLOW}Configuring S3 WAL archiving...${NC}"
     cat >> "$POSTGRESQL_CONF" <<EOF
 # Archive to S3 (requires AWS CLI configured)
-archive_command = 'aws s3 cp %p s3://${S3_BUCKET}/wal/%f --storage-class STANDARD_IA'
+# Retry up to 3 times and verify upload success
+archive_command = 'test ! -f s3://${S3_BUCKET}/wal/%f && for i in 1 2 3; do aws s3 cp %p s3://${S3_BUCKET}/wal/%f --storage-class STANDARD_IA && aws s3 ls s3://${S3_BUCKET}/wal/%f > /dev/null 2>&1 && exit 0; sleep 1; done; exit 1'
 
 # Restore command for recovery
 # restore_command = 'aws s3 cp s3://${S3_BUCKET}/wal/%f %p'
@@ -84,8 +85,8 @@ EOF
 else
     echo -e "${YELLOW}Configuring local WAL archiving...${NC}"
     cat >> "$POSTGRESQL_CONF" <<EOF
-# Archive to local directory
-archive_command = 'test ! -f ${WAL_ARCHIVE_DIR}/%f && cp %p ${WAL_ARCHIVE_DIR}/%f'
+# Archive to local directory with verification
+archive_command = 'test ! -f ${WAL_ARCHIVE_DIR}/%f && cp %p ${WAL_ARCHIVE_DIR}/%f && test -f ${WAL_ARCHIVE_DIR}/%f'
 
 # Restore command for recovery
 # restore_command = 'cp ${WAL_ARCHIVE_DIR}/%f %p'
