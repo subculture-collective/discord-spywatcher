@@ -543,3 +543,39 @@ model IncidentUpdate {
   @@index([incidentId])
   @@index([createdAt(sort: Desc)])
 }
+
+// Backup & Disaster Recovery Models
+
+enum BackupType {
+  FULL
+  INCREMENTAL
+  WAL_ARCHIVE
+}
+
+enum BackupStatus {
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  VERIFIED
+}
+
+model BackupLog {
+  id            String       @id @default(cuid())
+  backupType    BackupType
+  status        BackupStatus
+  filename      String
+  fileSizeMB    Float?
+  duration      Int? // Duration in seconds
+  s3Location    String? // Primary S3 location
+  s3LocationSecondary String? // Secondary region S3 location
+  errorMessage  String?      @db.Text
+  metadata      Json?        @db.JsonB
+  startedAt     DateTime     @default(now()) @db.Timestamptz
+  completedAt   DateTime?    @db.Timestamptz
+  verifiedAt    DateTime?    @db.Timestamptz
+
+  @@index([backupType])
+  @@index([status])
+  @@index([startedAt(sort: Desc)])
+  @@index([completedAt(sort: Desc)])
+}
