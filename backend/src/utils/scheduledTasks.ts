@@ -1,4 +1,5 @@
 import { processPendingDeletions } from './accountDeletion';
+import { checkBackupHealth } from './backupMonitor';
 import { cleanupOldData } from './dataRetention';
 
 /**
@@ -24,6 +25,31 @@ export async function runScheduledPrivacyTasks(): Promise<void> {
         console.log('Scheduled privacy tasks completed successfully');
     } catch (error) {
         console.error('Error running scheduled privacy tasks:', error);
+        throw error;
+    }
+}
+
+/**
+ * Run backup health check
+ * This should be called periodically to monitor backup status
+ */
+export async function runBackupHealthCheck(): Promise<void> {
+    console.log('Starting backup health check...');
+
+    try {
+        const healthCheck = await checkBackupHealth();
+        
+        if (healthCheck.healthy) {
+            console.log('✓ Backup health check passed');
+            if (healthCheck.lastBackup) {
+                console.log(`Last backup: ${healthCheck.lastBackup.toISOString()}`);
+            }
+        } else {
+            console.warn('⚠ Backup health check found issues:');
+            healthCheck.issues.forEach((issue) => console.warn(`  - ${issue}`));
+        }
+    } catch (error) {
+        console.error('Error running backup health check:', error);
         throw error;
     }
 }
@@ -60,4 +86,26 @@ export function startScheduledPrivacyTasks(): void {
             });
         }, 24 * 60 * 60 * 1000);
     }, msUntilNext2AM);
+}
+
+/**
+ * Start scheduled backup health checks (to be called on server startup)
+ * Runs checks every 6 hours
+ */
+export function startBackupHealthChecks(): void {
+    const SIX_HOURS = 6 * 60 * 60 * 1000;
+    
+    console.log('Starting backup health check scheduler (every 6 hours)');
+    
+    // Run immediately on startup
+    runBackupHealthCheck().catch((err) => {
+        console.error('Initial backup health check failed:', err);
+    });
+    
+    // Schedule recurring runs every 6 hours
+    setInterval(() => {
+        runBackupHealthCheck().catch((err) => {
+            console.error('Scheduled backup health check failed:', err);
+        });
+    }, SIX_HOURS);
 }
