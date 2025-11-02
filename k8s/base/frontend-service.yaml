@@ -6,6 +6,15 @@ metadata:
   labels:
     app: spywatcher
     tier: frontend
+  annotations:
+    # Health check configuration for load balancer
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "2"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2"
+    # Cross-zone load balancing
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 spec:
   type: ClusterIP
   selector:
@@ -16,3 +25,5 @@ spec:
     port: 80
     targetPort: http
     protocol: TCP
+  # Don't publish not ready addresses - wait for readiness
+  publishNotReadyAddresses: false

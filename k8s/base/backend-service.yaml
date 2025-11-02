@@ -8,6 +8,17 @@ metadata:
     tier: backend
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    # Health check configuration for load balancer
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/health/ready"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "5"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "2"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2"
+    # Cross-zone load balancing for better distribution
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    # Connection draining for graceful shutdown
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-connection-draining-timeout: "60"
 spec:
   type: ClusterIP
   sessionAffinity: ClientIP
@@ -22,3 +33,5 @@ spec:
     port: 80
     targetPort: http
     protocol: TCP
+  # Publish not ready addresses for smooth transitions during rolling updates
+  publishNotReadyAddresses: false

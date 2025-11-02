@@ -15,6 +15,7 @@ resources:
   - backend-hpa.yaml
   - frontend-deployment.yaml
   - frontend-service.yaml
+  - frontend-hpa.yaml
   - ingress.yaml
   - pdb.yaml
 
