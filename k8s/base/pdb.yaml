@@ -1,0 +1,29 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: spywatcher-backend-pdb
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    tier: backend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: spywatcher
+      tier: backend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: spywatcher-frontend-pdb
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    tier: frontend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: spywatcher
+      tier: frontend

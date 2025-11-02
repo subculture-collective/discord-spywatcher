@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spywatcher-config
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+data:
+  # Application settings
+  NODE_ENV: "production"
+  PORT: "3001"
+  
+  # Logging settings
+  LOG_LEVEL: "info"
+  
+  # Rate limiting settings
+  RATE_LIMIT_WINDOW_MS: "900000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  
+  # Health check settings
+  HEALTH_CHECK_INTERVAL: "30"
+  
+  # Database pool settings
+  DB_POOL_MIN: "2"
+  DB_POOL_MAX: "10"
+  
+  # Redis settings
+  REDIS_MAX_RETRIES: "3"
+  REDIS_RETRY_DELAY: "1000"

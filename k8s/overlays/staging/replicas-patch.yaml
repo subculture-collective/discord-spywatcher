@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spywatcher-backend
+  namespace: spywatcher-staging
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spywatcher-frontend
+  namespace: spywatcher-staging
+spec:
+  replicas: 1
