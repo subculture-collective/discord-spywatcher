@@ -264,6 +264,146 @@ Lots of classes hidden here to showcase the catppuccin color classes
     .outline-ctp-overlay2\/10 {
         outline-color: rgba(108, 112, 134, 0.1);
     }
+
+    /* Light Theme Overrides (Catppuccin Latte) */
+    .light .text-ctp-base {
+        color: #eff1f5;
+    }
+    .light .text-ctp-mantle {
+        color: #e6e9ef;
+    }
+    .light .text-ctp-crust {
+        color: #dce0e8;
+    }
+    .light .text-ctp-text {
+        color: #4c4f69;
+    }
+    .light .text-ctp-subtext1 {
+        color: #5c5f77;
+    }
+    .light .text-ctp-subtext0 {
+        color: #6c6f85;
+    }
+    .light .text-ctp-overlay2 {
+        color: #7c7f93;
+    }
+    .light .text-ctp-overlay1 {
+        color: #8c8fa1;
+    }
+    .light .text-ctp-overlay0 {
+        color: #9ca0b0;
+    }
+
+    .light .bg-ctp-base {
+        background-color: #eff1f5;
+    }
+    .light .bg-ctp-mantle {
+        background-color: #e6e9ef;
+    }
+    .light .bg-ctp-crust {
+        background-color: #dce0e8;
+    }
+    .light .bg-ctp-text {
+        background-color: #4c4f69;
+    }
+    .light .bg-ctp-subtext1 {
+        background-color: #5c5f77;
+    }
+    .light .bg-ctp-subtext0 {
+        background-color: #6c6f85;
+    }
+    .light .bg-ctp-surface2 {
+        background-color: #acb0be;
+    }
+    .light .bg-ctp-surface1 {
+        background-color: #bcc0cc;
+    }
+    .light .bg-ctp-surface0 {
+        background-color: #ccd0da;
+    }
+    .light .bg-ctp-overlay2 {
+        background-color: #7c7f93;
+    }
+    .light .bg-ctp-overlay1 {
+        background-color: #8c8fa1;
+    }
+    .light .bg-ctp-overlay0 {
+        background-color: #9ca0b0;
+    }
+
+    /* Light Theme Accent Colors */
+    .light .bg-ctp-blue {
+        background-color: #1e66f5;
+    }
+    .light .bg-ctp-lavender {
+        background-color: #7287fd;
+    }
+    .light .bg-ctp-flamingo {
+        background-color: #dd7878;
+    }
+    .light .bg-ctp-pink {
+        background-color: #ea76cb;
+    }
+    .light .bg-ctp-rosewater {
+        background-color: #dc8a78;
+    }
+    .light .bg-ctp-peach {
+        background-color: #fe640b;
+    }
+    .light .bg-ctp-green {
+        background-color: #40a02b;
+    }
+    .light .bg-ctp-yellow {
+        background-color: #df8e1d;
+    }
+    .light .bg-ctp-red {
+        background-color: #d20f39;
+    }
+    .light .bg-ctp-maroon {
+        background-color: #e64553;
+    }
+
+    .light .text-ctp-blue {
+        color: #1e66f5;
+    }
+    .light .text-ctp-lavender {
+        color: #7287fd;
+    }
+    .light .text-ctp-flamingo {
+        color: #dd7878;
+    }
+    .light .text-ctp-pink {
+        color: #ea76cb;
+    }
+    .light .text-ctp-rosewater {
+        color: #dc8a78;
+    }
+    .light .text-ctp-peach {
+        color: #fe640b;
+    }
+    .light .text-ctp-green {
+        color: #40a02b;
+    }
+    .light .text-ctp-yellow {
+        color: #df8e1d;
+    }
+    .light .text-ctp-red {
+        color: #d20f39;
+    }
+    .light .text-ctp-maroon {
+        color: #e64553;
+    }
+
+    /* Light Theme Borders/Outlines */
+    .light .border-ctp-surface2 {
+        border-color: #acb0be;
+    }
+    .light .border-ctp-overlay2 {
+        border-color: #7c7f93;
+    }
+    .light .outline-ctp-overlay2 {
+        outline-color: #7c7f93;
+    }
 }
 
 /* Screen reader only utility classes for accessibility */
