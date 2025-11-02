@@ -143,7 +143,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu" {
   alarm_description   = "This metric monitors Redis CPU utilization"
 
   dimensions = {
-    CacheClusterId = "${var.cluster_id}-001"
+    ReplicationGroupId = var.cluster_id
   }
 
   tags = {
@@ -164,7 +164,7 @@ resource "aws_cloudwatch_metric_alarm" "memory" {
   alarm_description   = "This metric monitors Redis memory usage"
 
   dimensions = {
-    CacheClusterId = "${var.cluster_id}-001"
+    ReplicationGroupId = var.cluster_id
   }
 
   tags = {

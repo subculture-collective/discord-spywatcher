@@ -143,11 +143,14 @@ main() {
     
     # Ensure stable deployment exists
     if ! kubectl get deployment "$APP_NAME-stable" -n "$NAMESPACE" &> /dev/null; then
-        # If stable doesn't exist, rename current deployment to stable
+        # If stable doesn't exist, copy from existing deployment
         if kubectl get deployment "$APP_NAME" -n "$NAMESPACE" &> /dev/null; then
-            print_info "Renaming existing deployment to stable"
-            kubectl patch deployment "$APP_NAME" -n "$NAMESPACE" \
-                --type='json' -p='[{"op": "replace", "path": "/metadata/name", "value":"'$APP_NAME-stable'"}]'
+            print_info "Creating stable deployment from existing deployment"
+            kubectl get deployment "$APP_NAME" -n "$NAMESPACE" -o yaml | \
+                sed "s/name: $APP_NAME$/name: $APP_NAME-stable/" | \
+                kubectl apply -f -
+            # Update the original deployment name if needed
+            kubectl label deployment "$APP_NAME-stable" version=stable -n "$NAMESPACE" --overwrite
         else
             print_error "No existing deployment found"
             exit 1

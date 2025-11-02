@@ -17,9 +17,11 @@ terraform {
   }
 
   # Backend configuration for state storage
+  # Note: The key should be set dynamically using -backend-config flag:
+  # terraform init -backend-config="key=<environment>/terraform.tfstate"
   backend "s3" {
     bucket         = "spywatcher-terraform-state"
-    key            = "production/terraform.tfstate"
+    key            = "terraform.tfstate"  # Override with -backend-config flag
     region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
