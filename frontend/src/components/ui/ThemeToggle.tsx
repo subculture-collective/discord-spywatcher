@@ -11,6 +11,8 @@ export function ThemeToggle() {
 
     // Add keyboard shortcut (Ctrl/Cmd + Shift + T)
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout | null = null;
+
         const handleKeyPress = (event: KeyboardEvent) => {
             if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'T') {
                 event.preventDefault();
@@ -18,12 +20,15 @@ export function ThemeToggle() {
                 
                 // Show tooltip briefly when triggered by keyboard
                 setShowTooltip(true);
-                setTimeout(() => setShowTooltip(false), 2000);
+                timeoutId = setTimeout(() => setShowTooltip(false), 2000);
             }
         };
 
         window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
+        return () => {
+            window.removeEventListener('keydown', handleKeyPress);
+            if (timeoutId) clearTimeout(timeoutId);
+        };
     }, [toggleTheme]);
 
     const getIcon = () => {

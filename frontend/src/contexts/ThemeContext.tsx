@@ -34,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setThemeState] = useState<Theme>(getInitialTheme);
     const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>(() => {
         const initial = getInitialTheme();
-        return initial === 'system' ? resolveSystemTheme() : initial;
+        return initial === 'system' ? resolveSystemTheme() : (initial as 'light' | 'dark');
     });
 
     useEffect(() => {
