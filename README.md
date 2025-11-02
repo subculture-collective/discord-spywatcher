@@ -242,6 +242,44 @@ Additional database documentation:
 - [DATABASE_OPTIMIZATION.md](./DATABASE_OPTIMIZATION.md) - Query optimization and indexing
 - [docs/PGBOUNCER_SETUP.md](./docs/PGBOUNCER_SETUP.md) - Quick reference guide
 
+## 🔄 Backup & Disaster Recovery
+
+Spywatcher implements comprehensive backup and disaster recovery procedures to ensure data safety and business continuity:
+
+- **Automated Backups** - Daily full backups and 6-hour incremental backups
+- **WAL Archiving** - Point-in-time recovery (PITR) capability
+- **Encrypted Backups** - GPG encryption for backup security
+- **Multi-Region Storage** - Primary and secondary S3 buckets for redundancy
+- **Backup Monitoring** - Automated health checks and alerting
+- **Recovery Procedures** - Documented runbooks for various disaster scenarios
+
+**Recovery Objectives:**
+- **RTO** (Recovery Time Objective): < 4 hours
+- **RPO** (Recovery Point Objective): < 1 hour
+
+See [DISASTER_RECOVERY.md](./DISASTER_RECOVERY.md) for detailed documentation on:
+- Backup strategy and configuration
+- Automated backup scripts and schedules
+- WAL archiving setup for PITR
+- Recovery procedures for different scenarios
+- Testing and drill schedules
+- Monitoring and alerting setup
+
+**Quick Commands:**
+```bash
+# Manual database backup
+cd backend && npm run db:backup
+
+# Restore from backup
+cd backend && npm run db:restore
+
+# Setup WAL archiving
+cd scripts && ./setup-wal-archiving.sh
+
+# Check backup health
+cd backend && npm run backup:health-check
+```
+
 ## 📊 Monitoring & Observability
 
 Spywatcher includes comprehensive monitoring and observability features:
