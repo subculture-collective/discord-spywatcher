@@ -128,32 +128,25 @@ jobs:
       
       - name: Run database migrations
         run: |
-          # Create migration job
-          cat <<EOF | kubectl apply -f -
-          apiVersion: batch/v1
-          kind: Job
-          metadata:
-            name: db-migration-${{ github.sha }}
-            namespace: spywatcher
-          spec:
-            ttlSecondsAfterFinished: 3600
-            template:
-              spec:
-                restartPolicy: Never
-                containers:
-                - name: migrate
-                  image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest
-                  command: ["sh", "-c", "npx prisma migrate deploy"]
-                  env:
-                  - name: DATABASE_URL
-                    valueFrom:
-                      secretKeyRef:
-                        name: spywatcher-secrets
-                        key: database-url
-          EOF
+          # Create unique migration job name
+          JOB_NAME="db-migration-$(date +%s)"
+          
+          # Update the migration job manifest with unique name and latest image
+          kubectl get job spywatcher-db-migration -n spywatcher -o yaml 2>/dev/null | \
+            sed "s/name: spywatcher-db-migration/name: $JOB_NAME/" | \
+            sed "s|image: ghcr.io/subculture-collective/spywatcher-backend:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest|" | \
+            kubectl apply -f - || \
+          kubectl create job $JOB_NAME --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest \
+            -n spywatcher -- sh -c "npx prisma migrate deploy"
+          
+          # Set DATABASE_URL secret for the job if created via kubectl create
+          kubectl set env job/$JOB_NAME -n spywatcher --from=secret/spywatcher-secrets DATABASE_URL=database-url || true
           
           # Wait for migration to complete
-          kubectl wait --for=condition=complete --timeout=300s job/db-migration-${{ github.sha }} -n spywatcher
+          kubectl wait --for=condition=complete --timeout=300s job/$JOB_NAME -n spywatcher
+          
+          # Show migration logs
+          kubectl logs job/$JOB_NAME -n spywatcher
       
       - name: Deploy with Rolling Update
         if: github.event.inputs.deployment_strategy == 'rolling' || github.event.inputs.deployment_strategy == ''
@@ -186,18 +179,38 @@ jobs:
       
       - name: Run smoke tests
         run: |
-          # Get service endpoint
-          BACKEND_URL=$(kubectl get service spywatcher-backend -n spywatcher -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          # Test via ingress if available, otherwise use port-forward
+          INGRESS_HOST=$(kubectl get ingress spywatcher-ingress -n spywatcher -o jsonpath='{.spec.rules[1].host}' 2>/dev/null || echo "")
           
-          # Wait for service to be ready
-          sleep 30
-          
-          # Test health endpoints
-          echo "Testing liveness endpoint..."
-          curl -f "http://${BACKEND_URL}/health/live" || exit 1
-          
-          echo "Testing readiness endpoint..."
-          curl -f "http://${BACKEND_URL}/health/ready" || exit 1
+          if [ -n "$INGRESS_HOST" ]; then
+            echo "Testing via ingress: $INGRESS_HOST"
+            BACKEND_URL="https://${INGRESS_HOST}"
+            
+            # Test health endpoints
+            echo "Testing liveness endpoint..."
+            curl -f "${BACKEND_URL}/health/live" || exit 1
+            
+            echo "Testing readiness endpoint..."
+            curl -f "${BACKEND_URL}/health/ready" || exit 1
+          else
+            echo "No ingress found, testing via port-forward"
+            # Port-forward backend service to localhost:8080
+            kubectl port-forward svc/spywatcher-backend 8080:80 -n spywatcher &
+            PORT_FORWARD_PID=$!
+            
+            # Wait for port-forward to be ready
+            sleep 5
+            
+            # Test health endpoints
+            echo "Testing liveness endpoint..."
+            curl -f "http://localhost:8080/health/live" || (kill $PORT_FORWARD_PID 2>/dev/null; exit 1)
+            
+            echo "Testing readiness endpoint..."
+            curl -f "http://localhost:8080/health/ready" || (kill $PORT_FORWARD_PID 2>/dev/null; exit 1)
+            
+            # Kill port-forward process
+            kill $PORT_FORWARD_PID 2>/dev/null
+          fi
           
           echo "Smoke tests passed!"
       

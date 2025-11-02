@@ -78,11 +78,16 @@ check_error_rate() {
 }
 
 # Function to update traffic weights
+# NOTE: This implementation uses replica counts to approximate traffic splitting,
+# which is not precise. For accurate percentage-based traffic splitting,
+# consider using a service mesh (Istio, Linkerd) or an ingress controller
+# that supports weighted traffic splitting (like NGINX Ingress with canary annotations).
 update_traffic_weight() {
     local canary_weight=$1
     local stable_weight=$((100 - canary_weight))
     
     print_info "Adjusting traffic: Canary $canary_weight%, Stable $stable_weight%"
+    print_warning "Note: Replica-based traffic splitting is approximate. Actual traffic may not match percentages exactly."
     
     # Calculate replica counts based on percentages
     local total_replicas=3

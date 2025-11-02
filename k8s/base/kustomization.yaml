@@ -9,6 +9,7 @@ resources:
   - secrets.yaml
   - postgres-statefulset.yaml
   - redis-statefulset.yaml
+  - migration-job.yaml
   - backend-deployment.yaml
   - backend-service.yaml
   - backend-hpa.yaml

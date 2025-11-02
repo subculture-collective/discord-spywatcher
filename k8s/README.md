@@ -10,6 +10,7 @@ k8s/
 │   ├── namespace.yaml       # Namespace and resource quotas
 │   ├── configmap.yaml       # Application configuration
 │   ├── secrets.yaml         # Secrets template (DO NOT commit actual secrets)
+│   ├── migration-job.yaml   # Database migration job
 │   ├── backend-deployment.yaml
 │   ├── backend-service.yaml
 │   ├── backend-hpa.yaml     # Horizontal Pod Autoscaler
@@ -242,16 +243,29 @@ kubectl rollout restart deployment/spywatcher-backend -n spywatcher
 
 ### Database Migrations
 
+Database migrations are run as a separate Kubernetes Job to avoid race conditions.
+Migrations should be run before deploying new application versions.
+
 ```bash
-# Run migration job
-kubectl create job --from=cronjob/db-migrate migrate-$(date +%s) -n spywatcher
+# Create a unique migration job
+JOB_NAME="db-migration-$(date +%s)"
+kubectl create job $JOB_NAME --from=job/spywatcher-db-migration -n spywatcher
+
+# Or apply the migration job directly (it will run once)
+kubectl apply -f k8s/base/migration-job.yaml
 
 # Check migration status
 kubectl get jobs -n spywatcher
 
 # View migration logs
-kubectl logs job/migrate-<timestamp> -n spywatcher
+kubectl logs job/$JOB_NAME -n spywatcher
+
+# Delete completed migration jobs (optional, they auto-delete after 1 hour)
+kubectl delete job $JOB_NAME -n spywatcher
 ```
+
+**Important:** The migration job uses `completions: 1` and `parallelism: 1` to ensure 
+only one migration runs at a time, preventing race conditions and deadlocks.
 
 ### Backup
 

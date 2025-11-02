@@ -54,29 +54,6 @@ spec:
                   - backend
               topologyKey: kubernetes.io/hostname
       
-      # Init container for database migrations
-      initContainers:
-      - name: migrate
-        image: ghcr.io/subculture-collective/spywatcher-backend:latest
-        imagePullPolicy: Always
-        command:
-        - sh
-        - -c
-        - npx prisma migrate deploy
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: spywatcher-secrets
-              key: database-url
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-      
       containers:
       - name: backend
         image: ghcr.io/subculture-collective/spywatcher-backend:latest
