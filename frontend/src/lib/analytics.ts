@@ -5,15 +5,17 @@
 
 import api from './api';
 
-export enum AnalyticsEventType {
-    PAGE_VIEW = 'PAGE_VIEW',
-    BUTTON_CLICK = 'BUTTON_CLICK',
-    FEATURE_USED = 'FEATURE_USED',
-    FORM_SUBMIT = 'FORM_SUBMIT',
-    ERROR = 'ERROR',
-    SEARCH = 'SEARCH',
-    EXPORT = 'EXPORT',
+export const AnalyticsEventType = {
+    PAGE_VIEW: 'PAGE_VIEW',
+    BUTTON_CLICK: 'BUTTON_CLICK',
+    FEATURE_USED: 'FEATURE_USED',
+    FORM_SUBMIT: 'FORM_SUBMIT',
+    ERROR: 'ERROR',
+    SEARCH: 'SEARCH',
+    EXPORT: 'EXPORT',
 }
+
+export type AnalyticsEventType = (typeof AnalyticsEventType)[keyof typeof AnalyticsEventType];
 
 interface TrackEventOptions {
     eventType: AnalyticsEventType;

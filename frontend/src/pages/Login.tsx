@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { LogIn, Shield, Activity, TrendingUp } from 'lucide-react';
 
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { config } from '../config/env';
 
 function Login() {
@@ -11,7 +12,11 @@ function Login() {
     const discordLoginUrl = `https://discord.com/oauth2/authorize?client_id=${config.discordClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify+guilds`;
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-ctp-base via-ctp-mantle to-ctp-crust">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-ctp-base via-ctp-mantle to-ctp-crust relative">
+            {/* Theme Toggle in top-right corner */}
+            <div className="absolute top-4 right-4">
+                <ThemeToggle />
+            </div>
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}

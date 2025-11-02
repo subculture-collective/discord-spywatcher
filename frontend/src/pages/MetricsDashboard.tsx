@@ -192,7 +192,7 @@ export default function MetricsDashboard() {
                                     outerRadius={100}
                                     label
                                 >
-                                    {data.features.slice(0, 6).map((entry, index) => (
+                                    {data.features.slice(0, 6).map((_, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
