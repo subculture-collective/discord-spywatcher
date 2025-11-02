@@ -77,12 +77,13 @@ fi
 # Decrypt if needed
 if [[ "$BACKUP_FILE" == *.gpg ]]; then
     echo -e "${YELLOW}Decrypting backup...${NC}"
+    ENCRYPTED_FILE="$BACKUP_FILE"
     DECRYPTED_FILE="${BACKUP_FILE%.gpg}"
     
-    if gpg --decrypt "$BACKUP_FILE" > "$DECRYPTED_FILE"; then
+    if gpg --decrypt "$ENCRYPTED_FILE" > "$DECRYPTED_FILE"; then
         echo -e "${GREEN}✓ Decryption completed${NC}"
         BACKUP_FILE="$DECRYPTED_FILE"
-        CLEANUP_DECRYPTED=true
+        CLEANUP_ENCRYPTED="$ENCRYPTED_FILE"
     else
         echo -e "${RED}✗ Decryption failed${NC}"
         exit 1
@@ -227,9 +228,15 @@ echo "  User records: $USER_COUNT"
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
 
-# Cleanup
-[ "${CLEANUP_TEMP:-false}" = true ] && rm -f "$BACKUP_FILE"
-[ "${CLEANUP_DECRYPTED:-false}" = true ] && rm -f "$BACKUP_FILE"
+# Cleanup temporary files
+if [ "${CLEANUP_TEMP:-false}" = true ]; then
+    rm -f "$BACKUP_FILE"
+    echo "Cleaned up temporary downloaded file"
+fi
+if [ -n "${CLEANUP_ENCRYPTED:-}" ]; then
+    rm -f "$CLEANUP_ENCRYPTED"
+    echo "Cleaned up temporary encrypted file"
+fi
 
 # Summary
 echo ""

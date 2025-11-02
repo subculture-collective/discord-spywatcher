@@ -233,7 +233,7 @@ export async function logBackupComplete(
             s3Location: details.s3Location,
             s3LocationSecondary: details.s3LocationSecondary,
             errorMessage: details.errorMessage,
-            metadata: details.metadata as never,
+            metadata: details.metadata ? (details.metadata as any) : null,
             duration,
             completedAt: new Date(),
         },
@@ -267,7 +267,7 @@ export async function markBackupVerified(
         data: {
             status: 'VERIFIED',
             verifiedAt: new Date(),
-            metadata: metadata as never,
+            metadata: metadata ? (metadata as any) : null,
         },
     });
 }

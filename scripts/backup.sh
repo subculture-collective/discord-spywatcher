@@ -138,7 +138,8 @@ DURATION=$((END_TIME - START_TIME))
 
 # Cleanup old local backups (keep last 7 days locally)
 echo -e "${YELLOW}Cleaning up old local backups (keeping last 7 days)...${NC}"
-find "$BACKUP_DIR" -name "spywatcher_*" -type f -mtime +7 -delete
+DELETED_COUNT=$(find "$BACKUP_DIR" -name "spywatcher_*" -type f -mtime +7 -delete -print | wc -l)
+echo "Removed $DELETED_COUNT old backup(s)"
 echo -e "${GREEN}✓ Local cleanup completed${NC}"
 
 # Cleanup old S3 backups based on retention policy
@@ -166,8 +167,8 @@ if [ "$S3_SUCCESS" = true ] && [ "$BACKUP_TYPE" = "FULL" ]; then
 fi
 
 # Summary
-TOTAL_BACKUPS=$(find "$BACKUP_DIR" -name "spywatcher_*" -type f | wc -l)
-TOTAL_SIZE=$(du -sh "$BACKUP_DIR" 2>/dev/null | cut -f1 || echo "unknown")
+TOTAL_BACKUPS=$(find "$BACKUP_DIR" -name "spywatcher_*" -type f 2>/dev/null | wc -l || echo "0")
+TOTAL_SIZE=$(du -sh "$BACKUP_DIR" 2>/dev/null | cut -f1 || echo "0B")
 
 echo ""
 echo "═══════════════════════════════════════════════════"

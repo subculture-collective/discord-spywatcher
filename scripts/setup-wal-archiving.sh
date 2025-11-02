@@ -45,7 +45,9 @@ echo -e "${GREEN}✓ Backup created${NC}"
 # Configure WAL archiving
 echo -e "${YELLOW}Configuring WAL archiving in postgresql.conf...${NC}"
 
-# Remove existing WAL configuration if present
+# Remove existing WAL configuration if present (backing up removed lines)
+echo -e "${YELLOW}Removing existing WAL configuration (if any)...${NC}"
+grep -E "^(wal_level|archive_mode|archive_command|archive_timeout|max_wal_senders|wal_keep_size)" "$POSTGRESQL_CONF" >> "${POSTGRESQL_CONF}.removed.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
 sed -i '/^wal_level/d' "$POSTGRESQL_CONF"
 sed -i '/^archive_mode/d' "$POSTGRESQL_CONF"
 sed -i '/^archive_command/d' "$POSTGRESQL_CONF"
