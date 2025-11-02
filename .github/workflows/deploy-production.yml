@@ -1,0 +1,291 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deployment_strategy:
+        description: 'Deployment strategy'
+        required: true
+        default: 'rolling'
+        type: choice
+        options:
+          - rolling
+          - blue-green
+          - canary
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: spywatcher-production
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository_owner }}/spywatcher-backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository_owner }}/spywatcher-frontend
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    outputs:
+      backend-tag: ${{ steps.meta-backend.outputs.tags }}
+      frontend-tag: ${{ steps.meta-frontend.outputs.tags }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+          tags: |
+            type=sha,prefix={{branch}}-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+          tags: |
+            type=sha,prefix={{branch}}-
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+    permissions:
+      contents: read
+      id-token: write  # Required for AWS OIDC authentication
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+      
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.28.0'
+      
+      - name: Verify cluster access
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+      
+      - name: Run database migrations
+        run: |
+          # Create unique migration job name
+          JOB_NAME="db-migration-$(date +%s)"
+          
+          # Update the migration job manifest with unique name and latest image
+          kubectl get job spywatcher-db-migration -n spywatcher -o yaml 2>/dev/null | \
+            sed "s/name: spywatcher-db-migration/name: $JOB_NAME/" | \
+            sed "s|image: ghcr.io/subculture-collective/spywatcher-backend:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest|" | \
+            kubectl apply -f - || \
+          kubectl create job $JOB_NAME --image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest \
+            -n spywatcher -- sh -c "npx prisma migrate deploy"
+          
+          # Set DATABASE_URL secret for the job if created via kubectl create
+          kubectl set env job/$JOB_NAME -n spywatcher --from=secret/spywatcher-secrets DATABASE_URL=database-url || true
+          
+          # Wait for migration to complete
+          kubectl wait --for=condition=complete --timeout=300s job/$JOB_NAME -n spywatcher
+          
+          # Show migration logs
+          kubectl logs job/$JOB_NAME -n spywatcher
+      
+      - name: Deploy with Rolling Update
+        if: github.event.inputs.deployment_strategy == 'rolling' || github.event.inputs.deployment_strategy == ''
+        run: |
+          # Update backend deployment
+          kubectl set image deployment/spywatcher-backend \
+            backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:latest \
+            -n spywatcher
+          
+          # Update frontend deployment
+          kubectl set image deployment/spywatcher-frontend \
+            frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest \
+            -n spywatcher
+          
+          # Wait for rollout to complete
+          kubectl rollout status deployment/spywatcher-backend -n spywatcher --timeout=10m
+          kubectl rollout status deployment/spywatcher-frontend -n spywatcher --timeout=10m
+      
+      - name: Deploy with Blue-Green
+        if: github.event.inputs.deployment_strategy == 'blue-green'
+        run: |
+          chmod +x ./scripts/deployment/blue-green-deploy.sh
+          IMAGE_TAG=latest ./scripts/deployment/blue-green-deploy.sh
+      
+      - name: Deploy with Canary
+        if: github.event.inputs.deployment_strategy == 'canary'
+        run: |
+          chmod +x ./scripts/deployment/canary-deploy.sh
+          IMAGE_TAG=latest ./scripts/deployment/canary-deploy.sh
+      
+      - name: Run smoke tests
+        run: |
+          # Test via ingress if available, otherwise use port-forward
+          INGRESS_HOST=$(kubectl get ingress spywatcher-ingress -n spywatcher -o jsonpath='{.spec.rules[1].host}' 2>/dev/null || echo "")
+          
+          if [ -n "$INGRESS_HOST" ]; then
+            echo "Testing via ingress: $INGRESS_HOST"
+            BACKEND_URL="https://${INGRESS_HOST}"
+            
+            # Test health endpoints
+            echo "Testing liveness endpoint..."
+            curl -f "${BACKEND_URL}/health/live" || exit 1
+            
+            echo "Testing readiness endpoint..."
+            curl -f "${BACKEND_URL}/health/ready" || exit 1
+          else
+            echo "No ingress found, testing via port-forward"
+            # Port-forward backend service to localhost:8080
+            kubectl port-forward svc/spywatcher-backend 8080:80 -n spywatcher &
+            PORT_FORWARD_PID=$!
+            
+            # Wait for port-forward to be ready
+            sleep 5
+            
+            # Test health endpoints
+            echo "Testing liveness endpoint..."
+            curl -f "http://localhost:8080/health/live" || (kill $PORT_FORWARD_PID 2>/dev/null; exit 1)
+            
+            echo "Testing readiness endpoint..."
+            curl -f "http://localhost:8080/health/ready" || (kill $PORT_FORWARD_PID 2>/dev/null; exit 1)
+            
+            # Kill port-forward process
+            kill $PORT_FORWARD_PID 2>/dev/null
+          fi
+          
+          echo "Smoke tests passed!"
+      
+      - name: Verify deployment
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployments -n spywatcher
+          kubectl get pods -n spywatcher
+          kubectl get services -n spywatcher
+          
+          echo "=== Recent Events ==="
+          kubectl get events -n spywatcher --sort-by='.lastTimestamp' | tail -20
+      
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed, rolling back..."
+          kubectl rollout undo deployment/spywatcher-backend -n spywatcher
+          kubectl rollout undo deployment/spywatcher-frontend -n spywatcher
+          
+          kubectl rollout status deployment/spywatcher-backend -n spywatcher --timeout=5m
+          kubectl rollout status deployment/spywatcher-frontend -n spywatcher --timeout=5m
+      
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "Deployed commit: ${{ github.sha }}"
+          echo "Deployment strategy: ${{ github.event.inputs.deployment_strategy || 'rolling' }}"
+      
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            Production deployment failed!
+            Commit: ${{ github.sha }}
+            Strategy: ${{ github.event.inputs.deployment_strategy || 'rolling' }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true
+
+  post-deployment:
+    name: Post-Deployment Tasks
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+      
+      - name: Clean up old resources
+        run: |
+          # Clean up completed migration jobs older than 1 hour
+          kubectl delete jobs -n spywatcher --field-selector status.successful=1 \
+            --ignore-not-found=true || true
+          
+          # Clean up old replica sets
+          kubectl delete replicaset -n spywatcher --field-selector status.replicas=0 \
+            --ignore-not-found=true || true
+      
+      - name: Update deployment documentation
+        run: |
+          echo "Deployment completed at $(date)" >> deployment-log.txt
+          echo "Commit: ${{ github.sha }}" >> deployment-log.txt
+          echo "Strategy: ${{ github.event.inputs.deployment_strategy || 'rolling' }}" >> deployment-log.txt
+          echo "---" >> deployment-log.txt

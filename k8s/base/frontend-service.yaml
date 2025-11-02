@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spywatcher-frontend
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    tier: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: spywatcher
+    tier: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP

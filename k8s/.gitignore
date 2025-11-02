@@ -1,0 +1,11 @@
+# Ignore secret files that contain sensitive data
+secrets/
+*.secret.yaml
+*-secrets.yaml
+
+# Ignore generated manifests
+generated/
+
+# Ignore local development files
+*.local.yaml
+local/

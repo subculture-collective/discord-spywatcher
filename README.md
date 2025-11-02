@@ -453,6 +453,69 @@ Git hooks are automatically installed when you run `npm install` in the root dir
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
+## 🚀 Production Deployment
+
+Spywatcher includes comprehensive production deployment infrastructure with Kubernetes, Terraform, and CI/CD automation.
+
+### Deployment Strategies
+
+- **Rolling Updates**: Zero-downtime gradual deployment (default)
+- **Blue-Green**: Instant traffic switching with quick rollback
+- **Canary**: Gradual rollout with automated error detection
+
+### Infrastructure as Code
+
+- **Terraform**: Complete AWS infrastructure modules
+  - VPC with multi-AZ setup
+  - EKS Kubernetes cluster
+  - RDS PostgreSQL (Multi-AZ, encrypted)
+  - ElastiCache Redis (encrypted, failover)
+  - Application Load Balancer with WAF
+- **Kubernetes**: Production-ready manifests
+  - Auto-scaling with HorizontalPodAutoscaler
+  - Health checks and pod disruption budgets
+  - Security contexts and network policies
+- **Helm Charts**: Simplified deployment and configuration
+
+### Quick Deployment
+
+```bash
+# Deploy with Terraform
+cd terraform
+terraform init
+terraform apply -var-file="environments/production/terraform.tfvars"
+
+# Deploy with Kubernetes
+kubectl apply -k k8s/overlays/production
+
+# Deploy with Helm
+helm install spywatcher ./helm/spywatcher -n spywatcher
+
+# Blue-green deployment
+./scripts/deployment/blue-green-deploy.sh
+
+# Canary deployment
+./scripts/deployment/canary-deploy.sh
+```
+
+### Documentation
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide
+- **[INFRASTRUCTURE.md](./INFRASTRUCTURE.md)** - Architecture overview
+- **[terraform/README.md](./terraform/README.md)** - Infrastructure as Code guide
+- **[k8s/README.md](./k8s/README.md)** - Kubernetes manifests guide
+
+### CI/CD Pipeline
+
+GitHub Actions workflows for automated deployment:
+- Docker image building and pushing to GHCR
+- Database migrations
+- Multiple deployment strategy support
+- Automated smoke tests and health checks
+- Rollback on failure
+
+See [.github/workflows/deploy-production.yml](./.github/workflows/deploy-production.yml) for the complete pipeline.
+
 ## 👥 Contributions
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on contributing to this project.

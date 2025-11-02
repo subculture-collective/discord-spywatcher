@@ -1,0 +1,15 @@
+apiVersion: v2
+name: spywatcher
+description: A Helm chart for Spywatcher Discord surveillance and analytics application
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - discord
+  - monitoring
+  - analytics
+maintainers:
+  - name: Spywatcher Team
+home: https://github.com/subculture-collective/discord-spywatcher
+sources:
+  - https://github.com/subculture-collective/discord-spywatcher

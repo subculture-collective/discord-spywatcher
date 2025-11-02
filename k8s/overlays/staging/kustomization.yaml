@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: spywatcher-staging
+
+bases:
+  - ../../base
+
+namePrefix: staging-
+
+commonLabels:
+  environment: staging
+
+patchesStrategicMerge:
+  - replicas-patch.yaml
+
+configMapGenerator:
+  - name: spywatcher-config
+    behavior: merge
+    literals:
+      - NODE_ENV=staging
+      - LOG_LEVEL=debug
+
+images:
+  - name: ghcr.io/subculture-collective/spywatcher-backend
+    newTag: staging
+  - name: ghcr.io/subculture-collective/spywatcher-frontend
+    newTag: staging

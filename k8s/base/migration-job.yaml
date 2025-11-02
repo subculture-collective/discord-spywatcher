@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spywatcher-db-migration
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    component: migration
+spec:
+  # Only keep successful jobs for 1 hour
+  ttlSecondsAfterFinished: 3600
+  # Prevent concurrent migrations
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: spywatcher
+        component: migration
+    spec:
+      restartPolicy: Never
+      
+      # Security context for pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      
+      containers:
+      - name: migrate
+        image: ghcr.io/subculture-collective/spywatcher-backend:latest
+        imagePullPolicy: Always
+        command:
+        - sh
+        - -c
+        - |
+          echo "Starting database migration..."
+          npx prisma migrate deploy
+          echo "Migration completed successfully"
+        
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: spywatcher-secrets
+              key: database-url
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
