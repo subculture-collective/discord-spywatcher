@@ -4,7 +4,27 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>Discord Spywatcher</title>
+    <!-- Prevent flash of unstyled content by applying theme before React loads -->
+    <script>
+      (function() {
+        function getTheme() {
+          const stored = localStorage.getItem('theme');
+          if (stored && ['light', 'dark', 'system'].includes(stored)) {
+            if (stored === 'system') {
+              return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            return stored;
+          }
+          // Default to system preference
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        
+        const theme = getTheme();
+        document.documentElement.classList.add(theme);
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
