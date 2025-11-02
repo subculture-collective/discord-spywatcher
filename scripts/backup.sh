@@ -64,7 +64,7 @@ gzip "$BACKUP_PATH"
 BACKUP_FILE="${BACKUP_FILE}.gz"
 BACKUP_PATH="${BACKUP_PATH}.gz"
 
-BACKUP_SIZE_BYTES=$(stat -f%z "$BACKUP_PATH" 2>/dev/null || stat -c%s "$BACKUP_PATH")
+BACKUP_SIZE_BYTES=$(stat -f%z "$BACKUP_PATH" 2>/dev/null || stat -c%s "$BACKUP_PATH" 2>/dev/null)
 BACKUP_SIZE_MB=$(echo "scale=2; $BACKUP_SIZE_BYTES / 1048576" | bc)
 BACKUP_SIZE_HUMAN=$(du -h "$BACKUP_PATH" | cut -f1)
 
@@ -147,7 +147,7 @@ if [ "$S3_SUCCESS" = true ] && [ "$BACKUP_TYPE" = "FULL" ]; then
     echo -e "${YELLOW}Applying S3 retention policy...${NC}"
     
     # Keep daily backups for 30 days
-    CUTOFF_DATE=$(date -d "$RETENTION_DAYS days ago" +%Y%m%d 2>/dev/null || date -v-${RETENTION_DAYS}d +%Y%m%d)
+    CUTOFF_DATE=$(date -d "$RETENTION_DAYS days ago" +%Y%m%d 2>/dev/null || date -v-${RETENTION_DAYS}d +%Y%m%d 2>/dev/null)
     aws s3 ls "s3://$S3_BUCKET/postgres/full/" | \
         awk '{print $4}' | \
         grep -E "spywatcher_full_[0-9]+_.*" | \
@@ -155,7 +155,7 @@ if [ "$S3_SUCCESS" = true ] && [ "$BACKUP_TYPE" = "FULL" ]; then
             FILE_DATE=$(echo "$file" | grep -oE "[0-9]{8}" | head -1)
             if [ "$FILE_DATE" -lt "$CUTOFF_DATE" ]; then
                 # Check if it's a monthly backup (1st of month)
-                FILE_DAY=$(echo "$FILE_DATE" | tail -c 3)
+                FILE_DAY="${FILE_DATE:6:2}"
                 if [ "$FILE_DAY" != "01" ]; then
                     echo "Removing old backup: $file"
                     aws s3 rm "s3://$S3_BUCKET/postgres/full/$file" || true

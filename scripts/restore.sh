@@ -111,7 +111,7 @@ read -p "Are you sure you want to continue? (yes/no): " CONFIRM
 if [ "$CONFIRM" != "yes" ]; then
     echo "Restore cancelled"
     [ "${CLEANUP_TEMP:-false}" = true ] && rm -f "$BACKUP_FILE"
-    [ "${CLEANUP_DECRYPTED:-false}" = true ] && rm -f "$BACKUP_FILE"
+    [ -n "${CLEANUP_ENCRYPTED:-}" ] && rm -f "$CLEANUP_ENCRYPTED"
     exit 0
 fi
 

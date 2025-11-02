@@ -102,14 +102,14 @@ Our backup strategy includes:
    aws s3 ls s3://spywatcher-backups/postgres/full/ --recursive | sort -r | head -10
    
    # Check backup logs
-   cd /home/runner/work/discord-spywatcher/discord-spywatcher/backend
+   cd $PROJECT_ROOT/backend
    npm run db:backup-logs
    ```
 
 4. **Restore Database** (60 minutes)
    ```bash
    # Download and restore the backup
-   cd /home/runner/work/discord-spywatcher/discord-spywatcher/scripts
+   cd $PROJECT_ROOT/scripts
    
    # Set environment variables
    export DB_NAME="spywatcher"
@@ -209,7 +209,7 @@ Our backup strategy includes:
    export S3_BUCKET="spywatcher-backups"
    
    # Restore from secondary backup location
-   cd /home/runner/work/discord-spywatcher/discord-spywatcher/scripts
+   cd $PROJECT_ROOT/scripts
    ./restore.sh s3://spywatcher-backups-us-west/postgres/full/latest.dump.gz
    ```
 
@@ -298,7 +298,7 @@ Our backup strategy includes:
    export DB_HOST="secondary-db.us-west-2.rds.amazonaws.com"
    export S3_BUCKET="spywatcher-backups-us-west"
    
-   cd /home/runner/work/discord-spywatcher/discord-spywatcher/scripts
+   cd $PROJECT_ROOT/scripts
    ./restore.sh s3://spywatcher-backups-us-west/postgres/full/latest.dump.gz
    ```
 
@@ -376,7 +376,7 @@ Our backup strategy includes:
    # Use backup from before attack
    # Verify backup is not compromised
    
-   cd /home/runner/work/discord-spywatcher/discord-spywatcher/scripts
+   cd $PROJECT_ROOT/scripts
    
    # Identify clean backup (before attack)
    aws s3 ls s3://spywatcher-backups/postgres/full/ | \
@@ -413,7 +413,7 @@ If you need to recover to a specific point in time:
 
 ```bash
 # Restore to specific timestamp
-cd /home/runner/work/discord-spywatcher/discord-spywatcher/scripts
+cd $PROJECT_ROOT/scripts
 ./restore.sh <backup_file> '2024-01-25 14:30:00'
 ```
 
@@ -506,7 +506,7 @@ psql -h $DB_HOST -U spywatcher -c "SELECT pg_size_pretty(pg_database_size('spywa
 psql -h $DB_HOST -U postgres -c "SELECT * FROM pg_stat_archiver;"
 
 # List recent backup logs
-cd /home/runner/work/discord-spywatcher/discord-spywatcher/backend
+cd $PROJECT_ROOT/backend
 npm run db:backup-logs
 
 # Monitor backup health
@@ -516,9 +516,9 @@ npm run backup:health-check
 ### Configuration Files
 
 - **PostgreSQL Config**: `/etc/postgresql/15/main/postgresql.conf`
-- **Backup Config**: `/home/runner/work/discord-spywatcher/discord-spywatcher/scripts/backup.sh`
-- **Environment**: `/home/runner/work/discord-spywatcher/discord-spywatcher/backend/.env`
-- **Infrastructure**: `/home/runner/work/discord-spywatcher/discord-spywatcher/infrastructure/`
+- **Backup Config**: `$PROJECT_ROOT/scripts/backup.sh`
+- **Environment**: `$PROJECT_ROOT/backend/.env`
+- **Infrastructure**: `$PROJECT_ROOT/infrastructure/`
 
 ### Additional Resources
 
