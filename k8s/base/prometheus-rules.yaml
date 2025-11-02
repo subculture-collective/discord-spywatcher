@@ -1,0 +1,251 @@
+# Prometheus Alert Rules for Auto-scaling Monitoring
+# These rules require Prometheus Operator to be installed
+# Apply with: kubectl apply -f prometheus-rules.yaml
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: spywatcher-autoscaling-alerts
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    prometheus: kube-prometheus
+spec:
+  groups:
+  - name: autoscaling
+    interval: 30s
+    rules:
+    # Alert when HPA reaches maximum replicas
+    - alert: HPAMaxedOut
+      expr: |
+        kube_horizontalpodautoscaler_status_current_replicas{namespace="spywatcher"}
+        >= kube_horizontalpodautoscaler_spec_max_replicas{namespace="spywatcher"}
+      for: 15m
+      labels:
+        severity: warning
+        component: autoscaling
+      annotations:
+        summary: "HPA {{ $labels.horizontalpodautoscaler }} has reached maximum replicas"
+        description: "The HPA {{ $labels.horizontalpodautoscaler }} has been at maximum capacity ({{ $value }} replicas) for 15 minutes. Consider increasing max replicas or optimizing the application."
+
+    # Alert when HPA is at minimum and CPU is still high
+    - alert: HPAAtMinimumButHighCPU
+      expr: |
+        kube_horizontalpodautoscaler_status_current_replicas{namespace="spywatcher"}
+        <= kube_horizontalpodautoscaler_spec_min_replicas{namespace="spywatcher"}
+        and
+        kube_horizontalpodautoscaler_status_current_metrics_average_utilization{namespace="spywatcher", metric_name="cpu"}
+        > 80
+      for: 10m
+      labels:
+        severity: warning
+        component: autoscaling
+      annotations:
+        summary: "HPA {{ $labels.horizontalpodautoscaler }} at minimum replicas but high CPU"
+        description: "The HPA {{ $labels.horizontalpodautoscaler }} is at minimum replicas but CPU usage is {{ $value }}%. Consider increasing minimum replicas."
+
+    # Alert when HPA metrics are unavailable
+    - alert: HPAMetricsUnavailable
+      expr: |
+        kube_horizontalpodautoscaler_status_condition{namespace="spywatcher", condition="ScalingActive", status="false"}
+      for: 5m
+      labels:
+        severity: critical
+        component: autoscaling
+      annotations:
+        summary: "HPA {{ $labels.horizontalpodautoscaler }} metrics unavailable"
+        description: "The HPA {{ $labels.horizontalpodautoscaler }} cannot retrieve metrics. Check metrics-server and ensure resource requests are set."
+
+    # Alert on frequent scaling events
+    - alert: FrequentScaling
+      expr: |
+        rate(kube_horizontalpodautoscaler_status_current_replicas{namespace="spywatcher"}[15m]) > 0.5
+      for: 30m
+      labels:
+        severity: warning
+        component: autoscaling
+      annotations:
+        summary: "HPA {{ $labels.horizontalpodautoscaler }} is scaling frequently"
+        description: "The HPA {{ $labels.horizontalpodautoscaler }} has been scaling up/down frequently. Consider adjusting stabilization windows or thresholds."
+
+    # Alert when pod count is high for extended period
+    - alert: HighPodCountSustained
+      expr: |
+        kube_horizontalpodautoscaler_status_current_replicas{namespace="spywatcher"}
+        > (kube_horizontalpodautoscaler_spec_max_replicas{namespace="spywatcher"} * 0.8)
+      for: 2h
+      labels:
+        severity: warning
+        component: autoscaling
+      annotations:
+        summary: "HPA {{ $labels.horizontalpodautoscaler }} has high replica count for 2 hours"
+        description: "The HPA {{ $labels.horizontalpodautoscaler }} has been running at {{ $value }} replicas (>80% of max) for 2 hours. This may indicate sustained high load."
+
+  - name: deployment-health
+    interval: 30s
+    rules:
+    # Alert when deployment rollout is stuck
+    - alert: DeploymentRolloutStuck
+      expr: |
+        kube_deployment_status_replicas_updated{namespace="spywatcher"}
+        < kube_deployment_spec_replicas{namespace="spywatcher"}
+      for: 15m
+      labels:
+        severity: critical
+        component: deployment
+      annotations:
+        summary: "Deployment {{ $labels.deployment }} rollout is stuck"
+        description: "The deployment {{ $labels.deployment }} has been stuck in rollout for 15 minutes. Only {{ $value }} of {{ $labels.spec_replicas }} replicas are updated."
+
+    # Alert when pods are not ready
+    - alert: PodsNotReady
+      expr: |
+        kube_deployment_status_replicas_ready{namespace="spywatcher"}
+        < kube_deployment_spec_replicas{namespace="spywatcher"}
+      for: 10m
+      labels:
+        severity: warning
+        component: deployment
+      annotations:
+        summary: "Deployment {{ $labels.deployment }} has pods not ready"
+        description: "The deployment {{ $labels.deployment }} has {{ $value }} pods not ready for 10 minutes."
+
+    # Alert on high pod restart rate
+    - alert: HighPodRestartRate
+      expr: |
+        rate(kube_pod_container_status_restarts_total{namespace="spywatcher"}[15m]) > 0.1
+      for: 15m
+      labels:
+        severity: warning
+        component: deployment
+      annotations:
+        summary: "Pod {{ $labels.pod }} is restarting frequently"
+        description: "Pod {{ $labels.pod }} in deployment {{ $labels.deployment }} is restarting at a rate of {{ $value }} restarts per second."
+
+  - name: load-balancer-health
+    interval: 30s
+    rules:
+    # Alert when service has no endpoints
+    - alert: ServiceNoEndpoints
+      expr: |
+        kube_service_spec_type{namespace="spywatcher", type="ClusterIP"}
+        unless on(service) kube_endpoint_address_available{namespace="spywatcher"} > 0
+      for: 5m
+      labels:
+        severity: critical
+        component: service
+      annotations:
+        summary: "Service {{ $labels.service }} has no endpoints"
+        description: "The service {{ $labels.service }} has no available endpoints for 5 minutes. Check if pods are running and passing readiness checks."
+
+    # Alert when endpoints are reduced significantly
+    - alert: EndpointsReducedSignificantly
+      expr: |
+        (
+          kube_endpoint_address_available{namespace="spywatcher"}
+          / (kube_endpoint_address_available{namespace="spywatcher"} offset 15m)
+        ) < 0.5
+      for: 5m
+      labels:
+        severity: warning
+        component: service
+      annotations:
+        summary: "Service {{ $labels.endpoint }} endpoints reduced by >50%"
+        description: "The service {{ $labels.endpoint }} has lost more than 50% of its endpoints in the last 15 minutes."
+
+  - name: resource-utilization
+    interval: 30s
+    rules:
+    # Alert on sustained high CPU usage
+    - alert: SustainedHighCPUUsage
+      expr: |
+        avg by (namespace, pod) (
+          rate(container_cpu_usage_seconds_total{namespace="spywatcher", container!=""}[5m])
+        ) > 0.8
+      for: 30m
+      labels:
+        severity: warning
+        component: resources
+      annotations:
+        summary: "Pod {{ $labels.pod }} has sustained high CPU usage"
+        description: "Pod {{ $labels.pod }} has been using >80% CPU for 30 minutes. Value: {{ $value }}."
+
+    # Alert on sustained high memory usage
+    - alert: SustainedHighMemoryUsage
+      expr: |
+        avg by (namespace, pod) (
+          container_memory_working_set_bytes{namespace="spywatcher", container!=""}
+          / container_spec_memory_limit_bytes{namespace="spywatcher", container!=""}
+        ) > 0.8
+      for: 30m
+      labels:
+        severity: warning
+        component: resources
+      annotations:
+        summary: "Pod {{ $labels.pod }} has sustained high memory usage"
+        description: "Pod {{ $labels.pod }} has been using >80% memory for 30 minutes. Value: {{ $value }}."
+
+    # Alert when approaching resource limits
+    - alert: NearCPULimit
+      expr: |
+        avg by (namespace, pod) (
+          rate(container_cpu_usage_seconds_total{namespace="spywatcher", container!=""}[5m])
+        ) > 0.95
+      for: 5m
+      labels:
+        severity: critical
+        component: resources
+      annotations:
+        summary: "Pod {{ $labels.pod }} is near CPU limit"
+        description: "Pod {{ $labels.pod }} is using >95% of CPU limit. This may cause throttling. Value: {{ $value }}."
+
+    # Alert when approaching memory limits
+    - alert: NearMemoryLimit
+      expr: |
+        avg by (namespace, pod) (
+          container_memory_working_set_bytes{namespace="spywatcher", container!=""}
+          / container_spec_memory_limit_bytes{namespace="spywatcher", container!=""}
+        ) > 0.95
+      for: 5m
+      labels:
+        severity: critical
+        component: resources
+      annotations:
+        summary: "Pod {{ $labels.pod }} is near memory limit"
+        description: "Pod {{ $labels.pod }} is using >95% of memory limit. This may cause OOM kills. Value: {{ $value }}."
+
+  - name: ingress-health
+    interval: 30s
+    rules:
+    # Alert on high 5xx error rate
+    - alert: High5xxErrorRate
+      expr: |
+        sum by (namespace, ingress) (
+          rate(nginx_ingress_controller_requests{namespace="spywatcher", status=~"5.."}[5m])
+        )
+        / sum by (namespace, ingress) (
+          rate(nginx_ingress_controller_requests{namespace="spywatcher"}[5m])
+        ) > 0.05
+      for: 5m
+      labels:
+        severity: critical
+        component: ingress
+      annotations:
+        summary: "High 5xx error rate on ingress {{ $labels.ingress }}"
+        description: "Ingress {{ $labels.ingress }} has a 5xx error rate of {{ $value | humanizePercentage }} for 5 minutes."
+
+    # Alert on increased response time
+    - alert: HighResponseTime
+      expr: |
+        histogram_quantile(0.95,
+          sum by (namespace, ingress, le) (
+            rate(nginx_ingress_controller_request_duration_seconds_bucket{namespace="spywatcher"}[5m])
+          )
+        ) > 2
+      for: 10m
+      labels:
+        severity: warning
+        component: ingress
+      annotations:
+        summary: "High response time on ingress {{ $labels.ingress }}"
+        description: "95th percentile response time for ingress {{ $labels.ingress }} is {{ $value }}s, which is above the 2s threshold."
