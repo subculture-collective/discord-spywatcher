@@ -1,0 +1,115 @@
+# Production Environment Values
+# Override default values for production deployment
+
+global:
+  environment: production
+
+namespace: spywatcher
+
+image:
+  backend:
+    repository: ghcr.io/subculture-collective/spywatcher-backend
+    tag: latest
+    pullPolicy: Always
+  frontend:
+    repository: ghcr.io/subculture-collective/spywatcher-frontend
+    tag: latest
+    pullPolicy: Always
+
+backend:
+  enabled: true
+  replicaCount: 3
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  env:
+    NODE_ENV: production
+    PORT: "3001"
+    LOG_LEVEL: info
+
+frontend:
+  enabled: true
+  replicaCount: 2
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  
+  env:
+    VITE_API_URL: "https://api.spywatcher.example.com"
+
+# Use managed services instead of in-cluster databases
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+  
+  hosts:
+    - host: spywatcher.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spywatcher-frontend
+          port: 80
+    - host: api.spywatcher.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spywatcher-backend
+          port: 80
+  
+  tls:
+    - secretName: spywatcher-tls-cert
+      hosts:
+        - spywatcher.example.com
+        - api.spywatcher.example.com
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+# Production-specific node affinity
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      preference:
+        matchExpressions:
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values:
+          - t3.large
+          - t3a.large

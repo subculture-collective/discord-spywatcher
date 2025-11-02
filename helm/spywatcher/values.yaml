@@ -1,0 +1,212 @@
+# Default values for spywatcher
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  environment: production
+
+# Namespace
+namespace: spywatcher
+
+# Image settings
+image:
+  backend:
+    repository: ghcr.io/subculture-collective/spywatcher-backend
+    tag: latest
+    pullPolicy: Always
+  frontend:
+    repository: ghcr.io/subculture-collective/spywatcher-frontend
+    tag: latest
+    pullPolicy: Always
+
+imagePullSecrets: []
+
+# Backend configuration
+backend:
+  enabled: true
+  replicaCount: 3
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3001
+  
+  env:
+    NODE_ENV: production
+    PORT: "3001"
+    LOG_LEVEL: info
+  
+  # Health check configuration
+  livenessProbe:
+    httpGet:
+      path: /health/live
+      port: 3001
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    httpGet:
+      path: /health/ready
+      port: 3001
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicaCount: 2
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+  
+  env:
+    VITE_API_URL: "https://api.spywatcher.example.com"
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  image: postgres:15-alpine
+  
+  auth:
+    username: spywatcher
+    database: spywatcher
+    # Password should be set via --set or separate values file
+    existingSecret: postgres-secret
+    secretKeys:
+      adminPasswordKey: password
+  
+  primary:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+    
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: ""
+
+# Redis configuration
+redis:
+  enabled: true
+  image: redis:7-alpine
+  
+  auth:
+    enabled: true
+    existingSecret: redis-secret
+    existingSecretPasswordKey: password
+  
+  master:
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  
+  hosts:
+    - host: spywatcher.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spywatcher-frontend
+          port: 80
+    - host: api.spywatcher.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spywatcher-backend
+          port: 80
+  
+  tls:
+    - secretName: spywatcher-tls-cert
+      hosts:
+        - spywatcher.example.com
+        - api.spywatcher.example.com
+
+# ConfigMap data
+configMap:
+  data:
+    NODE_ENV: "production"
+    PORT: "3001"
+    LOG_LEVEL: "info"
+    RATE_LIMIT_WINDOW_MS: "900000"
+    RATE_LIMIT_MAX_REQUESTS: "100"
+
+# Secrets (should be provided externally)
+secrets:
+  # Database
+  databaseUrl: ""
+  # Redis
+  redisUrl: ""
+  # JWT
+  jwtSecret: ""
+  jwtRefreshSecret: ""
+  # Discord
+  discordBotToken: ""
+  discordClientId: ""
+  discordClientSecret: ""
+  discordGuildId: ""
+  discordRedirectUri: ""
+  adminDiscordIds: ""
+  botGuildIds: ""
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+
+# Node affinity and tolerations
+affinity: {}
+tolerations: []
+nodeSelector: {}

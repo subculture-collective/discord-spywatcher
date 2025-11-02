@@ -1,0 +1,104 @@
+# Staging Environment Values
+# Override default values for staging deployment
+
+global:
+  environment: staging
+
+namespace: spywatcher-staging
+
+image:
+  backend:
+    repository: ghcr.io/subculture-collective/spywatcher-backend
+    tag: staging
+    pullPolicy: Always
+  frontend:
+    repository: ghcr.io/subculture-collective/spywatcher-frontend
+    tag: staging
+    pullPolicy: Always
+
+backend:
+  enabled: true
+  replicaCount: 1
+  
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  env:
+    NODE_ENV: staging
+    PORT: "3001"
+    LOG_LEVEL: debug
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+  
+  env:
+    VITE_API_URL: "https://api-staging.spywatcher.example.com"
+
+# Use in-cluster databases for staging
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      size: 10Gi
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      size: 5Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  
+  hosts:
+    - host: staging.spywatcher.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spywatcher-frontend
+          port: 80
+    - host: api-staging.spywatcher.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: spywatcher-backend
+          port: 80
+  
+  tls:
+    - secretName: spywatcher-staging-tls-cert
+      hosts:
+        - staging.spywatcher.example.com
+        - api-staging.spywatcher.example.com
+
+podDisruptionBudget:
+  enabled: false
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
