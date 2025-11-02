@@ -55,86 +55,96 @@ function Dashboard() {
         <div className="min-h-screen bg-ctp-base p-6">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <header className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-ctp-text">Dashboard</h1>
+                        <h1 id="main-content" className="text-3xl font-bold text-ctp-text">Dashboard</h1>
                         <p className="text-ctp-subtext0 mt-1">User behavior and suspicion monitoring</p>
                     </div>
                     <ThemeToggle />
-                </div>
+                </header>
 
                 {/* Stats Grid */}
-                {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <CardSkeleton />
-                        <CardSkeleton />
-                        <CardSkeleton />
-                        <CardSkeleton />
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <StatCard
-                            title="Total Users"
-                            value={totalUsers}
-                            subtitle="Tracked users"
-                            icon={Users}
-                        />
-                        <StatCard
-                            title="High Suspicion"
-                            value={highSuspicionUsers}
-                            subtitle="Score > 50"
-                            icon={AlertTriangle}
-                            trend={highSuspicionUsers > 0 ? 'up' : 'down'}
-                        />
-                        <StatCard
-                            title="Ghost Users"
-                            value={ghostUsers}
-                            subtitle="Ghost score > 5"
-                            icon={Shield}
-                        />
-                        <StatCard
-                            title="Banned Users"
-                            value={bannedCount}
-                            subtitle="Currently banned"
-                            icon={Activity}
-                        />
-                    </div>
-                )}
+                <section aria-labelledby="stats-heading">
+                    <h2 id="stats-heading" className="sr-only">Statistics Overview</h2>
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <CardSkeleton />
+                            <CardSkeleton />
+                            <CardSkeleton />
+                            <CardSkeleton />
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <StatCard
+                                title="Total Users"
+                                value={totalUsers}
+                                subtitle="Tracked users"
+                                icon={Users}
+                            />
+                            <StatCard
+                                title="High Suspicion"
+                                value={highSuspicionUsers}
+                                subtitle="Score > 50"
+                                icon={AlertTriangle}
+                                trend={highSuspicionUsers > 0 ? 'up' : 'down'}
+                            />
+                            <StatCard
+                                title="Ghost Users"
+                                value={ghostUsers}
+                                subtitle="Ghost score > 5"
+                                icon={Shield}
+                            />
+                            <StatCard
+                                title="Banned Users"
+                                value={bannedCount}
+                                subtitle="Currently banned"
+                                icon={Activity}
+                            />
+                        </div>
+                    )}
+                </section>
 
                 {/* Users Table */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle>User Suspicion List</CardTitle>
-                            <label className="flex items-center gap-2 text-sm text-ctp-subtext0">
-                                <input
-                                    type="checkbox"
-                                    checked={filterBanned}
-                                    onChange={(e) => setFilterBanned(e.target.checked)}
-                                    className="rounded border-ctp-surface1"
-                                />
-                                Hide banned users
-                            </label>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        {loading ? (
-                            <TableSkeleton rows={5} />
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full">
-                                    <thead className="bg-ctp-surface0 border-b border-ctp-surface1">
-                                        <tr>
-                                            <th className="text-left px-4 py-3 text-sm font-semibold text-ctp-text">Username</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Score</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Ghost</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Clients</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Channels</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Fast RT</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Age</th>
-                                            <th className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Actions</th>
-                                        </tr>
-                                    </thead>
+                <section aria-labelledby="users-heading">
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <CardTitle id="users-heading">User Suspicion List</CardTitle>
+                                <div>
+                                    <label htmlFor="filter-banned" className="flex items-center gap-2 text-sm text-ctp-subtext0">
+                                        <input
+                                            id="filter-banned"
+                                            type="checkbox"
+                                            checked={filterBanned}
+                                            onChange={(e) => setFilterBanned(e.target.checked)}
+                                            className="rounded border-ctp-surface1"
+                                            aria-describedby="filter-help"
+                                        />
+                                        Hide banned users
+                                    </label>
+                                    <span id="filter-help" className="sr-only">Toggle to show or hide banned users from the list</span>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {loading ? (
+                                <TableSkeleton rows={5} />
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full" aria-labelledby="users-heading">
+                                        <caption className="sr-only">User suspicion scores and actions</caption>
+                                        <thead className="bg-ctp-surface0 border-b border-ctp-surface1">
+                                            <tr>
+                                                <th scope="col" className="text-left px-4 py-3 text-sm font-semibold text-ctp-text">Username</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Score</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Ghost</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Clients</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Channels</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Fast Reaction Time">Fast RT</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Account Age in Days">Age</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Actions</th>
+                                            </tr>
+                                        </thead>
                                     <tbody className="divide-y divide-ctp-surface1">
                                         {filtered.map((user) => {
                                             const isBanned = bannedUsers.has(user.userId);
@@ -167,7 +177,7 @@ function Dashboard() {
                                                     <td className="text-center px-4 py-3">
                                                         {isBanned ? (
                                                             <button
-                                                                className="text-sm text-ctp-blue hover:text-ctp-blue/80 underline"
+                                                                className="text-sm text-ctp-blue hover:text-ctp-blue/80 underline focus:outline-none focus:ring-2 focus:ring-ctp-blue rounded"
                                                                 onClick={() =>
                                                                     api
                                                                         .post('/userunban', {
@@ -188,12 +198,13 @@ function Dashboard() {
                                                                             );
                                                                         })
                                                                 }
+                                                                aria-label={`Unban user ${user.username}`}
                                                             >
                                                                 Unban
                                                             </button>
                                                         ) : (
                                                             <button
-                                                                className="text-sm text-ctp-red hover:text-ctp-red/80 underline"
+                                                                className="text-sm text-ctp-red hover:text-ctp-red/80 underline focus:outline-none focus:ring-2 focus:ring-ctp-red rounded"
                                                                 onClick={() =>
                                                                     api
                                                                         .post('/userban', {
@@ -209,6 +220,7 @@ function Dashboard() {
                                                                             )
                                                                         )
                                                                 }
+                                                                aria-label={`Ban user ${user.username}`}
                                                             >
                                                                 Ban
                                                             </button>
@@ -223,6 +235,7 @@ function Dashboard() {
                         )}
                     </CardContent>
                 </Card>
+                </section>
             </div>
         </div>
     );

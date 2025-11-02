@@ -198,3 +198,32 @@ Lots of classes hidden here to showcase the catppuccin color classes
         outline-color: rgba(108, 112, 134, 0.1);
     }
 }
+
+/* Screen reader only utility classes for accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* Focus visible enhancement for better keyboard navigation */
+:focus-visible {
+    outline: 2px solid #89b4fa;
+    outline-offset: 2px;
+}
