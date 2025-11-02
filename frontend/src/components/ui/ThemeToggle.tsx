@@ -80,7 +80,7 @@ export function ThemeToggle() {
                 <div
                     role="status"
                     aria-live="polite"
-                    className="absolute top-full mt-2 right-0 bg-gray-900 dark:bg-ctp-surface0 text-white dark:text-ctp-text px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg border border-gray-700 dark:border-ctp-surface1 z-50 animate-fade-in"
+                    className="absolute top-full mt-2 right-0 bg-ctp-surface0 text-ctp-text px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg border border-ctp-surface1 z-50 animate-fade-in"
                 >
                     Switched to {getThemeLabel()}
                 </div>

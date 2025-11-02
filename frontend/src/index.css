@@ -2,17 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme transition for smooth mode switching */
-* {
+/* Theme transition for smooth mode switching - applied to common elements */
+body,
+.bg-ctp-base,
+.bg-ctp-mantle,
+.bg-ctp-crust,
+.bg-ctp-surface0,
+.bg-ctp-surface1,
+.bg-ctp-surface2,
+.text-ctp-text,
+.text-ctp-subtext0,
+.text-ctp-subtext1,
+[class*="bg-"],
+[class*="text-"],
+[class*="border-"] {
     transition: background-color 300ms ease-in-out, 
                 color 300ms ease-in-out, 
                 border-color 300ms ease-in-out,
                 box-shadow 300ms ease-in-out;
-}
-
-/* Disable transitions on initial page load */
-.disable-transitions * {
-    transition: none !important;
 }
 
 /* CSS Variables for Light Theme (Catppuccin Latte) */
