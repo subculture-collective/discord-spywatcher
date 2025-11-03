@@ -277,7 +277,6 @@ generate_report() {
     # Summary
     local checks_passed=0
     local checks_failed=0
-    local checks_warned=0
     
     # Components to check
     declare -A components=(

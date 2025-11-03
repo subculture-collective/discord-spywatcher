@@ -434,7 +434,7 @@ data:
           pod: {resource: "pod"}
       name:
         matches: "^(.*)_total"
-        as: "\${1}_per_second"
+        as: '${1}_per_second'
       metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)'
 EOF
 
