@@ -3,8 +3,8 @@
  * GDPR-compliant cookie consent banner
  */
 
-import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 import { useAnalytics } from '../hooks/useAnalytics';
 

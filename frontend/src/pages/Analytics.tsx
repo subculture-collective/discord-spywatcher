@@ -1,6 +1,7 @@
-import { Users, Activity, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Users, Activity, AlertTriangle, TrendingUp, Network } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 import DateRangeSelector from '../components/analytics/DateRangeSelector';
 import ExportButton from '../components/analytics/ExportButton';
@@ -121,6 +122,12 @@ function Analytics() {
                             </p>
                         </div>
                         <div className="flex gap-2 items-center">
+                            <Link to="/advanced-analytics">
+                                <Button variant="secondary" size="md">
+                                    <Network className="w-4 h-4 mr-2" />
+                                    Advanced Charts
+                                </Button>
+                            </Link>
                             <Button
                                 onClick={fetchData}
                                 disabled={loading}

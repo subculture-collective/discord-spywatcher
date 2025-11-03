@@ -6,10 +6,10 @@ import RequireAdmin from './components/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
 import SuspicionDetail from './components/suspicion/SuspicionDetail';
 import { usePageTracking } from './hooks/useAnalytics';
-import { Analytics, AuthCallback, Bans, Dashboard, Login, Status, Suspicion, UserTimeline } from './pages';
+import { Analytics, AdvancedAnalytics, AuthCallback, Bans, Dashboard, Login, Status, Suspicion, UserTimeline } from './pages';
 import MetricsDashboard from './pages/MetricsDashboard';
-import Rules from './pages/Rules';
 import RuleEditor from './pages/RuleEditor';
+import Rules from './pages/Rules';
 import { useAuth } from './store/auth';
 
 function AppContent() {
@@ -32,6 +32,7 @@ function AppContent() {
                 <Route element={<RequireAuth />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/advanced-analytics" element={<AdvancedAnalytics />} />
                     <Route path="/metrics" element={<MetricsDashboard />} />
                     <Route path="/rules" element={<Rules />} />
                     <Route path="/rules/new" element={<RuleEditor />} />
