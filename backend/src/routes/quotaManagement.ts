@@ -14,8 +14,38 @@ import {
 const router = express.Router();
 
 /**
- * Get quota usage for the authenticated user
- * GET /api/quota/usage
+ * @openapi
+ * /quota/usage:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get quota usage for authenticated user
+ *     description: |
+ *       Retrieve current quota usage, limits, and rate limits for the authenticated user
+ *       based on their subscription tier.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Quota usage information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 tier:
+ *                   type: string
+ *                   enum: [FREE, PRO, ENTERPRISE]
+ *                 usage:
+ *                   type: object
+ *                 limits:
+ *                   type: object
+ *                 rateLimits:
+ *                   type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 router.get('/usage', requireAuth, async (req: Request, res: Response) => {
     try {
@@ -49,8 +79,27 @@ router.get('/usage', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
- * Get quota limits for all tiers
- * GET /api/quota/limits
+ * @openapi
+ * /quota/limits:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get quota limits for all subscription tiers
+ *     description: Retrieve quota and rate limits for FREE, PRO, and ENTERPRISE tiers
+ *     responses:
+ *       200:
+ *         description: Quota limits by tier
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 FREE:
+ *                   type: object
+ *                 PRO:
+ *                   type: object
+ *                 ENTERPRISE:
+ *                   type: object
  */
 router.get('/limits', async (_req: Request, res: Response) => {
     try {
@@ -74,8 +123,42 @@ router.get('/limits', async (_req: Request, res: Response) => {
 });
 
 /**
- * Get quota usage for a specific user (admin only)
- * GET /api/quota/users/:userId
+ * @openapi
+ * /quota/users/{userId}:
+ *   get:
+ *     tags:
+ *       - Admin
+ *     summary: Get quota usage for a specific user
+ *     description: Retrieve quota usage for any user. Admin only.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User quota usage
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                 usage:
+ *                   type: object
+ *                 limits:
+ *                   type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 router.get(
     '/users/:userId',
