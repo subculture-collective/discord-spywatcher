@@ -169,6 +169,102 @@ async function main() {
     }
 
     console.log('✅ Assigned permissions to roles');
+
+    // Seed rule templates
+    console.log('🌱 Seeding rule templates...');
+
+    const ruleTemplates = [
+        {
+            name: 'High Ghost Score Alert',
+            description:
+                'Alert when users have high ghost scores (lots of typing but few messages)',
+            category: 'ghost_detection',
+            conditions: [
+                {
+                    field: 'ghostScore',
+                    operator: 'GREATER_THAN',
+                    value: 80,
+                },
+            ],
+            actions: [
+                {
+                    type: 'WEBHOOK',
+                    config: {
+                        message: 'High ghost score detected: {{username}} ({{ghostScore}})',
+                    },
+                },
+            ],
+            metadata: {
+                dataSource: 'ghosts',
+            },
+        },
+        {
+            name: 'Suspicious Activity Detection',
+            description:
+                'Alert when users show suspicious activity patterns',
+            category: 'suspicious_activity',
+            conditions: [
+                {
+                    field: 'suspicionScore',
+                    operator: 'GREATER_THAN',
+                    value: 15,
+                },
+            ],
+            actions: [
+                {
+                    type: 'NOTIFICATION',
+                    config: {
+                        message:
+                            'Suspicious activity detected: {{username}} (Score: {{suspicionScore}})',
+                    },
+                },
+            ],
+            metadata: {
+                dataSource: 'suspicion',
+            },
+        },
+        {
+            name: 'Low Engagement Alert',
+            description: 'Alert when ghost score indicates low engagement',
+            category: 'engagement',
+            conditions: [
+                {
+                    field: 'messageCount',
+                    operator: 'LESS_THAN',
+                    value: 5,
+                },
+                {
+                    field: 'typingCount',
+                    operator: 'GREATER_THAN',
+                    value: 20,
+                },
+            ],
+            actions: [
+                {
+                    type: 'DISCORD_MESSAGE',
+                    config: {
+                        message: 'Low engagement: {{username}} has typed {{typingCount}} times but only sent {{messageCount}} messages',
+                    },
+                },
+            ],
+            metadata: {
+                dataSource: 'ghosts',
+            },
+        },
+    ];
+
+    for (const template of ruleTemplates) {
+        await prisma.ruleTemplate.upsert({
+            where: { id: template.name.toLowerCase().replace(/\s+/g, '-') },
+            update: template,
+            create: {
+                id: template.name.toLowerCase().replace(/\s+/g, '-'),
+                ...template,
+            },
+        });
+    }
+
+    console.log(`✅ Created/updated ${ruleTemplates.length} rule templates`);
     console.log('🌱 Seeding complete!');
 }
 
