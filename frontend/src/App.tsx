@@ -7,6 +7,7 @@ import RequireAdmin from './components/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
 import SuspicionDetail from './components/suspicion/SuspicionDetail';
 import { usePageTracking } from './hooks/useAnalytics';
+import { useRTL } from './hooks/useRTL';
 import { Analytics, AdvancedAnalytics, AuthCallback, Bans, Dashboard, Login, Status, Suspicion, UserTimeline } from './pages';
 import MetricsDashboard from './pages/MetricsDashboard';
 import RuleEditor from './pages/RuleEditor';
@@ -16,6 +17,7 @@ import { useAuth } from './store/auth';
 function AppContent() {
     const { t } = useTranslation();
     usePageTracking();
+    useRTL();
 
     return (
         <>
