@@ -615,9 +615,8 @@ A: WebSocket connections have separate connection limits but not message rate li
 ## Additional Resources
 
 - [Quota Management API](/api/quota/usage)
-- [Subscription Tiers](/docs/SUBSCRIPTION_TIERS.md)
-- [API Best Practices](/docs/API_BEST_PRACTICES.md)
-- [WebSocket API Guide](/docs/WEBSOCKET_API.md)
+- [WebSocket API Guide](../../WEBSOCKET_API.md)
+- [Main Documentation](../)
 
 ## Support
 

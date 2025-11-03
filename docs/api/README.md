@@ -492,7 +492,7 @@ ws.onmessage = (event) => {
 };
 ```
 
-See [WEBSOCKET_API.md](../WEBSOCKET_API.md) for full WebSocket documentation.
+See [WEBSOCKET_API.md](../../WEBSOCKET_API.md) for full WebSocket documentation.
 
 ## 🧪 Testing
 
