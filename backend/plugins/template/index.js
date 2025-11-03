@@ -76,7 +76,7 @@ module.exports = {
     
     hooks.register('discord:presenceUpdate', async (data, context) => {
       // Handle Discord presence updates
-      const { oldPresence, newPresence } = data || {};
+      const { newPresence } = data || {};
       context.logger.debug('Presence updated', { 
         userId: newPresence?.userId 
       });
