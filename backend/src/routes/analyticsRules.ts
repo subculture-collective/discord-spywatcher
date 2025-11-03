@@ -12,6 +12,91 @@ router.use(requireAuth);
 
 /**
  * @openapi
+ * /rules/templates:
+ *   get:
+ *     tags:
+ *       - Analytics Rules
+ *     summary: Get rule templates
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of templates
+ */
+router.get('/rules/templates', async (req, res) => {
+    try {
+        const templates = await prisma.ruleTemplate.findMany({
+            orderBy: { usageCount: 'desc' },
+        });
+
+        res.json(templates);
+    } catch (error) {
+        logger.error('Failed to fetch templates', { error });
+        res.status(500).json({ error: 'Failed to fetch templates' });
+    }
+});
+
+/**
+ * @openapi
+ * /rules/templates/{id}/use:
+ *   post:
+ *     tags:
+ *       - Analytics Rules
+ *     summary: Create a rule from a template
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       201:
+ *         description: Rule created from template
+ */
+router.post('/rules/templates/:id/use', async (req, res) => {
+    try {
+        const userId = req.user?.userId as string;
+        const { id } = req.params;
+
+        const template = await prisma.ruleTemplate.findUnique({
+            where: { id },
+        });
+
+        if (!template) {
+            return res.status(404).json({ error: 'Template not found' });
+        }
+
+        // Create rule from template
+        const rule = await prisma.analyticsRule.create({
+            data: {
+                userId,
+                name: template.name,
+                description: template.description,
+                status: 'DRAFT',
+                triggerType: 'SCHEDULED',
+                conditions: template.conditions as unknown,
+                actions: template.actions as unknown,
+                metadata: (template.metadata || {}) as unknown,
+            },
+        });
+
+        // Increment template usage count
+        await prisma.ruleTemplate.update({
+            where: { id },
+            data: { usageCount: { increment: 1 } },
+        });
+
+        res.status(201).json(rule);
+    } catch (error) {
+        logger.error('Failed to create rule from template', { error });
+        res.status(500).json({ error: 'Failed to create rule from template' });
+    }
+});
+
+/**
+ * @openapi
  * /rules:
  *   get:
  *     tags:
@@ -348,91 +433,6 @@ router.post('/rules/:id/execute', async (req, res) => {
     } catch (error) {
         logger.error('Failed to execute rule', { error });
         res.status(500).json({ error: 'Failed to execute rule' });
-    }
-});
-
-/**
- * @openapi
- * /rules/templates:
- *   get:
- *     tags:
- *       - Analytics Rules
- *     summary: Get rule templates
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of templates
- */
-router.get('/rules/templates', async (req, res) => {
-    try {
-        const templates = await prisma.ruleTemplate.findMany({
-            orderBy: { usageCount: 'desc' },
-        });
-
-        res.json(templates);
-    } catch (error) {
-        logger.error('Failed to fetch templates', { error });
-        res.status(500).json({ error: 'Failed to fetch templates' });
-    }
-});
-
-/**
- * @openapi
- * /rules/templates/{id}/use:
- *   post:
- *     tags:
- *       - Analytics Rules
- *     summary: Create a rule from a template
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       201:
- *         description: Rule created from template
- */
-router.post('/rules/templates/:id/use', async (req, res) => {
-    try {
-        const userId = req.user?.userId as string;
-        const { id } = req.params;
-
-        const template = await prisma.ruleTemplate.findUnique({
-            where: { id },
-        });
-
-        if (!template) {
-            return res.status(404).json({ error: 'Template not found' });
-        }
-
-        // Create rule from template
-        const rule = await prisma.analyticsRule.create({
-            data: {
-                userId,
-                name: template.name,
-                description: template.description,
-                status: 'DRAFT',
-                triggerType: 'SCHEDULED',
-                conditions: template.conditions as never,
-                actions: template.actions as never,
-                metadata: (template.metadata || {}) as never,
-            },
-        });
-
-        // Increment template usage count
-        await prisma.ruleTemplate.update({
-            where: { id },
-            data: { usageCount: { increment: 1 } },
-        });
-
-        res.status(201).json(rule);
-    } catch (error) {
-        logger.error('Failed to create rule from template', { error });
-        res.status(500).json({ error: 'Failed to create rule from template' });
     }
 });
 

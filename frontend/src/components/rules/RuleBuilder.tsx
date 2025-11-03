@@ -50,6 +50,9 @@ export default function RuleBuilder({
     const [name, setName] = useState(initialData?.name || '');
     const [description, setDescription] = useState(initialData?.description || '');
     const [status, setStatus] = useState(initialData?.status || 'DRAFT');
+    const [dataSource, setDataSource] = useState<string>(
+        (initialData?.metadata?.dataSource as string) || 'ghosts',
+    );
     const [conditions, setConditions] = useState<RuleCondition[]>(
         initialData?.conditions || [
             { field: 'ghostScore', operator: 'GREATER_THAN', value: 80 },
@@ -114,7 +117,7 @@ export default function RuleBuilder({
             status,
             conditions,
             actions,
-            metadata: { dataSource: 'ghosts' },
+            metadata: { dataSource },
         });
     };
 
@@ -164,6 +167,21 @@ export default function RuleBuilder({
                         <option value="DRAFT">Draft</option>
                         <option value="ACTIVE">Active</option>
                         <option value="PAUSED">Paused</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="data-source" className="block text-sm font-medium text-surface-text mb-2">
+                        Data Source
+                    </label>
+                    <select
+                        id="data-source"
+                        value={dataSource}
+                        onChange={(e) => setDataSource(e.target.value)}
+                        className="w-full px-4 py-2 bg-surface-base border border-border rounded-lg text-surface-text focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                        <option value="ghosts">Ghost Users (typing vs messages)</option>
+                        <option value="suspicion">Suspicious Activity</option>
                     </select>
                 </div>
             </div>

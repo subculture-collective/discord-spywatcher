@@ -5,6 +5,9 @@ import logger from '../middleware/winstonLogger';
 
 const prisma = new PrismaClient();
 
+// Maximum number of matched results to store in execution history
+const MAX_STORED_MATCHES = 100;
+
 export interface RuleCondition {
     field: string;
     operator:
@@ -164,7 +167,14 @@ export async function fetchAnalyticsData(
     // Extract metadata to determine what data to fetch
     const metadata = rule.metadata as Record<string, unknown> | null;
     const dataSource = (metadata?.dataSource as string) || 'ghosts';
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
+    
+    // Allow configurable time window in hours via metadata, default to 24 hours
+    const timeWindowHours =
+        typeof metadata?.timeWindowHours === 'number' &&
+        metadata.timeWindowHours > 0
+            ? metadata.timeWindowHours
+            : 24;
+    const since = new Date(Date.now() - timeWindowHours * 60 * 60 * 1000);
 
     switch (dataSource) {
         case 'ghosts': {
@@ -288,7 +298,7 @@ export async function executeRule(ruleId: string): Promise<void> {
                 actionsExecuted,
                 executionTimeMs,
                 completedAt: new Date(),
-                results: matchedData.slice(0, 100) as never, // Store first 100 matches
+                results: matchedData.slice(0, MAX_STORED_MATCHES) as never,
             },
         });
 
