@@ -5,15 +5,15 @@ import { RTL_LANGUAGES } from '../config/i18n';
 
 export function useRTL() {
     const { i18n } = useTranslation();
+    const isRTL = RTL_LANGUAGES.includes(i18n.language as any);
 
     useEffect(() => {
-        const isRTL = RTL_LANGUAGES.includes(i18n.language as any);
         document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
         document.documentElement.lang = i18n.language;
-    }, [i18n.language]);
+    }, [i18n.language, isRTL]);
 
     return {
-        isRTL: RTL_LANGUAGES.includes(i18n.language as any),
-        dir: RTL_LANGUAGES.includes(i18n.language as any) ? 'rtl' : 'ltr',
+        isRTL,
+        dir: isRTL ? 'rtl' : 'ltr',
     };
 }

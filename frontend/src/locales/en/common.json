@@ -64,6 +64,7 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "User behavior and suspicion monitoring",
+    "userSuspicionList": "User Suspicion List",
     "stats": {
       "totalUsers": "Total Users",
       "trackedUsers": "Tracked users",

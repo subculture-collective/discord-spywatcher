@@ -115,7 +115,7 @@ function Dashboard() {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle id="users-heading">{t('dashboard.table.user')} {t('suspicion.title')}</CardTitle>
+                                <CardTitle id="users-heading">{t('dashboard.userSuspicionList')}</CardTitle>
                                 <div>
                                     <label htmlFor="filter-banned" className="flex items-center gap-2 text-sm text-ctp-subtext0">
                                         <input

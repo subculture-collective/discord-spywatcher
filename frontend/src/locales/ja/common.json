@@ -64,6 +64,7 @@
   "dashboard": {
     "title": "ダッシュボード",
     "subtitle": "ユーザー行動と疑惑の監視",
+    "userSuspicionList": "ユーザー疑惑リスト",
     "stats": {
       "totalUsers": "総ユーザー数",
       "trackedUsers": "追跡中のユーザー",

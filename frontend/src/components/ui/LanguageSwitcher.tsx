@@ -32,10 +32,6 @@ export function LanguageSwitcher() {
     const handleLanguageChange = (langCode: string) => {
         i18n.changeLanguage(langCode);
         setIsOpen(false);
-        
-        // Update document direction for RTL languages
-        document.documentElement.dir = langCode === 'ar' || langCode === 'he' ? 'rtl' : 'ltr';
-        document.documentElement.lang = langCode;
     };
 
     return (

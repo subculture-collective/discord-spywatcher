@@ -64,6 +64,7 @@
   "dashboard": {
     "title": "Panel",
     "subtitle": "Monitoreo de comportamiento y sospecha de usuarios",
+    "userSuspicionList": "Lista de Sospecha de Usuarios",
     "stats": {
       "totalUsers": "Usuarios Totales",
       "trackedUsers": "Usuarios rastreados",

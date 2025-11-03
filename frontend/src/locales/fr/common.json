@@ -64,6 +64,7 @@
   "dashboard": {
     "title": "Tableau de bord",
     "subtitle": "Surveillance du comportement et de la suspicion des utilisateurs",
+    "userSuspicionList": "Liste de Suspicion des Utilisateurs",
     "stats": {
       "totalUsers": "Utilisateurs Totaux",
       "trackedUsers": "Utilisateurs suivis",
