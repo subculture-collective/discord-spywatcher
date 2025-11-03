@@ -84,6 +84,114 @@ Generates load to test auto-scaling behavior and simulate traffic spikes.
 
 **See:** [docs/AUTO_SCALING_EXAMPLES.md](../docs/AUTO_SCALING_EXAMPLES.md) for examples.
 
+### Database Migration Scripts
+
+#### `test-migration.sh`
+
+Comprehensive migration testing in an isolated environment.
+
+**Features:**
+
+- Creates isolated test database
+- Applies pending migrations
+- Validates schema integrity
+- Tests data consistency
+- Verifies rollback procedures
+- Automatic cleanup
+
+**Usage:**
+
+```bash
+# Run comprehensive migration tests
+DB_PASSWORD=your_password ./scripts/test-migration.sh
+
+# Verbose output
+VERBOSE=true DB_PASSWORD=your_password ./scripts/test-migration.sh
+```
+
+**Environment Variables:**
+
+- `TEST_DB_NAME` - Test database name (default: spywatcher_test)
+- `DB_USER` - Database user (default: spywatcher)
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)
+- `DB_PASSWORD` - Database password (required)
+- `BACKUP_DIR` - Backup directory (default: /tmp/migration-test-backups)
+- `VERBOSE` - Show detailed output (default: false)
+
+**See:** [MIGRATION_SAFETY.md](../MIGRATION_SAFETY.md) for complete migration procedures.
+
+#### `rollback-migration.sh`
+
+Safely rollback database migrations to a previous state.
+
+**Features:**
+
+- Rollback to specific migration
+- Restore from backup file
+- List available migrations and backups
+- Automatic pre-rollback backup
+- Safe confirmation prompts
+
+**Usage:**
+
+```bash
+# List available options
+DB_PASSWORD=pass ./scripts/rollback-migration.sh --list
+
+# Rollback to specific migration
+DB_PASSWORD=pass ./scripts/rollback-migration.sh \
+  --migration 20250524175155_init
+
+# Restore from backup
+DB_PASSWORD=pass ./scripts/rollback-migration.sh \
+  --backup /path/to/backup.sql.gz
+```
+
+**Environment Variables:**
+
+- `DB_NAME` - Database name (default: spywatcher)
+- `DB_USER` - Database user (default: spywatcher)
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)
+- `DB_PASSWORD` - Database password (required)
+- `BACKUP_DIR` - Backup directory (default: /var/backups/spywatcher)
+
+#### `validate-migration.sh`
+
+Comprehensive data validation checks after migrations.
+
+**Features:**
+
+- Schema existence validation
+- Required tables verification
+- Index validation
+- Foreign key constraint checks
+- Primary key validation
+- Data type verification
+- Data consistency checks
+- Prisma migration status
+- Database size reporting
+
+**Usage:**
+
+```bash
+# Run validation checks
+DB_PASSWORD=your_password ./scripts/validate-migration.sh
+
+# Verbose validation
+VERBOSE=true DB_PASSWORD=your_password ./scripts/validate-migration.sh
+```
+
+**Environment Variables:**
+
+- `DB_NAME` - Database name (default: spywatcher)
+- `DB_USER` - Database user (default: spywatcher)
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)
+- `DB_PASSWORD` - Database password (required)
+- `VERBOSE` - Show detailed output (default: false)
+
 ### PostgreSQL Management Scripts
 
 #### 1. `postgres-init.sql`
