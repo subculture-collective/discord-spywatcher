@@ -1,7 +1,7 @@
 import { PrismaClient, AnalyticsRule, RuleStatus } from '@prisma/client';
 import axios from 'axios';
 
-import { logger } from '../utils/logger';
+import logger from '../middleware/winstonLogger';
 
 const prisma = new PrismaClient();
 
@@ -84,11 +84,11 @@ export function evaluateCondition(
             );
         case 'IN':
             return (
-                Array.isArray(conditionValue) && conditionValue.includes(fieldValue)
+                Array.isArray(conditionValue) && conditionValue.includes(fieldValue as never)
             );
         case 'NOT_IN':
             return (
-                Array.isArray(conditionValue) && !conditionValue.includes(fieldValue)
+                Array.isArray(conditionValue) && !conditionValue.includes(fieldValue as never)
             );
         default:
             return false;
@@ -118,7 +118,7 @@ export async function executeAction(
                 if (!action.config.url) {
                     throw new Error('Webhook URL is required');
                 }
-                await axios.post(action.config.url, {
+                await axios.post(String(action.config.url), {
                     matches: matchedData,
                     timestamp: new Date().toISOString(),
                 });
@@ -149,7 +149,7 @@ export async function executeAction(
                 return true;
 
             default:
-                throw new Error(`Unknown action type: ${action.type}`);
+                throw new Error(`Unknown action type: ${String(action.type)}`);
         }
     } catch (error) {
         logger.error('Failed to execute action', { action, error });
@@ -169,7 +169,7 @@ export async function fetchAnalyticsData(
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
 
     switch (dataSource) {
-        case 'ghosts':
+        case 'ghosts': {
             const ghosts = await prisma.$queryRaw<
                 Array<{
                     userId: string;
@@ -202,8 +202,8 @@ export async function fetchAnalyticsData(
                 messageCount: Number(g.messageCount),
                 ghostScore: g.ghostScore,
             }));
-
-        case 'suspicion':
+        }
+        case 'suspicion': {
             const suspicion = await prisma.$queryRaw<
                 Array<{
                     userId: string;
@@ -228,7 +228,7 @@ export async function fetchAnalyticsData(
                 username: s.username,
                 suspicionScore: s.suspicionScore,
             }));
-
+        }
         default:
             return [];
     }
@@ -264,13 +264,13 @@ export async function executeRule(ruleId: string): Promise<void> {
         const data = await fetchAnalyticsData(rule);
 
         // Evaluate conditions
-        const conditions = rule.conditions as RuleCondition[];
+        const conditions = rule.conditions as unknown as RuleCondition[];
         const matchedData = data.filter((item) =>
             evaluateRuleConditions(item, conditions),
         );
 
         // Execute actions
-        const actions = rule.actions as RuleAction[];
+        const actions = rule.actions as unknown as RuleAction[];
         let actionsExecuted = 0;
 
         if (matchedData.length > 0) {
@@ -290,7 +290,7 @@ export async function executeRule(ruleId: string): Promise<void> {
                 actionsExecuted,
                 executionTimeMs,
                 completedAt: new Date(),
-                results: matchedData.slice(0, 100), // Store first 100 matches
+                results: matchedData.slice(0, 100) as never, // Store first 100 matches
             },
         });
 

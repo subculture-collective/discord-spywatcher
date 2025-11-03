@@ -6,13 +6,12 @@ import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { CardSkeleton } from '../components/ui/LoadingSkeleton';
 import api from '../lib/api';
-import { AnalyticsRule, RuleTemplate } from '../types/rules';
+import type { AnalyticsRule, RuleTemplate } from '../types/rules';
 
 function Rules() {
     const [loading, setLoading] = useState(true);
     const [rules, setRules] = useState<AnalyticsRule[]>([]);
     const [templates, setTemplates] = useState<RuleTemplate[]>([]);
-    const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -114,7 +113,7 @@ function Rules() {
                         Create custom rules to automate alerts and actions
                     </p>
                 </div>
-                <Button onClick={() => setShowCreateModal(true)}>
+                <Button onClick={() => (window.location.href = '/rules/new')}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Rule
                 </Button>
@@ -144,7 +143,7 @@ function Rules() {
                                             Used {template.usageCount} times
                                         </span>
                                         <Button
-                                            variant="outline"
+                                            variant="secondary"
                                             size="sm"
                                             onClick={() =>
                                                 createFromTemplate(template.id)
@@ -171,7 +170,7 @@ function Rules() {
                             <p className="text-surface-text-secondary mb-4">
                                 No rules created yet
                             </p>
-                            <Button onClick={() => setShowCreateModal(true)}>
+                            <Button onClick={() => (window.location.href = '/rules/new')}>
                                 <Plus className="w-4 h-4 mr-2" />
                                 Create Your First Rule
                             </Button>

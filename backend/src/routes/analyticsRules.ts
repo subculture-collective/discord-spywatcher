@@ -1,9 +1,9 @@
-import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { Router } from 'express';
 
 import { requireAuth } from '../middleware';
+import logger from '../middleware/winstonLogger';
 import { executeRule } from '../services/rulesEngine';
-import { logger } from '../utils/logger';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -25,7 +25,7 @@ router.use(requireAuth);
  */
 router.get('/rules', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
 
         const rules = await prisma.analyticsRule.findMany({
             where: { userId },
@@ -68,7 +68,7 @@ router.get('/rules', async (req, res) => {
  */
 router.get('/rules/:id', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
         const { id } = req.params;
 
         const rule = await prisma.analyticsRule.findFirst({
@@ -136,7 +136,7 @@ router.get('/rules/:id', async (req, res) => {
  */
 router.post('/rules', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
         const {
             name,
             description,
@@ -146,7 +146,16 @@ router.post('/rules', async (req, res) => {
             conditions,
             actions,
             metadata,
-        } = req.body;
+        } = req.body as {
+            name?: string;
+            description?: string;
+            status?: string;
+            triggerType?: string;
+            schedule?: string;
+            conditions?: unknown;
+            actions?: unknown;
+            metadata?: unknown;
+        };
 
         // Validate required fields
         if (!name || !conditions || !actions) {
@@ -197,7 +206,7 @@ router.post('/rules', async (req, res) => {
  */
 router.put('/rules/:id', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
         const { id } = req.params;
         const {
             name,
@@ -208,7 +217,16 @@ router.put('/rules/:id', async (req, res) => {
             conditions,
             actions,
             metadata,
-        } = req.body;
+        } = req.body as {
+            name?: string;
+            description?: string;
+            status?: string;
+            triggerType?: string;
+            schedule?: string;
+            conditions?: unknown;
+            actions?: unknown;
+            metadata?: unknown;
+        };
 
         // Verify ownership
         const existing = await prisma.analyticsRule.findFirst({
@@ -219,23 +237,24 @@ router.put('/rules/:id', async (req, res) => {
             return res.status(404).json({ error: 'Rule not found' });
         }
 
+        const updateData: Record<string, unknown> = {};
+        if (name) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (status) updateData.status = status;
+        if (triggerType) updateData.triggerType = triggerType;
+        if (schedule !== undefined) updateData.schedule = schedule;
+        if (conditions) updateData.conditions = conditions;
+        if (actions) updateData.actions = actions;
+        if (metadata !== undefined) updateData.metadata = metadata;
+
         const rule = await prisma.analyticsRule.update({
             where: { id },
-            data: {
-                ...(name && { name }),
-                ...(description !== undefined && { description }),
-                ...(status && { status }),
-                ...(triggerType && { triggerType }),
-                ...(schedule !== undefined && { schedule }),
-                ...(conditions && { conditions }),
-                ...(actions && { actions }),
-                ...(metadata !== undefined && { metadata }),
-            },
+            data: updateData,
         });
 
         res.json(rule);
     } catch (error) {
-        logger.error('Failed to update rule', { error });
+        logger.error('Failed to update rule', { error: error as Error });
         res.status(500).json({ error: 'Failed to update rule' });
     }
 });
@@ -261,7 +280,7 @@ router.put('/rules/:id', async (req, res) => {
  */
 router.delete('/rules/:id', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
         const { id } = req.params;
 
         // Verify ownership
@@ -303,7 +322,7 @@ router.delete('/rules/:id', async (req, res) => {
  */
 router.post('/rules/:id/execute', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
         const { id } = req.params;
 
         // Verify ownership
@@ -316,8 +335,8 @@ router.post('/rules/:id/execute', async (req, res) => {
         }
 
         // Execute asynchronously
-        executeRule(id).catch((error) => {
-            logger.error('Rule execution failed', { ruleId: id, error });
+        executeRule(id).catch((error: unknown) => {
+            logger.error('Rule execution failed', { ruleId: id, error: error as Error });
         });
 
         res.status(202).json({ message: 'Rule execution started' });
@@ -374,7 +393,7 @@ router.get('/rules/templates', async (req, res) => {
  */
 router.post('/rules/templates/:id/use', async (req, res) => {
     try {
-        const userId = req.userId as string;
+        const userId = req.user?.userId as string;
         const { id } = req.params;
 
         const template = await prisma.ruleTemplate.findUnique({
@@ -393,9 +412,9 @@ router.post('/rules/templates/:id/use', async (req, res) => {
                 description: template.description,
                 status: 'DRAFT',
                 triggerType: 'SCHEDULED',
-                conditions: template.conditions,
-                actions: template.actions,
-                metadata: template.metadata || {},
+                conditions: template.conditions as never,
+                actions: template.actions as never,
+                metadata: (template.metadata || {}) as never,
             },
         });
 

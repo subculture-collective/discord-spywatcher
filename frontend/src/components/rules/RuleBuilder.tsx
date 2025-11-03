@@ -1,14 +1,14 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '../ui/Button';
-import {
+import type {
     ActionType,
     ConditionOperator,
     CreateRuleRequest,
     RuleAction,
     RuleCondition,
 } from '../../types/rules';
+import { Button } from '../ui/Button';
 
 interface RuleBuilderProps {
     initialData?: CreateRuleRequest;
@@ -123,10 +123,11 @@ export default function RuleBuilder({
             {/* Basic Info */}
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-surface-text mb-2">
+                    <label htmlFor="rule-name" className="block text-sm font-medium text-surface-text mb-2">
                         Rule Name *
                     </label>
                     <input
+                        id="rule-name"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -137,10 +138,11 @@ export default function RuleBuilder({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-surface-text mb-2">
+                    <label htmlFor="rule-description" className="block text-sm font-medium text-surface-text mb-2">
                         Description
                     </label>
                     <textarea
+                        id="rule-description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
@@ -150,12 +152,13 @@ export default function RuleBuilder({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-surface-text mb-2">
+                    <label htmlFor="rule-status" className="block text-sm font-medium text-surface-text mb-2">
                         Status
                     </label>
                     <select
+                        id="rule-status"
                         value={status}
-                        onChange={(e) => setStatus(e.target.value as any)}
+                        onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'ACTIVE' | 'PAUSED')}
                         className="w-full px-4 py-2 bg-surface-base border border-border rounded-lg text-surface-text focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                         <option value="DRAFT">Draft</option>
@@ -168,9 +171,9 @@ export default function RuleBuilder({
             {/* Conditions */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <label className="text-sm font-medium text-surface-text">
+                    <h3 className="text-sm font-medium text-surface-text">
                         Conditions (All must match)
-                    </label>
+                    </h3>
                     <Button type="button" size="sm" onClick={addCondition}>
                         <Plus className="w-4 h-4 mr-1" />
                         Add Condition
@@ -245,9 +248,9 @@ export default function RuleBuilder({
             {/* Actions */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <label className="text-sm font-medium text-surface-text">
+                    <h3 className="text-sm font-medium text-surface-text">
                         Actions
-                    </label>
+                    </h3>
                     <Button type="button" size="sm" onClick={addAction}>
                         <Plus className="w-4 h-4 mr-1" />
                         Add Action
@@ -317,7 +320,7 @@ export default function RuleBuilder({
 
             {/* Form Actions */}
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
-                <Button type="button" variant="outline" onClick={onCancel}>
+                <Button type="button" variant="secondary" onClick={onCancel}>
                     Cancel
                 </Button>
                 <Button type="submit">Save Rule</Button>

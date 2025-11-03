@@ -83,4 +83,4 @@ export interface CreateRuleRequest {
     metadata?: Record<string, unknown>;
 }
 
-export interface UpdateRuleRequest extends Partial<CreateRuleRequest> {}
+export type UpdateRuleRequest = Partial<CreateRuleRequest>;

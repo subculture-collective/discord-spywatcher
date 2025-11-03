@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import RuleBuilder from '../components/rules/RuleBuilder';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { CardSkeleton } from '../components/ui/LoadingSkeleton';
 import api from '../lib/api';
-import { AnalyticsRule, CreateRuleRequest } from '../types/rules';
+import type { AnalyticsRule, CreateRuleRequest } from '../types/rules';
 
 function RuleEditor() {
     const { id } = useParams<{ id: string }>();
@@ -14,13 +14,7 @@ function RuleEditor() {
     const [loading, setLoading] = useState(!!id);
     const [rule, setRule] = useState<AnalyticsRule | null>(null);
 
-    useEffect(() => {
-        if (id) {
-            fetchRule();
-        }
-    }, [id]);
-
-    const fetchRule = async () => {
+    const fetchRule = useCallback(async () => {
         if (!id) return;
 
         setLoading(true);
@@ -33,7 +27,13 @@ function RuleEditor() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        if (id) {
+            fetchRule();
+        }
+    }, [id, fetchRule]);
 
     const handleSubmit = async (data: CreateRuleRequest) => {
         try {
