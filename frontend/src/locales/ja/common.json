@@ -1,0 +1,225 @@
+{
+  "app": {
+    "name": "Discord Spywatcher",
+    "tagline": "高度なユーザー行動分析"
+  },
+  "navigation": {
+    "dashboard": "ダッシュボード",
+    "analytics": "分析",
+    "advancedAnalytics": "高度な分析",
+    "metrics": "メトリクス",
+    "rules": "ルール",
+    "suspicion": "疑惑",
+    "bans": "BANリスト",
+    "timeline": "タイムライン",
+    "skipToContent": "メインコンテンツへスキップ"
+  },
+  "auth": {
+    "loginWithDiscord": "Discordでログイン",
+    "logout": "ログアウト",
+    "termsAgreement": "ログインすることで、利用規約に同意したことになります",
+    "loggingIn": "ログイン中..."
+  },
+  "features": {
+    "realTimeMonitoring": "リアルタイム監視",
+    "ghostDetection": "ゴースト検出",
+    "advancedAnalytics": "高度な分析"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "save": "保存",
+    "changeLanguage": "言語を変更",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "update": "更新",
+    "search": "検索",
+    "filter": "フィルター",
+    "export": "エクスポート",
+    "refresh": "更新",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "submit": "送信",
+    "actions": "アクション",
+    "details": "詳細",
+    "status": "ステータス",
+    "settings": "設定",
+    "language": "言語",
+    "theme": "テーマ",
+    "yes": "はい",
+    "no": "いいえ",
+    "loadingPleaseWait": "読み込み中です、お待ちください..."
+  },
+  "theme": {
+    "toggle": "テーマを切り替え",
+    "light": "ライトモード",
+    "dark": "ダークモード",
+    "system": "システム",
+    "keyboardShortcut": "Ctrl+Shift+Tで切り替え"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "subtitle": "ユーザー行動と疑惑の監視",
+    "userSuspicionList": "ユーザー疑惑リスト",
+    "stats": {
+      "totalUsers": "総ユーザー数",
+      "trackedUsers": "追跡中のユーザー",
+      "highSuspicion": "高い疑惑",
+      "scoreThreshold": "スコア > {{threshold}}",
+      "ghostUsers": "ゴーストユーザー",
+      "ghostScoreThreshold": "ゴーストスコア > {{threshold}}",
+      "bannedUsers": "BANユーザー",
+      "currentlyBanned": "現在BANされているユーザー"
+    },
+    "filters": {
+      "hideBanned": "BANされたユーザーを非表示",
+      "showAll": "すべてのユーザーを表示",
+      "hideBannedHelp": "リスト内のBANされたユーザーの表示/非表示を切り替え"
+    },
+    "table": {
+      "user": "ユーザー",
+      "suspicionScore": "疑惑スコア",
+      "ghostScore": "ゴーストスコア",
+      "clients": "クライアント",
+      "channels": "チャンネル",
+      "accountAge": "アカウント年齢",
+      "days": "{{count}}日",
+      "days_other": "{{count}}日",
+      "avgReaction": "平均リアクション",
+      "fastReactions": "高速リアクション",
+      "fastReactionsAbbr": "高速R",
+      "accountAgeAbbr": "年齢",
+      "ms": "{{value}}ミリ秒",
+      "noData": "データがありません"
+    }
+  },
+  "suspicion": {
+    "title": "疑惑監視",
+    "subtitle": "疑わしいユーザー行動の監視と調査",
+    "filters": {
+      "all": "すべてのユーザー",
+      "high": "高い疑惑",
+      "medium": "中程度の疑惑",
+      "low": "低い疑惑"
+    },
+    "details": {
+      "overview": "概要",
+      "recentActivity": "最近の活動",
+      "patterns": "行動パターン",
+      "history": "履歴"
+    },
+    "score": "疑惑スコア",
+    "ghostScore": "ゴーストスコア",
+    "multiClient": "マルチクライアント検出",
+    "channelActivity": "チャンネルアクティビティ"
+  },
+  "analytics": {
+    "title": "分析",
+    "subtitle": "包括的な分析ダッシュボード",
+    "advancedTitle": "高度な分析",
+    "advancedSubtitle": "ユーザー行動パターンの詳細な分析",
+    "timeRange": {
+      "last24h": "過去24時間",
+      "last7d": "過去7日間",
+      "last30d": "過去30日間",
+      "last90d": "過去90日間",
+      "custom": "カスタム範囲"
+    },
+    "charts": {
+      "suspicionTrends": "疑惑の傾向",
+      "userActivity": "ユーザーアクティビティ",
+      "channelDistribution": "チャンネル分布",
+      "ghostDetection": "ゴースト検出",
+      "exportChart": "チャートを画像としてエクスポート"
+    },
+    "metrics": {
+      "totalEvents": "総イベント数",
+      "activeUsers": "アクティブユーザー",
+      "avgSuspicion": "平均疑惑",
+      "detections": "検出数"
+    }
+  },
+  "rules": {
+    "title": "ルール",
+    "subtitle": "検出ルールと閾値の管理",
+    "createNew": "新しいルールを作成",
+    "editRule": "ルールを編集",
+    "deleteRule": "ルールを削除",
+    "ruleEditor": {
+      "name": "ルール名",
+      "description": "説明",
+      "conditions": "条件",
+      "actions": "アクション",
+      "enabled": "有効",
+      "disabled": "無効",
+      "priority": "優先度",
+      "type": "ルールタイプ"
+    },
+    "confirmDelete": "このルールを削除してもよろしいですか？"
+  },
+  "bans": {
+    "title": "ユーザーBAN",
+    "subtitle": "BANされたユーザーの管理",
+    "banUser": "ユーザーをBAN",
+    "unbanUser": "ユーザーのBAN解除",
+    "reason": "理由",
+    "bannedAt": "BAN日時",
+    "bannedBy": "BANした人",
+    "confirmBan": "このユーザーをBANしてもよろしいですか？",
+    "confirmUnban": "このユーザーのBANを解除してもよろしいですか？"
+  },
+  "timeline": {
+    "title": "ユーザータイムライン",
+    "subtitle": "ユーザーアクティビティのタイムラインを表示",
+    "events": "イベント",
+    "activity": "アクティビティ",
+    "connections": "接続",
+    "messages": "メッセージ",
+    "reactions": "リアクション"
+  },
+  "status": {
+    "title": "システムステータス",
+    "subtitle": "システムの健全性とパフォーマンスの監視",
+    "uptime": "稼働時間",
+    "healthy": "正常",
+    "degraded": "劣化",
+    "down": "ダウン",
+    "services": {
+      "api": "APIサービス",
+      "database": "データベース",
+      "redis": "Redisキャッシュ",
+      "websocket": "WebSocket"
+    }
+  },
+  "errors": {
+    "somethingWentWrong": "何か問題が発生しました",
+    "pageNotFound": "ページが見つかりません",
+    "unauthorized": "認証されていません",
+    "forbidden": "アクセス権限がありません",
+    "serverError": "サーバーエラー",
+    "networkError": "ネットワークエラー",
+    "tryAgain": "もう一度お試しください",
+    "goHome": "ホームに戻る",
+    "contactSupport": "サポートに連絡"
+  },
+  "consent": {
+    "analyticsTitle": "分析とプライバシー",
+    "analyticsMessage": "私たちはプライバシーを尊重した分析を使用してユーザー体験を向上させています。いつでもオプトアウトできます。",
+    "accept": "同意する",
+    "decline": "拒否する",
+    "learnMore": "詳細を見る"
+  },
+  "accessibility": {
+    "loading": "コンテンツを読み込んでいます",
+    "menu": "メインメニュー",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "userProfile": "ユーザープロフィール",
+    "notifications": "通知"
+  }
+}

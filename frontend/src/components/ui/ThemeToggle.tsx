@@ -1,11 +1,13 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../contexts/ThemeContext';
 
 import { Button } from './Button';
 
 export function ThemeToggle() {
+    const { t } = useTranslation();
     const { theme, toggleTheme, effectiveTheme } = useTheme();
     const [showTooltip, setShowTooltip] = useState(false);
 
@@ -45,26 +47,13 @@ export function ThemeToggle() {
     const getThemeLabel = () => {
         switch (theme) {
             case 'light':
-                return 'Light mode';
+                return t('theme.light');
             case 'dark':
-                return 'Dark mode';
+                return t('theme.dark');
             case 'system':
-                return `System (${effectiveTheme})`;
+                return `${t('theme.system')} (${effectiveTheme})`;
             default:
-                return 'Theme';
-        }
-    };
-
-    const getNextThemeLabel = () => {
-        switch (theme) {
-            case 'light':
-                return 'dark';
-            case 'dark':
-                return 'system';
-            case 'system':
-                return 'light';
-            default:
-                return 'theme';
+                return t('theme.toggle');
         }
     };
 
@@ -75,8 +64,8 @@ export function ThemeToggle() {
                 size="sm"
                 onClick={toggleTheme}
                 className="w-10 h-10 p-0 flex items-center justify-center"
-                aria-label={`Current theme: ${getThemeLabel()}. Click to switch to ${getNextThemeLabel()} mode (Ctrl+Shift+T)`}
-                title={`Current: ${getThemeLabel()}\nClick to cycle themes\nShortcut: Ctrl+Shift+T`}
+                aria-label={`${t('theme.toggle')}: ${getThemeLabel()}. ${t('theme.keyboardShortcut')}`}
+                title={`${t('theme.toggle')}: ${getThemeLabel()}\n${t('theme.keyboardShortcut')}`}
             >
                 {getIcon()}
             </Button>
@@ -87,7 +76,7 @@ export function ThemeToggle() {
                     aria-live="polite"
                     className="absolute top-full mt-2 right-0 bg-ctp-surface0 text-ctp-text px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg border border-ctp-surface1 z-50 animate-fade-in"
                 >
-                    Switched to {getThemeLabel()}
+                    {t('theme.toggle')}: {getThemeLabel()}
                 </div>
             )}
         </div>

@@ -1,0 +1,225 @@
+{
+  "app": {
+    "name": "Discord Spywatcher",
+    "tagline": "Análisis avanzado del comportamiento de usuarios"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "analytics": "Análisis",
+    "advancedAnalytics": "Análisis Avanzado",
+    "metrics": "Métricas",
+    "rules": "Reglas",
+    "suspicion": "Sospecha",
+    "bans": "Baneos",
+    "timeline": "Línea de Tiempo",
+    "skipToContent": "Saltar al contenido principal"
+  },
+  "auth": {
+    "loginWithDiscord": "Iniciar sesión con Discord",
+    "logout": "Cerrar sesión",
+    "termsAgreement": "Al iniciar sesión, aceptas nuestros términos de servicio",
+    "loggingIn": "Iniciando sesión..."
+  },
+  "features": {
+    "realTimeMonitoring": "Monitoreo en tiempo real",
+    "ghostDetection": "Detección de fantasmas",
+    "advancedAnalytics": "Análisis avanzado"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "changeLanguage": "Cambiar idioma",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "refresh": "Actualizar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "actions": "Acciones",
+    "details": "Detalles",
+    "status": "Estado",
+    "settings": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "yes": "Sí",
+    "no": "No",
+    "loadingPleaseWait": "Cargando, por favor espera..."
+  },
+  "theme": {
+    "toggle": "Cambiar tema",
+    "light": "Modo claro",
+    "dark": "Modo oscuro",
+    "system": "Sistema",
+    "keyboardShortcut": "Presiona Ctrl+Shift+T para cambiar"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Monitoreo de comportamiento y sospecha de usuarios",
+    "userSuspicionList": "Lista de Sospecha de Usuarios",
+    "stats": {
+      "totalUsers": "Usuarios Totales",
+      "trackedUsers": "Usuarios rastreados",
+      "highSuspicion": "Alta Sospecha",
+      "scoreThreshold": "Puntuación > {{threshold}}",
+      "ghostUsers": "Usuarios Fantasma",
+      "ghostScoreThreshold": "Puntuación fantasma > {{threshold}}",
+      "bannedUsers": "Usuarios Baneados",
+      "currentlyBanned": "Actualmente baneados"
+    },
+    "filters": {
+      "hideBanned": "Ocultar usuarios baneados",
+      "showAll": "Mostrar todos los usuarios",
+      "hideBannedHelp": "Alternar para ocultar o mostrar usuarios baneados en la lista"
+    },
+    "table": {
+      "user": "Usuario",
+      "suspicionScore": "Puntuación de Sospecha",
+      "ghostScore": "Puntuación Fantasma",
+      "clients": "Clientes",
+      "channels": "Canales",
+      "accountAge": "Edad de Cuenta",
+      "days": "{{count}} día",
+      "days_other": "{{count}} días",
+      "avgReaction": "Reacción Promedio",
+      "fastReactions": "Reacciones Rápidas",
+      "fastReactionsAbbr": "Reac. Rápidas",
+      "accountAgeAbbr": "Edad",
+      "ms": "{{value}}ms",
+      "noData": "No hay datos disponibles"
+    }
+  },
+  "suspicion": {
+    "title": "Monitoreo de Sospecha",
+    "subtitle": "Monitorear e investigar comportamiento sospechoso de usuarios",
+    "filters": {
+      "all": "Todos los Usuarios",
+      "high": "Alta Sospecha",
+      "medium": "Sospecha Media",
+      "low": "Baja Sospecha"
+    },
+    "details": {
+      "overview": "Resumen",
+      "recentActivity": "Actividad Reciente",
+      "patterns": "Patrones de Comportamiento",
+      "history": "Historial"
+    },
+    "score": "Puntuación de Sospecha",
+    "ghostScore": "Puntuación Fantasma",
+    "multiClient": "Detección Multi-Cliente",
+    "channelActivity": "Actividad de Canal"
+  },
+  "analytics": {
+    "title": "Análisis",
+    "subtitle": "Panel de análisis integral",
+    "advancedTitle": "Análisis Avanzado",
+    "advancedSubtitle": "Análisis profundo de patrones de comportamiento de usuarios",
+    "timeRange": {
+      "last24h": "Últimas 24 horas",
+      "last7d": "Últimos 7 días",
+      "last30d": "Últimos 30 días",
+      "last90d": "Últimos 90 días",
+      "custom": "Rango personalizado"
+    },
+    "charts": {
+      "suspicionTrends": "Tendencias de Sospecha",
+      "userActivity": "Actividad de Usuarios",
+      "channelDistribution": "Distribución de Canales",
+      "ghostDetection": "Detección de Fantasmas",
+      "exportChart": "Exportar gráfico como imagen"
+    },
+    "metrics": {
+      "totalEvents": "Eventos Totales",
+      "activeUsers": "Usuarios Activos",
+      "avgSuspicion": "Sospecha Promedio",
+      "detections": "Detecciones"
+    }
+  },
+  "rules": {
+    "title": "Reglas",
+    "subtitle": "Gestionar reglas de detección y umbrales",
+    "createNew": "Crear Nueva Regla",
+    "editRule": "Editar Regla",
+    "deleteRule": "Eliminar Regla",
+    "ruleEditor": {
+      "name": "Nombre de Regla",
+      "description": "Descripción",
+      "conditions": "Condiciones",
+      "actions": "Acciones",
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "priority": "Prioridad",
+      "type": "Tipo de Regla"
+    },
+    "confirmDelete": "¿Estás seguro de que quieres eliminar esta regla?"
+  },
+  "bans": {
+    "title": "Baneos de Usuarios",
+    "subtitle": "Gestionar usuarios baneados",
+    "banUser": "Banear Usuario",
+    "unbanUser": "Desbanear Usuario",
+    "reason": "Razón",
+    "bannedAt": "Baneado el",
+    "bannedBy": "Baneado por",
+    "confirmBan": "¿Estás seguro de que quieres banear a este usuario?",
+    "confirmUnban": "¿Estás seguro de que quieres desbanear a este usuario?"
+  },
+  "timeline": {
+    "title": "Línea de Tiempo del Usuario",
+    "subtitle": "Ver línea de tiempo de actividad del usuario",
+    "events": "Eventos",
+    "activity": "Actividad",
+    "connections": "Conexiones",
+    "messages": "Mensajes",
+    "reactions": "Reacciones"
+  },
+  "status": {
+    "title": "Estado del Sistema",
+    "subtitle": "Monitorear salud y rendimiento del sistema",
+    "uptime": "Tiempo de actividad",
+    "healthy": "Saludable",
+    "degraded": "Degradado",
+    "down": "Caído",
+    "services": {
+      "api": "Servicio API",
+      "database": "Base de Datos",
+      "redis": "Caché Redis",
+      "websocket": "WebSocket"
+    }
+  },
+  "errors": {
+    "somethingWentWrong": "Algo salió mal",
+    "pageNotFound": "Página no encontrada",
+    "unauthorized": "No autorizado",
+    "forbidden": "Prohibido",
+    "serverError": "Error del servidor",
+    "networkError": "Error de red",
+    "tryAgain": "Intentar de nuevo",
+    "goHome": "Ir a la página principal",
+    "contactSupport": "Contactar soporte"
+  },
+  "consent": {
+    "analyticsTitle": "Análisis y Privacidad",
+    "analyticsMessage": "Usamos análisis que respetan la privacidad para mejorar tu experiencia. Puedes optar por no participar en cualquier momento.",
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "learnMore": "Más información"
+  },
+  "accessibility": {
+    "loading": "El contenido se está cargando",
+    "menu": "Menú principal",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "userProfile": "Perfil de usuario",
+    "notifications": "Notificaciones"
+  }
+}

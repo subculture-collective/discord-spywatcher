@@ -1,0 +1,225 @@
+{
+  "app": {
+    "name": "Discord Spywatcher",
+    "tagline": "Advanced user behavior analytics"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "advancedAnalytics": "Advanced Analytics",
+    "metrics": "Metrics",
+    "rules": "Rules",
+    "suspicion": "Suspicion",
+    "bans": "Bans",
+    "timeline": "Timeline",
+    "skipToContent": "Skip to main content"
+  },
+  "auth": {
+    "loginWithDiscord": "Login with Discord",
+    "logout": "Logout",
+    "termsAgreement": "By logging in, you agree to our terms of service",
+    "loggingIn": "Logging in..."
+  },
+  "features": {
+    "realTimeMonitoring": "Real-time monitoring",
+    "ghostDetection": "Ghost detection",
+    "advancedAnalytics": "Advanced analytics"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "changeLanguage": "Change language",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "refresh": "Refresh",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "actions": "Actions",
+    "details": "Details",
+    "status": "Status",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "yes": "Yes",
+    "no": "No",
+    "loadingPleaseWait": "Loading, please wait..."
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "system": "System",
+    "keyboardShortcut": "Press Ctrl+Shift+T to toggle"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "User behavior and suspicion monitoring",
+    "userSuspicionList": "User Suspicion List",
+    "stats": {
+      "totalUsers": "Total Users",
+      "trackedUsers": "Tracked users",
+      "highSuspicion": "High Suspicion",
+      "scoreThreshold": "Score > {{threshold}}",
+      "ghostUsers": "Ghost Users",
+      "ghostScoreThreshold": "Ghost score > {{threshold}}",
+      "bannedUsers": "Banned Users",
+      "currentlyBanned": "Currently banned"
+    },
+    "filters": {
+      "hideBanned": "Hide banned users",
+      "showAll": "Show all users",
+      "hideBannedHelp": "Toggle to hide or show banned users in the list"
+    },
+    "table": {
+      "user": "User",
+      "suspicionScore": "Suspicion Score",
+      "ghostScore": "Ghost Score",
+      "clients": "Clients",
+      "channels": "Channels",
+      "accountAge": "Account Age",
+      "days": "{{count}} day",
+      "days_other": "{{count}} days",
+      "avgReaction": "Avg. Reaction",
+      "fastReactions": "Fast Reactions",
+      "fastReactionsAbbr": "Fast RT",
+      "accountAgeAbbr": "Age",
+      "ms": "{{value}}ms",
+      "noData": "No data available"
+    }
+  },
+  "suspicion": {
+    "title": "Suspicion Monitoring",
+    "subtitle": "Monitor and investigate suspicious user behavior",
+    "filters": {
+      "all": "All Users",
+      "high": "High Suspicion",
+      "medium": "Medium Suspicion",
+      "low": "Low Suspicion"
+    },
+    "details": {
+      "overview": "Overview",
+      "recentActivity": "Recent Activity",
+      "patterns": "Behavior Patterns",
+      "history": "History"
+    },
+    "score": "Suspicion Score",
+    "ghostScore": "Ghost Score",
+    "multiClient": "Multi-Client Detection",
+    "channelActivity": "Channel Activity"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "Comprehensive analytics dashboard",
+    "advancedTitle": "Advanced Analytics",
+    "advancedSubtitle": "Deep dive into user behavior patterns",
+    "timeRange": {
+      "last24h": "Last 24 hours",
+      "last7d": "Last 7 days",
+      "last30d": "Last 30 days",
+      "last90d": "Last 90 days",
+      "custom": "Custom range"
+    },
+    "charts": {
+      "suspicionTrends": "Suspicion Trends",
+      "userActivity": "User Activity",
+      "channelDistribution": "Channel Distribution",
+      "ghostDetection": "Ghost Detection",
+      "exportChart": "Export chart as image"
+    },
+    "metrics": {
+      "totalEvents": "Total Events",
+      "activeUsers": "Active Users",
+      "avgSuspicion": "Avg. Suspicion",
+      "detections": "Detections"
+    }
+  },
+  "rules": {
+    "title": "Rules",
+    "subtitle": "Manage detection rules and thresholds",
+    "createNew": "Create New Rule",
+    "editRule": "Edit Rule",
+    "deleteRule": "Delete Rule",
+    "ruleEditor": {
+      "name": "Rule Name",
+      "description": "Description",
+      "conditions": "Conditions",
+      "actions": "Actions",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "priority": "Priority",
+      "type": "Rule Type"
+    },
+    "confirmDelete": "Are you sure you want to delete this rule?"
+  },
+  "bans": {
+    "title": "User Bans",
+    "subtitle": "Manage banned users",
+    "banUser": "Ban User",
+    "unbanUser": "Unban User",
+    "reason": "Reason",
+    "bannedAt": "Banned At",
+    "bannedBy": "Banned By",
+    "confirmBan": "Are you sure you want to ban this user?",
+    "confirmUnban": "Are you sure you want to unban this user?"
+  },
+  "timeline": {
+    "title": "User Timeline",
+    "subtitle": "View user activity timeline",
+    "events": "Events",
+    "activity": "Activity",
+    "connections": "Connections",
+    "messages": "Messages",
+    "reactions": "Reactions"
+  },
+  "status": {
+    "title": "System Status",
+    "subtitle": "Monitor system health and performance",
+    "uptime": "Uptime",
+    "healthy": "Healthy",
+    "degraded": "Degraded",
+    "down": "Down",
+    "services": {
+      "api": "API Service",
+      "database": "Database",
+      "redis": "Redis Cache",
+      "websocket": "WebSocket"
+    }
+  },
+  "errors": {
+    "somethingWentWrong": "Something went wrong",
+    "pageNotFound": "Page not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "tryAgain": "Try again",
+    "goHome": "Go to homepage",
+    "contactSupport": "Contact support"
+  },
+  "consent": {
+    "analyticsTitle": "Analytics & Privacy",
+    "analyticsMessage": "We use privacy-respecting analytics to improve your experience. You can opt out anytime.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "learnMore": "Learn more"
+  },
+  "accessibility": {
+    "loading": "Content is loading",
+    "menu": "Main menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "userProfile": "User profile",
+    "notifications": "Notifications"
+  }
+}

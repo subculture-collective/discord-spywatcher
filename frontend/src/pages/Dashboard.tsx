@@ -1,8 +1,10 @@
 import { Users, AlertTriangle, Shield, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { CardSkeleton, TableSkeleton } from '../components/ui/LoadingSkeleton';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { StatCard } from '../components/ui/StatCard';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import api from '../lib/api';
@@ -24,6 +26,7 @@ type BannedUser = {
 };
 
 function Dashboard() {
+    const { t } = useTranslation();
     const [data, setData] = useState<UserEntry[]>([]);
     const [bannedUsers, setBannedUsers] = useState<Set<string>>(new Set());
     const [filterBanned, setFilterBanned] = useState(false);
@@ -57,10 +60,13 @@ function Dashboard() {
                 {/* Header */}
                 <header className="flex items-center justify-between">
                     <div>
-                        <h1 id="main-content" className="text-3xl font-bold text-ctp-text">Dashboard</h1>
-                        <p className="text-ctp-subtext0 mt-1">User behavior and suspicion monitoring</p>
+                        <h1 id="main-content" className="text-3xl font-bold text-ctp-text">{t('dashboard.title')}</h1>
+                        <p className="text-ctp-subtext0 mt-1">{t('dashboard.subtitle')}</p>
                     </div>
-                    <ThemeToggle />
+                    <div className="flex gap-2">
+                        <LanguageSwitcher />
+                        <ThemeToggle />
+                    </div>
                 </header>
 
                 {/* Stats Grid */}
@@ -76,28 +82,28 @@ function Dashboard() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <StatCard
-                                title="Total Users"
+                                title={t('dashboard.stats.totalUsers')}
                                 value={totalUsers}
-                                subtitle="Tracked users"
+                                subtitle={t('dashboard.stats.trackedUsers')}
                                 icon={Users}
                             />
                             <StatCard
-                                title="High Suspicion"
+                                title={t('dashboard.stats.highSuspicion')}
                                 value={highSuspicionUsers}
-                                subtitle="Score > 50"
+                                subtitle={t('dashboard.stats.scoreThreshold', { threshold: 50 })}
                                 icon={AlertTriangle}
                                 trend={highSuspicionUsers > 0 ? 'up' : 'down'}
                             />
                             <StatCard
-                                title="Ghost Users"
+                                title={t('dashboard.stats.ghostUsers')}
                                 value={ghostUsers}
-                                subtitle="Ghost score > 5"
+                                subtitle={t('dashboard.stats.ghostScoreThreshold', { threshold: 5 })}
                                 icon={Shield}
                             />
                             <StatCard
-                                title="Banned Users"
+                                title={t('dashboard.stats.bannedUsers')}
                                 value={bannedCount}
-                                subtitle="Currently banned"
+                                subtitle={t('dashboard.stats.currentlyBanned')}
                                 icon={Activity}
                             />
                         </div>
@@ -109,7 +115,7 @@ function Dashboard() {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle id="users-heading">User Suspicion List</CardTitle>
+                                <CardTitle id="users-heading">{t('dashboard.userSuspicionList')}</CardTitle>
                                 <div>
                                     <label htmlFor="filter-banned" className="flex items-center gap-2 text-sm text-ctp-subtext0">
                                         <input
@@ -120,9 +126,9 @@ function Dashboard() {
                                             className="rounded border-ctp-surface1"
                                             aria-describedby="filter-help"
                                         />
-                                        Hide banned users
+                                        {t('dashboard.filters.hideBanned')}
                                     </label>
-                                    <span id="filter-help" className="sr-only">Toggle to show or hide banned users from the list</span>
+                                    <span id="filter-help" className="sr-only">{t('dashboard.filters.hideBannedHelp')}</span>
                                 </div>
                             </div>
                         </CardHeader>
@@ -135,14 +141,14 @@ function Dashboard() {
                                         <caption className="sr-only">User suspicion scores and actions</caption>
                                         <thead className="bg-ctp-surface0 border-b border-ctp-surface1">
                                             <tr>
-                                                <th scope="col" className="text-left px-4 py-3 text-sm font-semibold text-ctp-text">Username</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Score</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Ghost</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Clients</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Channels</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Fast Reaction Time">Fast RT</abbr></th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title="Account Age in Days">Age</abbr></th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">Actions</th>
+                                                <th scope="col" className="text-left px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.user')}</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.suspicionScore')}</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.ghostScore')}</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.clients')}</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.channels')}</th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title={t('dashboard.table.fastReactions')}>{t('dashboard.table.fastReactionsAbbr')}</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title={t('dashboard.table.accountAge')}>{t('dashboard.table.accountAgeAbbr')}</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('common.actions')}</th>
                                             </tr>
                                         </thead>
                                     <tbody className="divide-y divide-ctp-surface1">
@@ -198,9 +204,9 @@ function Dashboard() {
                                                                             );
                                                                         })
                                                                 }
-                                                                aria-label={`Unban user ${user.username}`}
+                                                                aria-label={`${t('bans.unbanUser')} ${user.username}`}
                                                             >
-                                                                Unban
+                                                                {t('bans.unbanUser')}
                                                             </button>
                                                         ) : (
                                                             <button
@@ -220,9 +226,9 @@ function Dashboard() {
                                                                             )
                                                                         )
                                                                 }
-                                                                aria-label={`Ban user ${user.username}`}
+                                                                aria-label={`${t('bans.banUser')} ${user.username}`}
                                                             >
-                                                                Ban
+                                                                {t('bans.banUser')}
                                                             </button>
                                                         )}
                                                     </td>

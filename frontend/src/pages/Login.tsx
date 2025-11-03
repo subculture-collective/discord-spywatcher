@@ -1,10 +1,13 @@
 import { motion } from 'framer-motion';
 import { LogIn, Shield, Activity, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { config } from '../config/env';
 
 function Login() {
+    const { t } = useTranslation();
     const REDIRECT_URI = encodeURIComponent(
         `${window.location.origin}/auth/callback`
     );
@@ -13,8 +16,9 @@ function Login() {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-ctp-base via-ctp-mantle to-ctp-crust relative">
-            {/* Theme Toggle in top-right corner */}
-            <div className="absolute top-4 right-4">
+            {/* Theme Toggle and Language Switcher in top-right corner */}
+            <div className="absolute top-4 right-4 flex gap-2">
+                <LanguageSwitcher />
                 <ThemeToggle />
             </div>
             <motion.div
@@ -44,7 +48,7 @@ function Login() {
                             transition={{ delay: 0.3 }}
                             className="text-3xl font-bold text-ctp-text mb-2"
                         >
-                            Discord Spywatcher
+                            {t('app.name')}
                         </motion.h1>
                         <motion.p
                             initial={{ y: -20, opacity: 0 }}
@@ -52,7 +56,7 @@ function Login() {
                             transition={{ delay: 0.4 }}
                             className="text-ctp-subtext0"
                         >
-                            Advanced user behavior analytics
+                            {t('app.tagline')}
                         </motion.p>
                     </header>
 
@@ -66,15 +70,15 @@ function Login() {
                     >
                         <li className="flex items-center gap-3 text-ctp-subtext1">
                             <Activity className="w-5 h-5 text-ctp-green" aria-hidden="true" />
-                            <span className="text-sm">Real-time monitoring</span>
+                            <span className="text-sm">{t('features.realTimeMonitoring')}</span>
                         </li>
                         <li className="flex items-center gap-3 text-ctp-subtext1">
                             <Shield className="w-5 h-5 text-ctp-blue" aria-hidden="true" />
-                            <span className="text-sm">Ghost detection</span>
+                            <span className="text-sm">{t('features.ghostDetection')}</span>
                         </li>
                         <li className="flex items-center gap-3 text-ctp-subtext1">
                             <TrendingUp className="w-5 h-5 text-ctp-pink" aria-hidden="true" />
-                            <span className="text-sm">Advanced analytics</span>
+                            <span className="text-sm">{t('features.advancedAnalytics')}</span>
                         </li>
                     </motion.ul>
 
@@ -87,10 +91,10 @@ function Login() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="flex items-center justify-center gap-3 w-full bg-ctp-blue hover:bg-ctp-blue/90 text-ctp-base px-6 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-offset-2"
-                        aria-label="Login with Discord"
+                        aria-label={t('auth.loginWithDiscord')}
                     >
                         <LogIn className="w-5 h-5" aria-hidden="true" />
-                        Login with Discord
+                        {t('auth.loginWithDiscord')}
                     </motion.a>
 
                     <motion.p
@@ -99,7 +103,7 @@ function Login() {
                         transition={{ delay: 0.8 }}
                         className="text-center text-xs text-ctp-overlay0 mt-6"
                     >
-                        By logging in, you agree to our terms of service
+                        {t('auth.termsAgreement')}
                     </motion.p>
                 </div>
             </motion.div>

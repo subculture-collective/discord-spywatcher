@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import AnalyticsConsentBanner from './components/AnalyticsConsentBanner';
@@ -6,6 +7,7 @@ import RequireAdmin from './components/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
 import SuspicionDetail from './components/suspicion/SuspicionDetail';
 import { usePageTracking } from './hooks/useAnalytics';
+import { useRTL } from './hooks/useRTL';
 import { Analytics, AdvancedAnalytics, AuthCallback, Bans, Dashboard, Login, Status, Suspicion, UserTimeline } from './pages';
 import MetricsDashboard from './pages/MetricsDashboard';
 import RuleEditor from './pages/RuleEditor';
@@ -13,7 +15,9 @@ import Rules from './pages/Rules';
 import { useAuth } from './store/auth';
 
 function AppContent() {
+    const { t } = useTranslation();
     usePageTracking();
+    useRTL();
 
     return (
         <>
@@ -22,7 +26,7 @@ function AppContent() {
                 href="#main-content"
                 className="sr-only sr-only-focusable fixed top-4 left-4 z-50 bg-ctp-blue text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-offset-2"
             >
-                Skip to main content
+                {t('navigation.skipToContent')}
             </a>
             <Routes>
                 <Route path="/login" element={<Login />} />

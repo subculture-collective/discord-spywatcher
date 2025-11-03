@@ -5,10 +5,12 @@
 
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useAnalytics } from '../hooks/useAnalytics';
 
 export default function AnalyticsConsentBanner() {
+    const { t } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
     const { consentStatus, grantConsent, denyConsent } = useAnalytics();
 
@@ -43,33 +45,31 @@ export default function AnalyticsConsentBanner() {
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex-1">
                         <h3 id="consent-heading" className="text-lg font-semibold text-white mb-1">
-                            <span aria-hidden="true">🍪</span> Privacy & Analytics
+                            <span aria-hidden="true">🍪</span> {t('consent.analyticsTitle')}
                         </h3>
                         <p className="text-sm text-gray-300">
-                            We use analytics to improve your experience and understand how you
-                            use our application. Your data is anonymized and never shared with
-                            third parties. You can change your preferences at any time in settings.
+                            {t('consent.analyticsMessage')}
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleDeny}
                             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
-                            aria-label="Decline analytics"
+                            aria-label={t('consent.decline')}
                         >
-                            Decline
+                            {t('consent.decline')}
                         </button>
                         <button
                             onClick={handleAccept}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            aria-label="Accept analytics"
+                            aria-label={t('consent.accept')}
                         >
-                            Accept
+                            {t('consent.accept')}
                         </button>
                         <button
                             onClick={handleDeny}
                             className="p-2 text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 rounded"
-                            aria-label="Close banner"
+                            aria-label={t('common.close')}
                         >
                             <X className="w-5 h-5" aria-hidden="true" />
                         </button>
