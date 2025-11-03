@@ -53,6 +53,7 @@ export default defineConfig({
             { text: 'Introduction', link: '/guide/' },
             { text: 'Installation', link: '/guide/installation' },
             { text: 'Quick Start', link: '/guide/quick-start' },
+            { text: 'Getting Started Guide', link: '/guide/getting-started' },
             { text: 'Discord OAuth Setup', link: '/guide/oauth-setup' },
             { text: 'Guild Selection', link: '/guide/guild-selection' },
           ],
@@ -78,6 +79,17 @@ export default defineConfig({
             { text: 'Advanced Charts', link: '/guide/advanced-charts' },
             { text: 'Privacy Controls', link: '/guide/privacy' },
             { text: 'Plugin System', link: '/guide/plugins' },
+          ],
+        },
+        {
+          text: 'Learning Resources',
+          collapsed: false,
+          items: [
+            { text: 'Video Tutorials', link: '/guide/tutorials' },
+            { text: 'Best Practices', link: '/guide/best-practices' },
+            { text: 'Quick Reference', link: '/guide/quick-reference' },
+            { text: 'Screenshots Guide', link: '/guide/screenshots' },
+            { text: 'Glossary', link: '/guide/glossary' },
           ],
         },
         {
