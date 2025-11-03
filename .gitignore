@@ -31,12 +31,15 @@ frontend/node_modules/
 # Cache
 .cache/
 .parcel-cache/
-.vitepress/
 .vitepress/dist/
 .vitepress/cache/
 .nyc_output/
 coverage/
 *.lcov
+
+# VitePress build output
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 
 # VSCode
 .vscode-test
