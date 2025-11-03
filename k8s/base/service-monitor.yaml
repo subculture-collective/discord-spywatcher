@@ -1,0 +1,57 @@
+# ServiceMonitor for Prometheus Operator
+# Configures Prometheus to scrape metrics from Spywatcher services
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spywatcher-backend
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    tier: backend
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: spywatcher
+      tier: backend
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spywatcher-frontend
+  namespace: spywatcher
+  labels:
+    app: spywatcher
+    tier: frontend
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: spywatcher
+      tier: frontend
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace

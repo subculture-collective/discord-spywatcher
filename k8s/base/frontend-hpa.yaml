@@ -1,18 +1,18 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: spywatcher-backend-hpa
+  name: spywatcher-frontend-hpa
   namespace: spywatcher
   labels:
     app: spywatcher
-    tier: backend
+    tier: frontend
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: spywatcher-backend
+    name: spywatcher-frontend
   minReplicas: 2
-  maxReplicas: 10
+  maxReplicas: 5
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -47,19 +47,3 @@ spec:
       target:
         type: Utilization
         averageUtilization: 80
-  # Custom metrics for request-based scaling (requires metrics-server and custom metrics API)
-  # Uncomment when Prometheus adapter or similar is configured
-  # - type: Pods
-  #   pods:
-  #     metric:
-  #       name: http_requests_per_second
-  #     target:
-  #       type: AverageValue
-  #       averageValue: "1000"
-  # - type: Pods
-  #   pods:
-  #     metric:
-  #       name: active_connections
-  #     target:
-  #       type: AverageValue
-  #       averageValue: "100"

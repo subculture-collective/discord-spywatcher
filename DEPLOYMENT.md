@@ -15,6 +15,13 @@ This document describes the production deployment strategy for Spywatcher, inclu
 - [Monitoring and Alerts](#monitoring-and-alerts)
 - [Troubleshooting](#troubleshooting)
 
+## Related Documentation
+
+- [AUTO_SCALING.md](./AUTO_SCALING.md) - Comprehensive auto-scaling and load balancing guide
+- [docs/AUTO_SCALING_EXAMPLES.md](./docs/AUTO_SCALING_EXAMPLES.md) - Practical examples and tutorials
+- [INFRASTRUCTURE.md](./INFRASTRUCTURE.md) - Infrastructure architecture overview
+- [MONITORING.md](./MONITORING.md) - Monitoring and observability setup
+
 ## Overview
 
 Spywatcher uses a multi-strategy deployment approach with:
@@ -83,11 +90,13 @@ Updates pods gradually, maintaining service availability.
 ```
 
 **Advantages:**
+
 - Simple and predictable
 - Zero downtime
 - Automatic rollback on failure
 
 **Disadvantages:**
+
 - Gradual rollout may take time
 - Both versions run simultaneously during update
 
@@ -107,11 +116,13 @@ IMAGE_TAG=latest ./scripts/deployment/blue-green-deploy.sh
 ```
 
 **Advantages:**
+
 - Instant traffic switch
 - Easy rollback
 - Full environment testing before switch
 
 **Disadvantages:**
+
 - Requires double resources temporarily
 - Database migrations must be compatible with both versions
 
@@ -128,11 +139,13 @@ IMAGE_TAG=latest CANARY_STEPS="5 25 50 100" ./scripts/deployment/canary-deploy.s
 ```
 
 **Advantages:**
+
 - Risk mitigation through gradual rollout
 - Real-world testing with subset of users
 - Automated rollback on errors
 
 **Disadvantages:**
+
 - Longer deployment time
 - Requires robust monitoring
 
@@ -235,26 +248,26 @@ The deployment pipeline is triggered by:
 #### Pipeline Steps
 
 1. **Build and Push**
-   - Build Docker images for backend and frontend
-   - Push to GitHub Container Registry
-   - Tag with commit SHA and latest
+    - Build Docker images for backend and frontend
+    - Push to GitHub Container Registry
+    - Tag with commit SHA and latest
 
 2. **Database Migration**
-   - Run Prisma migrations
-   - Verify migration success
+    - Run Prisma migrations
+    - Verify migration success
 
 3. **Deploy**
-   - Apply selected deployment strategy
-   - Update Kubernetes deployments
-   - Monitor rollout status
+    - Apply selected deployment strategy
+    - Update Kubernetes deployments
+    - Monitor rollout status
 
 4. **Smoke Tests**
-   - Health check endpoints
-   - Basic functionality tests
+    - Health check endpoints
+    - Basic functionality tests
 
 5. **Rollback on Failure**
-   - Automatic rollback if deployment fails
-   - Notification to team
+    - Automatic rollback if deployment fails
+    - Notification to team
 
 ### Required Secrets
 
@@ -336,6 +349,7 @@ kubectl top nodes
 ### CloudWatch Metrics
 
 Monitor via AWS CloudWatch:
+
 - EKS cluster metrics
 - RDS performance metrics
 - ElastiCache metrics
@@ -407,6 +421,7 @@ kubectl describe deployment spywatcher-backend -n spywatcher
 ## Support
 
 For deployment issues:
+
 - Check GitHub Actions logs
 - Review CloudWatch logs
 - Contact DevOps team

@@ -1,13 +1,97 @@
-# PostgreSQL Management Scripts
+# Scripts Directory
 
-This directory contains scripts for managing the PostgreSQL database for Discord SpyWatcher.
+This directory contains management scripts for Discord SpyWatcher, including database operations, deployment automation, and auto-scaling validation.
 
 ## Scripts Overview
 
-### 1. `postgres-init.sql`
+### Auto-scaling & Deployment Scripts
+
+#### `validate-autoscaling.sh`
+
+Validates auto-scaling and load balancing configuration in Kubernetes.
+
+**Features:**
+
+- Checks HPA configuration and status
+- Verifies metrics-server availability
+- Validates deployment configurations
+- Checks service endpoints and health
+- Verifies Pod Disruption Budgets
+- Tests pod metrics availability
+- Comprehensive validation report
+
+**Usage:**
+
+```bash
+# Run validation
+./scripts/validate-autoscaling.sh
+
+# With custom namespace
+NAMESPACE=spywatcher-prod ./scripts/validate-autoscaling.sh
+
+# Verbose output
+VERBOSE=true ./scripts/validate-autoscaling.sh
+```
+
+**Environment Variables:**
+
+- `NAMESPACE` - Kubernetes namespace (default: spywatcher)
+- `VERBOSE` - Show detailed output (default: false)
+
+**See:** [AUTO_SCALING.md](../AUTO_SCALING.md) for detailed documentation.
+
+#### `load-test.sh`
+
+Generates load to test auto-scaling behavior and simulate traffic spikes.
+
+**Features:**
+
+- Multiple load testing tools support (ab, wrk, hey)
+- Configurable duration and concurrency
+- Traffic spike simulation mode
+- Real-time HPA monitoring
+- Scaling event tracking
+- Comprehensive results reporting
+
+**Usage:**
+
+```bash
+# Basic load test (5 minutes, 50 concurrent)
+./scripts/load-test.sh
+
+# Custom configuration
+./scripts/load-test.sh --duration 600 --concurrent 100 --rps 200
+
+# Simulate traffic spike pattern
+./scripts/load-test.sh --spike
+
+# Monitor HPA only (no load generation)
+./scripts/load-test.sh --monitor
+
+# Custom target URL
+./scripts/load-test.sh --url https://api.example.com/health
+```
+
+**Options:**
+
+- `-u, --url URL` - Target URL (auto-detected if not specified)
+- `-d, --duration SECONDS` - Test duration (default: 300)
+- `-c, --concurrent NUM` - Concurrent requests (default: 50)
+- `-r, --rps NUM` - Requests per second (default: 100)
+- `-s, --spike` - Simulate traffic spike pattern
+- `-m, --monitor` - Monitor HPA only
+- `-h, --help` - Show help
+
+**See:** [docs/AUTO_SCALING_EXAMPLES.md](../docs/AUTO_SCALING_EXAMPLES.md) for examples.
+
+### PostgreSQL Management Scripts
+
+#### 1. `postgres-init.sql`
+
 Initialization script that runs when the PostgreSQL container starts for the first time.
 
 **Features:**
+
 - Enables required PostgreSQL extensions (uuid-ossp, pg_trgm)
 - Sets timezone to UTC
 - Logs successful initialization
@@ -15,16 +99,19 @@ Initialization script that runs when the PostgreSQL container starts for the fir
 **Usage:**
 Automatically executed by Docker when the database container is first created.
 
-### 2. `backup.sh`
+#### 2. `backup.sh`
+
 Creates compressed backups of the PostgreSQL database.
 
 **Features:**
+
 - Creates gzip-compressed backups
 - Automatic backup retention (30 days by default)
 - Optional S3 upload support
 - Colored output for easy monitoring
 
 **Usage:**
+
 ```bash
 # Basic backup
 DB_PASSWORD=your_password ./scripts/backup.sh
@@ -37,6 +124,7 @@ S3_BUCKET=my-bucket DB_PASSWORD=your_password ./scripts/backup.sh
 ```
 
 **Environment Variables:**
+
 - `BACKUP_DIR` - Backup directory (default: /var/backups/spywatcher)
 - `DB_NAME` - Database name (default: spywatcher)
 - `DB_USER` - Database user (default: spywatcher)
@@ -46,16 +134,19 @@ S3_BUCKET=my-bucket DB_PASSWORD=your_password ./scripts/backup.sh
 - `RETENTION_DAYS` - Days to keep backups (default: 30)
 - `S3_BUCKET` - S3 bucket for cloud backup (optional)
 
-### 3. `restore.sh`
+#### 3. `restore.sh`
+
 Restores the database from a backup file.
 
 **Features:**
+
 - Interactive confirmation before restore
 - Terminates existing connections
 - Verifies restore success
 - Colored output for status messages
 
 **Usage:**
+
 ```bash
 # Restore from backup
 DB_PASSWORD=your_password ./scripts/restore.sh /path/to/backup.sql.gz
@@ -65,6 +156,7 @@ DB_PASSWORD=your_password ./scripts/restore.sh
 ```
 
 **Environment Variables:**
+
 - `DB_NAME` - Database name (default: spywatcher)
 - `DB_USER` - Database user (default: spywatcher)
 - `DB_HOST` - Database host (default: localhost)
@@ -73,10 +165,12 @@ DB_PASSWORD=your_password ./scripts/restore.sh
 
 **Warning:** This operation will REPLACE all current data!
 
-### 4. `maintenance.sh`
+#### 4. `maintenance.sh`
+
 Performs routine database maintenance tasks.
 
 **Features:**
+
 - VACUUM ANALYZE for cleanup and optimization
 - Updates table statistics
 - Checks for table bloat
@@ -86,6 +180,7 @@ Performs routine database maintenance tasks.
 - Detects long-running queries
 
 **Usage:**
+
 ```bash
 # Run maintenance
 DB_PASSWORD=your_password ./scripts/maintenance.sh
@@ -95,16 +190,19 @@ DB_PASSWORD=your_password ./scripts/maintenance.sh
 ```
 
 **Environment Variables:**
+
 - `DB_NAME` - Database name (default: spywatcher)
 - `DB_USER` - Database user (default: spywatcher)
 - `DB_HOST` - Database host (default: localhost)
 - `DB_PORT` - Database port (default: 5432)
 - `DB_PASSWORD` - Database password (required)
 
-### 5. `migrate-to-postgres.ts`
+#### 5. `migrate-to-postgres.ts`
+
 Migrates data from SQLite to PostgreSQL.
 
 **Features:**
+
 - Batch processing for large datasets
 - Data transformation (IDs to UUIDs, strings to arrays)
 - Progress tracking with colored output
@@ -112,6 +210,7 @@ Migrates data from SQLite to PostgreSQL.
 - Detailed migration statistics
 
 **Usage:**
+
 ```bash
 cd backend
 
@@ -126,28 +225,33 @@ BATCH_SIZE=500 SQLITE_DATABASE_URL="file:./prisma/dev.db" DATABASE_URL="postgres
 ```
 
 **Environment Variables:**
+
 - `SQLITE_DATABASE_URL` - SQLite connection string (default: file:./backend/prisma/dev.db)
 - `DATABASE_URL` - PostgreSQL connection string (required)
 - `BATCH_SIZE` - Records per batch (default: 1000)
 - `DRY_RUN` - Test mode without writing (default: false)
 
 **Migrated Models:**
+
 - PresenceEvent (with array clients)
 - TypingEvent
 - MessageEvent (with full-text search support)
 - JoinEvent
 - RoleChangeEvent (with array addedRoles)
 
-### 6. `setup-fulltext-search.sh`
+#### 6. `setup-fulltext-search.sh`
+
 Sets up full-text search capabilities for the MessageEvent table.
 
 **Features:**
+
 - Adds tsvector column for efficient text search
 - Creates GIN index for performance
 - Verifies index creation
 - Colored output
 
 **Usage:**
+
 ```bash
 # Setup full-text search
 DB_PASSWORD=your_password ./scripts/setup-fulltext-search.sh
@@ -157,6 +261,7 @@ DB_PASSWORD=your_password npm run db:fulltext
 ```
 
 **Environment Variables:**
+
 - `DB_NAME` - Database name (default: spywatcher)
 - `DB_USER` - Database user (default: spywatcher)
 - `DB_HOST` - Database host (default: localhost)
@@ -233,6 +338,7 @@ PGPASSWORD=your_password psql -h localhost -p 5432 -U spywatcher -d spywatcher -
 ### Large Database Performance
 
 For databases over 1GB, consider:
+
 - Increasing BATCH_SIZE for migrations
 - Running maintenance during off-peak hours
 - Using parallel processing for backups
@@ -249,6 +355,7 @@ For databases over 1GB, consider:
 ## Support
 
 For issues or questions:
+
 - Check the main [README.md](../README.md)
 - Review [MIGRATION.md](../MIGRATION.md) for database migration guidance
 - Review [DOCKER.md](../DOCKER.md) for Docker-specific issues

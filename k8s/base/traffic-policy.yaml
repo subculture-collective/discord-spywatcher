@@ -1,0 +1,150 @@
+# Traffic Management Policies
+# These policies can be applied when using service mesh solutions like Istio or Linkerd
+# Comment: This file is optional and requires service mesh installation
+
+# ---
+# # Virtual Service for advanced traffic routing
+# apiVersion: networking.istio.io/v1beta1
+# kind: VirtualService
+# metadata:
+#   name: spywatcher-backend-vs
+#   namespace: spywatcher
+# spec:
+#   hosts:
+#   - spywatcher-backend
+#   http:
+#   - match:
+#     - headers:
+#         x-version:
+#           exact: "v2"
+#     route:
+#     - destination:
+#         host: spywatcher-backend
+#         subset: v2
+#       weight: 100
+#   - route:
+#     - destination:
+#         host: spywatcher-backend
+#         subset: v1
+#       weight: 100
+#   timeout: 60s
+#   retries:
+#     attempts: 3
+#     perTryTimeout: 20s
+#     retryOn: 5xx,reset,connect-failure,refused-stream
+
+# ---
+# # Destination Rule for traffic policies
+# apiVersion: networking.istio.io/v1beta1
+# kind: DestinationRule
+# metadata:
+#   name: spywatcher-backend-dr
+#   namespace: spywatcher
+# spec:
+#   host: spywatcher-backend
+#   trafficPolicy:
+#     loadBalancer:
+#       consistentHash:
+#         httpCookie:
+#           name: session
+#           ttl: 3600s
+#     connectionPool:
+#       tcp:
+#         maxConnections: 100
+#       http:
+#         http1MaxPendingRequests: 50
+#         http2MaxRequests: 100
+#         maxRequestsPerConnection: 2
+#     outlierDetection:
+#       consecutiveErrors: 5
+#       interval: 30s
+#       baseEjectionTime: 30s
+#       maxEjectionPercent: 50
+#   subsets:
+#   - name: v1
+#     labels:
+#       version: v1
+#   - name: v2
+#     labels:
+#       version: v2
+
+# ---
+# # Circuit Breaker for backend service
+# apiVersion: networking.istio.io/v1beta1
+# kind: DestinationRule
+# metadata:
+#   name: spywatcher-backend-circuit-breaker
+#   namespace: spywatcher
+# spec:
+#   host: spywatcher-backend
+#   trafficPolicy:
+#     connectionPool:
+#       tcp:
+#         maxConnections: 100
+#       http:
+#         http1MaxPendingRequests: 50
+#         http2MaxRequests: 100
+#         maxRequestsPerConnection: 2
+#     outlierDetection:
+#       consecutiveErrors: 5
+#       interval: 30s
+#       baseEjectionTime: 30s
+#       maxEjectionPercent: 50
+#       minHealthPercent: 50
+
+# ---
+# # Rate Limiting at service mesh level
+# apiVersion: networking.istio.io/v1beta1
+# kind: EnvoyFilter
+# metadata:
+#   name: spywatcher-rate-limit
+#   namespace: spywatcher
+# spec:
+#   workloadSelector:
+#     labels:
+#       app: spywatcher
+#       tier: backend
+#   configPatches:
+#   - applyTo: HTTP_FILTER
+#     match:
+#       context: SIDECAR_INBOUND
+#       listener:
+#         filterChain:
+#           filter:
+#             name: "envoy.filters.network.http_connection_manager"
+#             subFilter:
+#               name: "envoy.filters.http.router"
+#     patch:
+#       operation: INSERT_BEFORE
+#       value:
+#         name: envoy.filters.http.local_ratelimit
+#         typed_config:
+#           "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+#           stat_prefix: http_local_rate_limiter
+#           token_bucket:
+#             max_tokens: 100
+#             tokens_per_fill: 100
+#             fill_interval: 60s
+#           filter_enabled:
+#             runtime_key: local_rate_limit_enabled
+#             default_value:
+#               numerator: 100
+#               denominator: HUNDRED
+
+---
+# Note: The above configurations are examples for service mesh integration
+# They are commented out as they require Istio or similar service mesh
+# 
+# To enable service mesh features:
+# 1. Install Istio: istioctl install --set profile=production
+# 2. Enable sidecar injection: kubectl label namespace spywatcher istio-injection=enabled
+# 3. Uncomment desired configurations above
+# 4. Apply: kubectl apply -f traffic-policy.yaml
+# 
+# Benefits of Service Mesh:
+# - Advanced traffic routing (A/B testing, canary releases)
+# - Circuit breaking and fault injection
+# - Fine-grained traffic control
+# - Enhanced observability
+# - mTLS encryption between services
+# - Distributed tracing
