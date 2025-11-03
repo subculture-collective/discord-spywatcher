@@ -32,9 +32,38 @@ Spywatcher is a full-stack surveillance and analytics tool for Discord servers. 
 backend/        # Discord bot + API server
 frontend/       # React + Vite frontend client
 sdk/            # TypeScript/JavaScript SDK for API integration
-docs/           # Comprehensive documentation
+docs/           # VitePress documentation site
 .github/        # CI/CD workflows and automation
 ```
+
+## 📚 Documentation
+
+Comprehensive documentation is available at multiple levels:
+
+- **[User Guide](./docs/guide/)** - Installation, features, and usage
+- **[Admin Guide](./docs/admin/)** - Configuration and operations
+- **[Developer Guide](./docs/developer/)** - Architecture and contributing
+- **[API Reference](./docs/api/)** - Complete API documentation
+
+### Building Documentation Locally
+
+```bash
+# Start development server
+npm run docs:dev
+
+# Build static site
+npm run docs:build
+
+# Preview build
+npm run docs:preview
+```
+
+Documentation is built with [VitePress](https://vitepress.dev/) and includes:
+- Interactive search
+- Dark mode support
+- Mobile-responsive design
+- Code examples in multiple languages
+- Comprehensive guides for all features
 
 ## 🔄 CI/CD Pipeline
 
