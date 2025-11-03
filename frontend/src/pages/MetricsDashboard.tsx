@@ -3,10 +3,10 @@
  * Displays comprehensive usage metrics and insights
  */
 
-import { useState, useEffect } from 'react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Activity, Users, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import { getDashboardData } from '../lib/analytics';
 
