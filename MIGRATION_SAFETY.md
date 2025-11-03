@@ -118,11 +118,11 @@ DB_PASSWORD=your_password ./scripts/rollback-migration.sh \
 
 This will:
 
-- Confirm the operation
-- Terminate active connections
-- Drop and recreate database
-- Restore data from backup
-- Verify restoration
+- confirm the operation
+- terminate active connections
+- drop and recreate database
+- restore data from backup
+- verify restoration
 
 ### Rollback Best Practices
 

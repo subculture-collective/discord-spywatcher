@@ -113,7 +113,7 @@ list_backups() {
     echo ""
     
     if [ -d "$BACKUP_DIR" ]; then
-        ls -lh "$BACKUP_DIR" | grep -E '\.sql(\.gz)?$' | awk '{print $9, "("$5")", $6, $7, $8}' || print_warning "No backup files found"
+        find "$BACKUP_DIR" -maxdepth 1 -type f \( -name '*.sql' -o -name '*.sql.gz' \) -printf '%f (%s bytes) %TY-%Tm-%Td %TH:%TM\n' | sort -r || print_warning "No backup files found"
     else
         print_warning "Backup directory does not exist: $BACKUP_DIR"
     fi

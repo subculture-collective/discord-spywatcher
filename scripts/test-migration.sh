@@ -215,16 +215,42 @@ validate_data_integrity() {
         DO \$\$
         DECLARE
             r RECORD;
+            child_cols TEXT;
+            parent_cols TEXT;
+            sql TEXT;
+            violation_count INTEGER := 0;
         BEGIN
-            FOR r IN (
-                SELECT conname, conrelid::regclass AS table_name
+            FOR r IN
+                SELECT
+                    conname,
+                    conrelid::regclass AS child_table,
+                    confrelid::regclass AS parent_table,
+                    conkey,
+                    confkey
                 FROM pg_constraint
                 WHERE contype = 'f'
-            ) LOOP
+            LOOP
+                -- Get child and parent column names as comma-separated lists
+                SELECT string_agg(quote_ident(attname), ', ')
+                INTO child_cols
+                FROM unnest(r.conkey) AS colnum
+                JOIN pg_attribute a ON a.attrelid = r.child_table::regclass AND a.attnum = colnum;
+
+                SELECT string_agg(quote_ident(attname), ', ')
+                INTO parent_cols
+                FROM unnest(r.confkey) AS colnum
+                JOIN pg_attribute a ON a.attrelid = r.parent_table::regclass AND a.attnum = colnum;
+
+                sql := 'SELECT COUNT(*) FROM ' || r.child_table || ' c LEFT JOIN ' || r.parent_table || ' p ON (' ||
+                    'c.' || child_cols || ' = p.' || parent_cols || ') WHERE p.' || parent_cols || ' IS NULL';
+
                 BEGIN
-                    EXECUTE 'SELECT COUNT(*) FROM ' || r.table_name || ' WHERE NOT EXISTS (SELECT 1 FROM ONLY ' || r.table_name || ')';
+                    EXECUTE sql INTO violation_count;
+                    IF violation_count > 0 THEN
+                        RAISE NOTICE 'Foreign key violation in constraint %: % orphaned rows in table %', r.conname, violation_count, r.child_table;
+                    END IF;
                 EXCEPTION WHEN OTHERS THEN
-                    RAISE NOTICE 'Foreign key violation in %', r.table_name;
+                    RAISE NOTICE 'Error checking foreign key constraint %', r.conname;
                 END;
             END LOOP;
         END;

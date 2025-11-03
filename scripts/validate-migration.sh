@@ -215,7 +215,7 @@ validate_foreign_keys() {
             RAISE NOTICE 'Total violations: %', violation_count;
         END;
         \$\$;
-    " 2>&1 | grep "Total violations" | grep -oP '\d+' || echo "0")
+    " 2>&1 | grep "Total violations" | grep -oE '[0-9]+' || echo "0")
     
     if [ "$violations" -eq "0" ]; then
         print_success "No foreign key violations detected"
