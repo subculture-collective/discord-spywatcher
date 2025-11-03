@@ -105,13 +105,13 @@ Use the view toggle buttons at the top of the page:
 
 ```json
 {
-  "d3": "^7.x",
-  "d3-sankey": "^0.12.x",
-  "@types/d3": "^7.x",
-  "@types/d3-sankey": "^0.12.x",
-  "vis-network": "^9.x",
-  "vis-data": "^7.x",
-  "html2canvas": "^1.x"
+  "d3": "^7.9.0",
+  "d3-sankey": "^0.12.3",
+  "@types/d3": "^7.4.3",
+  "@types/d3-sankey": "^0.12.4",
+  "vis-network": "^10.0.2",
+  "vis-data": "^8.0.3",
+  "html2canvas": "^1.4.1"
 }
 ```
 

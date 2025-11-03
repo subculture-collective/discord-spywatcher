@@ -77,22 +77,29 @@ function AdvancedAnalytics() {
                 });
             });
 
-            // Merge suspicion data
+            // Merge suspicion data efficiently using a Map indexed by userId
+            const suspicionMap = new Map<string, { suspicionScore: number; ghostScore: number }>();
             suspicionRes.data.forEach((item: unknown) => {
                 const suspicionItem = item as {
                     userId: string;
                     suspicionScore: number;
                     ghostScore: number;
                 };
-                dataMap.forEach((existing, key) => {
-                    if (existing.userId === suspicionItem.userId) {
-                        dataMap.set(key, {
-                            ...existing,
-                            suspicionScore: suspicionItem.suspicionScore,
-                            ghostScore: suspicionItem.ghostScore,
-                        });
-                    }
+                suspicionMap.set(suspicionItem.userId, {
+                    suspicionScore: suspicionItem.suspicionScore,
+                    ghostScore: suspicionItem.ghostScore,
                 });
+            });
+
+            dataMap.forEach((existing, key) => {
+                const suspicion = suspicionMap.get(existing.userId);
+                if (suspicion) {
+                    dataMap.set(key, {
+                        ...existing,
+                        suspicionScore: suspicion.suspicionScore,
+                        ghostScore: suspicion.ghostScore,
+                    });
+                }
             });
 
             dataMap.forEach(value => combinedData.push(value));
