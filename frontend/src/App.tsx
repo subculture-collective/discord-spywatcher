@@ -8,6 +8,8 @@ import SuspicionDetail from './components/suspicion/SuspicionDetail';
 import { usePageTracking } from './hooks/useAnalytics';
 import { Analytics, AuthCallback, Bans, Dashboard, Login, Status, Suspicion, UserTimeline } from './pages';
 import MetricsDashboard from './pages/MetricsDashboard';
+import Rules from './pages/Rules';
+import RuleEditor from './pages/RuleEditor';
 import { useAuth } from './store/auth';
 
 function AppContent() {
@@ -31,6 +33,9 @@ function AppContent() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/metrics" element={<MetricsDashboard />} />
+                    <Route path="/rules" element={<Rules />} />
+                    <Route path="/rules/new" element={<RuleEditor />} />
+                    <Route path="/rules/:id/edit" element={<RuleEditor />} />
                     <Route path="/suspicion" element={<Suspicion />} />
                     <Route path="/suspicion/:userId" element={<SuspicionDetail />} />
                     <Route path="/timeline/:userId" element={<UserTimeline />} />

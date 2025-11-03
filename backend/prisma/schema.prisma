@@ -579,3 +579,95 @@ model BackupLog {
   @@index([startedAt(sort: Desc)])
   @@index([completedAt(sort: Desc)])
 }
+
+// Analytics Rules Engine Models
+
+enum RuleStatus {
+  ACTIVE
+  PAUSED
+  DRAFT
+}
+
+enum RuleTriggerType {
+  SCHEDULED // Runs on a schedule (cron)
+  REALTIME  // Evaluates on event streams
+  MANUAL    // User-triggered
+}
+
+enum ActionType {
+  WEBHOOK
+  NOTIFICATION
+  EMAIL
+  DISCORD_MESSAGE
+}
+
+enum ConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  GREATER_THAN
+  LESS_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN_OR_EQUAL
+  CONTAINS
+  NOT_CONTAINS
+  IN
+  NOT_IN
+}
+
+model AnalyticsRule {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?          @db.Text
+  userId          String // Owner of the rule
+  status          RuleStatus       @default(DRAFT)
+  triggerType     RuleTriggerType  @default(SCHEDULED)
+  schedule        String?          // Cron expression for scheduled rules
+  conditions      Json             @db.JsonB // Array of condition objects
+  actions         Json             @db.JsonB // Array of action configurations
+  metadata        Json?            @db.JsonB // Additional configuration
+  lastExecutedAt  DateTime?        @db.Timestamptz
+  createdAt       DateTime         @default(now()) @db.Timestamptz
+  updatedAt       DateTime         @updatedAt @db.Timestamptz
+  executions      RuleExecution[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([triggerType])
+  @@index([lastExecutedAt])
+  @@index([userId, status])
+}
+
+model RuleExecution {
+  id              String   @id @default(cuid())
+  ruleId          String
+  rule            AnalyticsRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  status          String   // SUCCESS, FAILED, PARTIAL
+  matchedCount    Int      @default(0) // Number of records that matched conditions
+  actionsExecuted Int      @default(0) // Number of actions successfully executed
+  error           String?  @db.Text
+  results         Json?    @db.JsonB // Execution results and matched data
+  executionTimeMs Int?     // Execution duration in milliseconds
+  startedAt       DateTime @default(now()) @db.Timestamptz
+  completedAt     DateTime? @db.Timestamptz
+
+  @@index([ruleId])
+  @@index([status])
+  @@index([startedAt(sort: Desc)])
+  @@index([ruleId, startedAt(sort: Desc)])
+}
+
+model RuleTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  category    String   // E.g., "ghost_detection", "suspicious_activity", "engagement"
+  conditions  Json     @db.JsonB // Template condition structure
+  actions     Json     @db.JsonB // Template action structure
+  metadata    Json?    @db.JsonB
+  usageCount  Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  @@index([category])
+  @@index([usageCount(sort: Desc)])
+}
