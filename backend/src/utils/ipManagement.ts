@@ -10,7 +10,7 @@ function sanitizeIPForLog(ip: string): string {
     // Strict validation to prevent any injection
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
     const ipv6Regex = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
-    
+
     if (ipv4Regex.test(ip) || ipv6Regex.test(ip)) {
         return ip.substring(0, 45); // Max IPv6 length
     }
@@ -41,16 +41,15 @@ export async function autoBlockOnAbuse(
         });
 
         if (whitelisted) {
-            console.log(
-                'IP is whitelisted, not blocking despite abuse'
-            );
+            console.log('IP is whitelisted, not blocking despite abuse');
             return;
         }
 
         // Block the IP with optional expiration time
-        const expiresAt = durationSeconds > 0 
-            ? new Date(Date.now() + durationSeconds * 1000)
-            : null;
+        const expiresAt =
+            durationSeconds > 0
+                ? new Date(Date.now() + durationSeconds * 1000)
+                : null;
 
         await db.blockedIP.create({
             data: {
@@ -64,7 +63,6 @@ export async function autoBlockOnAbuse(
         console.log(
             `🔒 Blocked IP ${sanitizedIP} for ${durationSeconds} seconds`
         );
-
     } catch (error) {
         console.error('Failed to auto-block IP');
         throw error;
@@ -103,11 +101,11 @@ export async function isIPBlocked(ipAddress: string): Promise<boolean> {
     const blocked = await db.blockedIP.findFirst({
         where: { ip: ipAddress },
     });
-    
+
     if (!blocked) {
         return false;
     }
-    
+
     // Check if block has expired
     if (blocked.expiresAt && blocked.expiresAt < new Date()) {
         // Block has expired, remove it
@@ -116,7 +114,7 @@ export async function isIPBlocked(ipAddress: string): Promise<boolean> {
         });
         return false;
     }
-    
+
     return true;
 }
 

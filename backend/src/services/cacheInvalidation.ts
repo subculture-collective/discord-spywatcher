@@ -3,7 +3,7 @@ import { pubsub } from './pubsub';
 
 /**
  * CacheInvalidationService - Handles cache invalidation on data changes
- * 
+ *
  * This service provides utilities to invalidate cache entries when data
  * is created, updated, or deleted, ensuring data consistency.
  */
@@ -30,7 +30,10 @@ export class CacheInvalidationService {
                 timestamp: new Date().toISOString(),
             });
         } catch (error) {
-            console.error('Failed to invalidate cache on message created:', error);
+            console.error(
+                'Failed to invalidate cache on message created:',
+                error
+            );
         }
     }
 
@@ -77,7 +80,10 @@ export class CacheInvalidationService {
                 timestamp: new Date().toISOString(),
             });
         } catch (error) {
-            console.error('Failed to invalidate cache on presence update:', error);
+            console.error(
+                'Failed to invalidate cache on presence update:',
+                error
+            );
         }
     }
 
@@ -140,7 +146,9 @@ export class CacheInvalidationService {
                 cache.invalidateByTag('analytics:shifts'),
             ]);
 
-            console.log(`Invalidated all analytics caches for guild: ${guildId}`);
+            console.log(
+                `Invalidated all analytics caches for guild: ${guildId}`
+            );
         } catch (error) {
             console.error('Failed to invalidate all analytics:', error);
         }
@@ -153,7 +161,7 @@ export class CacheInvalidationService {
     async invalidateMultipleGuilds(guildIds: string[]): Promise<void> {
         try {
             await Promise.all(
-                guildIds.map(guildId => this.invalidateAllAnalytics(guildId))
+                guildIds.map((guildId) => this.invalidateAllAnalytics(guildId))
             );
         } catch (error) {
             console.error('Failed to invalidate multiple guilds:', error);

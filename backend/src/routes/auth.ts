@@ -31,10 +31,7 @@ import {
     revokeAllUserRefreshTokens,
 } from '../utils/refreshToken';
 import { sanitizeForLog } from '../utils/security';
-import {
-    logSecurityEvent,
-    SecurityActions,
-} from '../utils/securityLogger';
+import { logSecurityEvent, SecurityActions } from '../utils/securityLogger';
 import {
     createSession,
     getUserSessions,
@@ -564,7 +561,10 @@ router.get('/me', requireAuth, async (req, res): Promise<void> => {
         });
 
         if (!user) {
-            console.warn('⚠️ DB user not found for:', sanitizeForLog(req.user.discordId));
+            console.warn(
+                '⚠️ DB user not found for:',
+                sanitizeForLog(req.user.discordId)
+            );
             res.status(404).json({ error: 'User not found in DB' });
             return;
         }

@@ -97,9 +97,7 @@ router.get('/', async (_req: Request, res: Response) => {
                     latency: healthStatus.database.latency,
                 },
                 redis: {
-                    status: healthStatus.redis.healthy
-                        ? 'operational'
-                        : 'down',
+                    status: healthStatus.redis.healthy ? 'operational' : 'down',
                     latency: healthStatus.redis.latency,
                 },
                 discord: {
@@ -116,8 +114,9 @@ router.get('/', async (_req: Request, res: Response) => {
             },
             incidents: {
                 active: activeIncidents.length,
-                critical: activeIncidents.filter((i) => i.severity === 'CRITICAL')
-                    .length,
+                critical: activeIncidents.filter(
+                    (i) => i.severity === 'CRITICAL'
+                ).length,
                 major: activeIncidents.filter((i) => i.severity === 'MAJOR')
                     .length,
             },
@@ -190,20 +189,20 @@ router.get('/history', async (req: Request, res: Response) => {
 
         const avgLatencies = {
             database:
-                (history
+                history
                     .filter((h) => h.databaseLatency)
                     .reduce((sum, h) => sum + (h.databaseLatency || 0), 0) /
-                    history.filter((h) => h.databaseLatency).length) || 0,
+                    history.filter((h) => h.databaseLatency).length || 0,
             redis:
-                (history
+                history
                     .filter((h) => h.redisLatency)
                     .reduce((sum, h) => sum + (h.redisLatency || 0), 0) /
-                    history.filter((h) => h.redisLatency).length) || 0,
+                    history.filter((h) => h.redisLatency).length || 0,
             discord:
-                (history
+                history
                     .filter((h) => h.discordLatency)
                     .reduce((sum, h) => sum + (h.discordLatency || 0), 0) /
-                    history.filter((h) => h.discordLatency).length) || 0,
+                    history.filter((h) => h.discordLatency).length || 0,
         };
 
         res.json({

@@ -15,7 +15,7 @@ export async function getChannelHeatmap({
 }): Promise<ChannelHeatmap[]> {
     // Generate cache key based on parameters
     const cacheKey = `analytics:heatmap:${guildId}:${since?.getTime() || 'all'}`;
-    
+
     // Use cache.remember pattern - returns cached data or executes callback
     return cache.remember(
         cacheKey,
@@ -24,7 +24,7 @@ export async function getChannelHeatmap({
             return getChannelHeatmapUncached({ guildId, since });
         },
         {
-            tags: [`guild:${guildId}`, 'analytics:heatmap']
+            tags: [`guild:${guildId}`, 'analytics:heatmap'],
         }
     );
 }

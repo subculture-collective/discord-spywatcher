@@ -38,9 +38,9 @@ client.on('presenceUpdate', async (oldPresence, newPresence) => {
 
     if (platforms.length > 1) {
         console.log(
-            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.username)} is online on: ${platforms.map(sanitizeForLog).join(
-                ', '
-            )}`
+            `[⚠️ MULTI-CLIENT] ${sanitizeForLog(user.username)} is online on: ${platforms
+                .map(sanitizeForLog)
+                .join(', ')}`
         );
         await db.presenceEvent.create({
             data: {
@@ -256,16 +256,34 @@ client.once('ready', async () => {
 
         console.log(`Total Users: ${heatmap.length}`);
         console.log('🌡️ Heatmap:');
-        console.table(heatmap.map(h => ({...h, username: sanitizeForLog(h.username), channel: sanitizeForLog(h.channel)})));
+        console.table(
+            heatmap.map((h) => ({
+                ...h,
+                username: sanitizeForLog(h.username),
+                channel: sanitizeForLog(h.channel),
+            }))
+        );
 
         console.log('👻 Top Ghost Users:');
-        console.table(ghosts.slice(0, 10).map(g => ({...g, username: sanitizeForLog(g.username)})));
+        console.table(
+            ghosts
+                .slice(0, 10)
+                .map((g) => ({ ...g, username: sanitizeForLog(g.username) }))
+        );
 
         console.log('📱 Top Multi-Client Users:');
-        console.table(logins.slice(0, 10).map(l => ({...l, username: sanitizeForLog(l.username)})));
+        console.table(
+            logins
+                .slice(0, 10)
+                .map((l) => ({ ...l, username: sanitizeForLog(l.username) }))
+        );
 
         console.log('🛰️ Most Channel-Diverse Users:');
-        console.table(channelStats.slice(0, 10).map(c => ({...c, username: sanitizeForLog(c.username)})));
+        console.table(
+            channelStats
+                .slice(0, 10)
+                .map((c) => ({ ...c, username: sanitizeForLog(c.username) }))
+        );
 
         console.log('🔍 Suspicion Report (Top 10):');
         console.table(
@@ -307,7 +325,7 @@ client.once('ready', async () => {
         const { pluginManager } = await import('./plugins');
         const pluginDir = path.join(__dirname, '../plugins');
         const dataDir = path.join(__dirname, '../plugin-data');
-        
+
         await pluginManager.initialize(
             {
                 pluginDir,
@@ -319,6 +337,9 @@ client.once('ready', async () => {
         );
         console.log('✅ Plugin system initialized with Discord client');
     } catch (err) {
-        console.error('⚠️  Failed to initialize plugin system with Discord client:', err);
+        console.error(
+            '⚠️  Failed to initialize plugin system with Discord client:',
+            err
+        );
     }
 });

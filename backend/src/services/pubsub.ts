@@ -4,7 +4,7 @@ import { getRedisClient } from '../utils/redis';
 
 /**
  * PubSubService - Provides real-time publish/subscribe functionality using Redis
- * 
+ *
  * Features:
  * - Publish events to channels
  * - Subscribe to channels for real-time updates
@@ -15,7 +15,8 @@ export class PubSubService {
     private publisher: Redis | null = null;
     private subscriber: Redis | null = null;
     private channelPrefix: string = 'spywatcher:pubsub:';
-    private messageHandlers: Map<string, Set<(message: unknown) => void>> = new Map();
+    private messageHandlers: Map<string, Set<(message: unknown) => void>> =
+        new Map();
 
     constructor() {
         this.initialize();
@@ -78,7 +79,10 @@ export class PubSubService {
      * @param channel - Channel name (without prefix)
      * @param handler - Message handler function
      */
-    async subscribe(channel: string, handler: (message: unknown) => void): Promise<void> {
+    async subscribe(
+        channel: string,
+        handler: (message: unknown) => void
+    ): Promise<void> {
         if (!this.subscriber) {
             console.warn('Pub/Sub not available, skipping subscribe');
             return;
@@ -109,7 +113,10 @@ export class PubSubService {
      * @param channel - Channel name (without prefix)
      * @param handler - Message handler function to remove
      */
-    async unsubscribe(channel: string, handler: (message: unknown) => void): Promise<void> {
+    async unsubscribe(
+        channel: string,
+        handler: (message: unknown) => void
+    ): Promise<void> {
         if (!this.subscriber) {
             return;
         }
@@ -129,7 +136,10 @@ export class PubSubService {
                 }
             }
         } catch (error) {
-            console.error(`Failed to unsubscribe from channel ${channel}:`, error);
+            console.error(
+                `Failed to unsubscribe from channel ${channel}:`,
+                error
+            );
         }
     }
 
@@ -146,7 +156,7 @@ export class PubSubService {
             const data: unknown = JSON.parse(message);
 
             // Call all handlers for this channel
-            handlers.forEach(handler => {
+            handlers.forEach((handler) => {
                 try {
                     handler(data);
                 } catch (error) {
@@ -182,7 +192,10 @@ export class PubSubService {
      * @param userId - User ID
      * @param notification - Notification data
      */
-    async publishNotification(userId: string, notification: unknown): Promise<void> {
+    async publishNotification(
+        userId: string,
+        notification: unknown
+    ): Promise<void> {
         await this.publish(`notifications:${userId}`, {
             userId,
             notification,
@@ -195,7 +208,10 @@ export class PubSubService {
      * @param userId - User ID
      * @param presence - Presence data
      */
-    async publishPresenceUpdate(userId: string, presence: unknown): Promise<void> {
+    async publishPresenceUpdate(
+        userId: string,
+        presence: unknown
+    ): Promise<void> {
         await this.publish(`presence:${userId}`, {
             userId,
             presence,

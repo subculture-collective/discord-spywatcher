@@ -65,7 +65,7 @@ export const globalRateLimiter = createRateLimiter({
         // Skip rate limiting for localhost
         const whitelist = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
         const ip = req.ip || '';
-        
+
         // Only check localhost for now - database whitelist checking
         // is done in the IP block middleware, not in rate limiting
         return whitelist.includes(ip);
@@ -161,7 +161,9 @@ export const refreshLimiter = createRateLimiter({
  * Get user metadata (tier and role) with Redis caching
  * Caches for 5 minutes to reduce database load
  */
-async function getUserMetadata(userId: string): Promise<{ subscriptionTier: any; role: any } | null> {
+async function getUserMetadata(
+    userId: string
+): Promise<{ subscriptionTier: any; role: any } | null> {
     const cacheKey = `user:meta:${userId}`;
 
     // Try to get from Redis cache first
@@ -212,7 +214,7 @@ export const userRateLimiter = rateLimit({
     max: async (req: Request) => {
         const user = (req as any).user;
         if (!user) return 30; // Unauthenticated users
-        
+
         try {
             // Fetch user's subscription tier and role (with caching)
             const dbUser = await getUserMetadata(user.userId);
@@ -261,4 +263,3 @@ export const publicApiLimiter = createRateLimiter({
     message: 'Too many requests to public API. Please try again later.',
     prefix: 'public-api',
 });
-

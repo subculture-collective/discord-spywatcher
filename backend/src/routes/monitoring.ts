@@ -48,7 +48,13 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
         const violationKeys: string[] = [];
         let cursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'violations:*', 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(
+                cursor,
+                'MATCH',
+                'violations:*',
+                'COUNT',
+                100
+            );
             violationKeys.push(...keys);
             cursor = nextCursor;
         } while (cursor !== '0');
@@ -77,7 +83,13 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
         const blockedKeys: string[] = [];
         let blockedCursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(blockedCursor, 'MATCH', 'blocked:*', 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(
+                blockedCursor,
+                'MATCH',
+                'blocked:*',
+                'COUNT',
+                100
+            );
             blockedKeys.push(...keys);
             blockedCursor = nextCursor;
         } while (blockedCursor !== '0');
@@ -101,7 +113,13 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
         const rateLimitKeys: string[] = [];
         let rateLimitCursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(rateLimitCursor, 'MATCH', 'rl:*', 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(
+                rateLimitCursor,
+                'MATCH',
+                'rl:*',
+                'COUNT',
+                100
+            );
             rateLimitKeys.push(...keys);
             rateLimitCursor = nextCursor;
         } while (rateLimitCursor !== '0');
@@ -121,7 +139,10 @@ router.get('/rate-limits', async (_req: Request, res: Response) => {
             tempBlocked: tempBlocked.sort((a, b) => b.ttl - a.ttl),
             rateLimitStats,
             summary: {
-                totalViolations: violations.reduce((sum, v) => sum + v.count, 0),
+                totalViolations: violations.reduce(
+                    (sum, v) => sum + v.count,
+                    0
+                ),
                 uniqueIPsWithViolations: violations.length,
                 tempBlockedCount: tempBlocked.length,
                 activeRateLimiters: Object.keys(rateLimitStats).length,
@@ -168,11 +189,18 @@ router.get('/rate-limits/:ip', async (req: Request, res: Response) => {
         const rateLimitKeys: string[] = [];
         let cursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', `rl:*:${ip}*`, 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(
+                cursor,
+                'MATCH',
+                `rl:*:${ip}*`,
+                'COUNT',
+                100
+            );
             rateLimitKeys.push(...keys);
             cursor = nextCursor;
         } while (cursor !== '0');
-        const rateLimitInfo: Record<string, { value: string; ttl: number }> = {};
+        const rateLimitInfo: Record<string, { value: string; ttl: number }> =
+            {};
 
         for (const key of rateLimitKeys) {
             const value = await redis.get(key);
@@ -226,7 +254,13 @@ router.delete('/rate-limits/:ip', async (req: Request, res: Response) => {
         const rateLimitKeys: string[] = [];
         let cursor = '0';
         do {
-            const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', `rl:*:${ip}*`, 'COUNT', 100);
+            const [nextCursor, keys] = await redis.scan(
+                cursor,
+                'MATCH',
+                `rl:*:${ip}*`,
+                'COUNT',
+                100
+            );
             rateLimitKeys.push(...keys);
             cursor = nextCursor;
         } while (cursor !== '0');
@@ -256,7 +290,7 @@ router.delete('/rate-limits/:ip', async (req: Request, res: Response) => {
  */
 router.get('/system', async (_req: Request, res: Response) => {
     const os = await import('os');
-    
+
     const cpuUsage = os.loadavg()[0] / os.cpus().length;
     const memUsage = 1 - os.freemem() / os.totalmem();
     const uptime = process.uptime();
@@ -439,19 +473,22 @@ router.get('/database/slow-queries', async (req: Request, res: Response) => {
  * DELETE /api/admin/monitoring/database/slow-queries
  * Clear slow query logs
  */
-router.delete('/database/slow-queries', async (_req: Request, res: Response) => {
-    try {
-        clearSlowQueryLogs();
-        res.json({
-            message: 'Slow query logs cleared successfully',
-        });
-    } catch (error) {
-        console.error('Failed to clear slow query logs:', error);
-        res.status(500).json({
-            error: 'Failed to clear slow query logs',
-        });
+router.delete(
+    '/database/slow-queries',
+    async (_req: Request, res: Response) => {
+        try {
+            clearSlowQueryLogs();
+            res.json({
+                message: 'Slow query logs cleared successfully',
+            });
+        } catch (error) {
+            console.error('Failed to clear slow query logs:', error);
+            res.status(500).json({
+                error: 'Failed to clear slow query logs',
+            });
+        }
     }
-});
+);
 
 /**
  * GET /api/admin/monitoring/database/pg-slow-queries
@@ -464,9 +501,10 @@ router.get('/database/pg-slow-queries', async (req: Request, res: Response) => {
 
         res.json({
             queries,
-            note: queries.length === 0
-                ? 'pg_stat_statements extension may not be enabled'
-                : undefined,
+            note:
+                queries.length === 0
+                    ? 'pg_stat_statements extension may not be enabled'
+                    : undefined,
         });
     } catch (error) {
         console.error('Failed to get PostgreSQL slow queries:', error);
@@ -525,7 +563,7 @@ router.get('/cache/stats', async (_req: Request, res: Response) => {
 
     try {
         const stats = await cache.getStats();
-        
+
         if (!stats) {
             res.status(500).json({
                 error: 'Failed to retrieve cache statistics',
@@ -562,7 +600,7 @@ router.delete('/cache/clear', async (_req: Request, res: Response) => {
     try {
         await cache.flushAll();
         console.log('Cache cleared by admin');
-        
+
         res.json({
             message: 'Cache cleared successfully',
             timestamp: new Date().toISOString(),
@@ -590,7 +628,7 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
 
     try {
         const { tag } = req.params;
-        
+
         // Validate tag format - disallow Redis pattern special characters
         // to prevent unintended key matching
         if (
@@ -599,15 +637,16 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
             /^[*?[\]{}()|\\]/.test(tag) ||
             /[*?[\]{}()|\\]/.test(tag)
         ) {
-            res.status(400).json({ 
+            res.status(400).json({
                 error: 'Invalid tag format',
-                message: 'Tag must contain only alphanumeric characters, colons, underscores, and hyphens, and must not contain Redis pattern special characters (*, ?, [, ], {, }, (, ), |, \\)'
+                message:
+                    'Tag must contain only alphanumeric characters, colons, underscores, and hyphens, and must not contain Redis pattern special characters (*, ?, [, ], {, }, (, ), |, \\)',
             });
             return;
         }
 
         const invalidatedCount = await cache.invalidateByTag(tag);
-        
+
         res.json({
             message: 'Cache invalidated successfully',
             tag,

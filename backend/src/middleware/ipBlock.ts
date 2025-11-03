@@ -16,7 +16,7 @@ export async function blockKnownBadIPs(
     next: NextFunction
 ): Promise<void> {
     const ip = req.ip;
-    
+
     if (!ip) {
         next();
         return;
@@ -24,7 +24,9 @@ export async function blockKnownBadIPs(
 
     // Check if IP is whitelisted (bypass all blocks)
     try {
-        const whitelisted = await db.whitelistedIP.findUnique({ where: { ip } });
+        const whitelisted = await db.whitelistedIP.findUnique({
+            where: { ip },
+        });
         if (whitelisted) {
             // IP is whitelisted, allow through
             next();
@@ -83,7 +85,9 @@ export async function banIP(ip: string, reason?: string): Promise<void> {
             update: { reason },
             create: { ip, reason },
         });
-        console.log(`IP ${sanitizeForLog(ip)} permanently banned. Reason: ${sanitizeForLog(reason) || 'N/A'}`);
+        console.log(
+            `IP ${sanitizeForLog(ip)} permanently banned. Reason: ${sanitizeForLog(reason) || 'N/A'}`
+        );
     } catch (err) {
         console.error(`Failed to ban IP ${sanitizeForLog(ip)}:`, err);
         throw err;
@@ -108,7 +112,9 @@ export async function temporarilyBlockIP(
 
     try {
         await redis.set(`blocked:${ip}`, '1', 'EX', duration);
-        console.log(`IP ${sanitizeForLog(ip)} temporarily blocked for ${duration} seconds. Reason: ${sanitizeForLog(reason || 'N/A')}`);
+        console.log(
+            `IP ${sanitizeForLog(ip)} temporarily blocked for ${duration} seconds. Reason: ${sanitizeForLog(reason || 'N/A')}`
+        );
 
         // Log the block in audit log
         await db.auditLog.create({
@@ -120,7 +126,10 @@ export async function temporarilyBlockIP(
             },
         });
     } catch (err) {
-        console.error(`Failed to temporarily block IP ${sanitizeForLog(ip)}:`, err);
+        console.error(
+            `Failed to temporarily block IP ${sanitizeForLog(ip)}:`,
+            err
+        );
         throw err;
     }
 }
@@ -134,7 +143,11 @@ export async function autoBlockOnAbuse(
     ip: string,
     duration: number = 3600
 ): Promise<void> {
-    await temporarilyBlockIP(ip, duration, 'Automatic block due to abuse detection');
+    await temporarilyBlockIP(
+        ip,
+        duration,
+        'Automatic block due to abuse detection'
+    );
 }
 
 /**
@@ -145,7 +158,9 @@ export async function unbanIP(ip: string): Promise<void> {
         await db.blockedIP.delete({ where: { ip } });
         console.log(`IP ${sanitizeForLog(ip)} unbanned successfully`);
     } catch (_err) {
-        console.warn(`Attempted to unban IP ${sanitizeForLog(ip)}, but it wasn't found.`);
+        console.warn(
+            `Attempted to unban IP ${sanitizeForLog(ip)}, but it wasn't found.`
+        );
     }
 }
 
@@ -162,7 +177,10 @@ export async function removeTemporaryBlock(ip: string): Promise<void> {
         await redis.del(`blocked:${ip}`);
         console.log(`Temporary block removed for IP ${sanitizeForLog(ip)}`);
     } catch (err) {
-        console.error(`Failed to remove temporary block for IP ${sanitizeForLog(ip)}:`, err);
+        console.error(
+            `Failed to remove temporary block for IP ${sanitizeForLog(ip)}:`,
+            err
+        );
     }
 }
 
@@ -200,8 +218,10 @@ export async function whitelistIP(ip: string, reason?: string): Promise<void> {
             update: { reason },
             create: { ip, reason },
         });
-        console.log(`IP ${sanitizeForLog(ip)} added to whitelist. Reason: ${sanitizeForLog(reason) || 'N/A'}`);
-        
+        console.log(
+            `IP ${sanitizeForLog(ip)} added to whitelist. Reason: ${sanitizeForLog(reason) || 'N/A'}`
+        );
+
         // Log the action in audit log
         await db.auditLog.create({
             data: {
@@ -224,7 +244,7 @@ export async function removeIPFromWhitelist(ip: string): Promise<void> {
     try {
         await db.whitelistedIP.delete({ where: { ip } });
         console.log(`IP ${sanitizeForLog(ip)} removed from whitelist`);
-        
+
         // Log the action in audit log
         await db.auditLog.create({
             data: {
@@ -235,7 +255,9 @@ export async function removeIPFromWhitelist(ip: string): Promise<void> {
             },
         });
     } catch (_err) {
-        console.warn(`Attempted to remove IP ${sanitizeForLog(ip)} from whitelist, but it wasn't found.`);
+        console.warn(
+            `Attempted to remove IP ${sanitizeForLog(ip)} from whitelist, but it wasn't found.`
+        );
     }
 }
 
@@ -244,7 +266,9 @@ export async function removeIPFromWhitelist(ip: string): Promise<void> {
  */
 export async function isIPWhitelisted(ip: string): Promise<boolean> {
     try {
-        const whitelisted = await db.whitelistedIP.findUnique({ where: { ip } });
+        const whitelisted = await db.whitelistedIP.findUnique({
+            where: { ip },
+        });
         return !!whitelisted;
     } catch (err) {
         console.error('Database check failed for whitelist:', err);
@@ -255,12 +279,14 @@ export async function isIPWhitelisted(ip: string): Promise<boolean> {
 /**
  * Get all whitelisted IPs
  */
-export async function getWhitelistedIPs(): Promise<Array<{ ip: string; reason?: string; createdAt: Date }>> {
+export async function getWhitelistedIPs(): Promise<
+    Array<{ ip: string; reason?: string; createdAt: Date }>
+> {
     try {
         const whitelisted = await db.whitelistedIP.findMany({
             orderBy: { createdAt: 'desc' },
         });
-        return whitelisted.map(w => ({
+        return whitelisted.map((w) => ({
             ip: w.ip,
             reason: w.reason || undefined,
             createdAt: w.createdAt,
@@ -274,12 +300,14 @@ export async function getWhitelistedIPs(): Promise<Array<{ ip: string; reason?: 
 /**
  * Get all blocked IPs
  */
-export async function getBlockedIPs(): Promise<Array<{ ip: string; reason?: string; createdAt: Date }>> {
+export async function getBlockedIPs(): Promise<
+    Array<{ ip: string; reason?: string; createdAt: Date }>
+> {
     try {
         const blocked = await db.blockedIP.findMany({
             orderBy: { createdAt: 'desc' },
         });
-        return blocked.map(b => ({
+        return blocked.map((b) => ({
             ip: b.ip,
             reason: b.reason || undefined,
             createdAt: b.createdAt,
@@ -297,7 +325,7 @@ export async function getRateLimitViolations(ip: string): Promise<number> {
     if (!redis) {
         return 0;
     }
-    
+
     try {
         const violations = await redis.get(`violations:${ip}`);
         return violations ? parseInt(violations, 10) : 0;
@@ -306,4 +334,3 @@ export async function getRateLimitViolations(ip: string): Promise<number> {
         return 0;
     }
 }
-

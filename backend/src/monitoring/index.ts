@@ -14,5 +14,10 @@ export {
     withSpan,
     Sentry,
 } from './sentry';
-export { metrics, metricsMiddleware, metricsHandler, register } from './metrics';
+export {
+    metrics,
+    metricsMiddleware,
+    metricsHandler,
+    register,
+} from './metrics';
 export { setupDatabaseMonitoring } from './dbMonitoring';

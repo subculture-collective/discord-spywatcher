@@ -55,9 +55,7 @@ export async function processPendingDeletions(): Promise<{
             }
         }
 
-        console.log(
-            `Processed ${processed} deletions with ${errors} errors`
-        );
+        console.log(`Processed ${processed} deletions with ${errors} errors`);
     } catch (err) {
         console.error('Failed to process pending deletions:', err);
         throw err;
@@ -91,10 +89,7 @@ export async function deleteUserAccount(
             db.deletedMessageEvent.deleteMany({ where: { userId: discordId } }),
             db.reactionTime.deleteMany({
                 where: {
-                    OR: [
-                        { observerId: discordId },
-                        { actorId: discordId },
-                    ],
+                    OR: [{ observerId: discordId }, { actorId: discordId }],
                 },
             }),
         ]);
@@ -114,7 +109,10 @@ export async function deleteUserAccount(
 
         console.log(`Successfully deleted account: ${sanitizeForLog(userId)}`);
     } catch (err) {
-        console.error(`Failed to delete account ${sanitizeForLog(userId)}:`, err);
+        console.error(
+            `Failed to delete account ${sanitizeForLog(userId)}:`,
+            err
+        );
         throw err;
     }
 }

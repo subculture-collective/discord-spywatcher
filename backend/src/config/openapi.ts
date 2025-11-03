@@ -40,7 +40,8 @@ const options: swaggerJsdoc.Options = {
                     type: 'oauth2',
                     flows: {
                         authorizationCode: {
-                            authorizationUrl: 'https://discord.com/oauth2/authorize',
+                            authorizationUrl:
+                                'https://discord.com/oauth2/authorize',
                             tokenUrl: 'https://discord.com/api/oauth2/token',
                             scopes: {
                                 identify: 'Read user profile',
@@ -112,7 +113,8 @@ const options: swaggerJsdoc.Options = {
                         ghostScore: {
                             type: 'number',
                             format: 'float',
-                            description: 'Ratio of presence to messages (higher = more ghosting)',
+                            description:
+                                'Ratio of presence to messages (higher = more ghosting)',
                         },
                     },
                 },
@@ -184,7 +186,8 @@ const options: swaggerJsdoc.Options = {
             },
             responses: {
                 Unauthorized: {
-                    description: 'Unauthorized - Invalid or missing authentication',
+                    description:
+                        'Unauthorized - Invalid or missing authentication',
                     content: {
                         'application/json': {
                             schema: {
@@ -318,7 +321,8 @@ const options: swaggerJsdoc.Options = {
         tags: [
             {
                 name: 'Authentication',
-                description: 'Discord OAuth2 authentication and session management',
+                description:
+                    'Discord OAuth2 authentication and session management',
             },
             {
                 name: 'Analytics',

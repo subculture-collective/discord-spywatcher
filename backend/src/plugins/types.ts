@@ -127,7 +127,10 @@ export enum PluginHookType {
 /**
  * Plugin hook handler
  */
-export type PluginHookHandler<T = unknown> = (data: T, context: PluginContext) => Promise<T | void> | T | void;
+export type PluginHookHandler<T = unknown> = (
+    data: T,
+    context: PluginContext
+) => Promise<T | void> | T | void;
 
 /**
  * Plugin lifecycle states

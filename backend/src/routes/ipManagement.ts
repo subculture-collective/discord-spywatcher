@@ -74,7 +74,11 @@ router.get('/check/:ip', async (req: Request, res: Response) => {
             blocked,
             whitelisted,
             violations,
-            status: whitelisted ? 'whitelisted' : blocked ? 'blocked' : 'normal',
+            status: whitelisted
+                ? 'whitelisted'
+                : blocked
+                  ? 'blocked'
+                  : 'normal',
         });
     } catch (error) {
         console.error('Failed to check IP status:', error);
@@ -97,8 +101,12 @@ router.post('/block', async (req: Request, res: Response) => {
 
         await banIP(ip, reason);
 
-        const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
-        console.log(`Admin ${sanitizeForLog(username)} blocked IP ${sanitizeForLog(ip)}`);
+        const username =
+            (req as { user?: { username?: string } }).user?.username ||
+            'unknown';
+        console.log(
+            `Admin ${sanitizeForLog(username)} blocked IP ${sanitizeForLog(ip)}`
+        );
 
         res.json({
             message: 'IP permanently blocked',
@@ -139,7 +147,9 @@ router.post('/temp-block', async (req: Request, res: Response) => {
 
         await temporarilyBlockIP(ip, blockDuration, reason);
 
-        const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
+        const username =
+            (req as { user?: { username?: string } }).user?.username ||
+            'unknown';
         console.log(
             `Admin ${sanitizeForLog(username)} temporarily blocked IP ${sanitizeForLog(ip)} for ${sanitizeForLog(String(blockDuration))}s`
         );
@@ -171,8 +181,12 @@ router.delete('/unblock/:ip', async (req: Request, res: Response) => {
 
         await unbanIP(ip);
 
-        const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
-        console.log(`Admin ${sanitizeForLog(username)} unblocked IP ${sanitizeForLog(ip)}`);
+        const username =
+            (req as { user?: { username?: string } }).user?.username ||
+            'unknown';
+        console.log(
+            `Admin ${sanitizeForLog(username)} unblocked IP ${sanitizeForLog(ip)}`
+        );
 
         res.json({
             message: 'IP unblocked successfully',
@@ -199,7 +213,9 @@ router.delete('/temp-unblock/:ip', async (req: Request, res: Response) => {
 
         await removeTemporaryBlock(ip);
 
-        const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
+        const username =
+            (req as { user?: { username?: string } }).user?.username ||
+            'unknown';
         console.log(
             `Admin ${sanitizeForLog(username)} removed temporary block for IP ${sanitizeForLog(ip)}`
         );
@@ -229,8 +245,12 @@ router.post('/whitelist', async (req: Request, res: Response) => {
 
         await whitelistIP(ip, reason);
 
-        const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
-        console.log(`Admin ${sanitizeForLog(username)} whitelisted IP ${sanitizeForLog(ip)}`);
+        const username =
+            (req as { user?: { username?: string } }).user?.username ||
+            'unknown';
+        console.log(
+            `Admin ${sanitizeForLog(username)} whitelisted IP ${sanitizeForLog(ip)}`
+        );
 
         res.json({
             message: 'IP added to whitelist',
@@ -258,7 +278,9 @@ router.delete('/whitelist/:ip', async (req: Request, res: Response) => {
 
         await removeIPFromWhitelist(ip);
 
-        const username = ((req as { user?: { username?: string } }).user?.username) || 'unknown';
+        const username =
+            (req as { user?: { username?: string } }).user?.username ||
+            'unknown';
         console.log(
             `Admin ${sanitizeForLog(username)} removed IP ${sanitizeForLog(ip)} from whitelist`
         );

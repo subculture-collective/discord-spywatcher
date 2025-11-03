@@ -27,7 +27,11 @@ export class PluginManager {
     /**
      * Initialize plugin system
      */
-    async initialize(config: PluginLoaderConfig, discordClient?: Client, app?: Express): Promise<void> {
+    async initialize(
+        config: PluginLoaderConfig,
+        discordClient?: Client,
+        app?: Express
+    ): Promise<void> {
         if (this.initialized) {
             console.warn('Plugin system already initialized');
             return;
@@ -67,7 +71,10 @@ export class PluginManager {
     /**
      * Execute hooks for Discord events
      */
-    async executeDiscordHook(hookType: PluginHookType, data: unknown): Promise<unknown> {
+    async executeDiscordHook(
+        hookType: PluginHookType,
+        data: unknown
+    ): Promise<unknown> {
         if (!this.loader) {
             return data;
         }

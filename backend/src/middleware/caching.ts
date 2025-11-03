@@ -54,11 +54,8 @@ export const etagMiddleware = (
     // Override the send function to generate ETag
     res.send = function (data): Response {
         // Generate ETag from response data
-        if (data && typeof data === 'string' || Buffer.isBuffer(data)) {
-            const hash = crypto
-                .createHash('md5')
-                .update(data)
-                .digest('hex');
+        if ((data && typeof data === 'string') || Buffer.isBuffer(data)) {
+            const hash = crypto.createHash('md5').update(data).digest('hex');
             const etag = `"${hash}"`;
 
             // Set ETag header
@@ -83,7 +80,11 @@ export const etagMiddleware = (
  * Caches responses in Redis for specified duration
  */
 export const redisCacheMiddleware = (ttl: number = 60) => {
-    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
         // Only cache GET requests
         if (req.method !== 'GET' || !redis) {
             next();
@@ -96,7 +97,7 @@ export const redisCacheMiddleware = (ttl: number = 60) => {
         try {
             // Try to get cached response
             const cachedResponse = await redis.get(cacheKey);
-            
+
             if (cachedResponse) {
                 // Return cached response
                 res.setHeader('X-Cache', 'HIT');
@@ -112,20 +113,17 @@ export const redisCacheMiddleware = (ttl: number = 60) => {
             res.send = function (data): Response {
                 // Cache the response
                 if (res.statusCode === 200 && data) {
-                    const cacheData = typeof data === 'string' ? data : JSON.stringify(data);
+                    const cacheData =
+                        typeof data === 'string' ? data : JSON.stringify(data);
                     const dataSize = Buffer.byteLength(cacheData, 'utf8');
-                    redis.setex(cacheKey, ttl, cacheData)
-                        .catch(err => {
-                            console.error(
-                                `Failed to cache response in Redis.`,
-                                {
-                                    cacheKey,
-                                    ttl,
-                                    dataSize,
-                                    error: err
-                                }
-                            );
+                    redis.setex(cacheKey, ttl, cacheData).catch((err) => {
+                        console.error(`Failed to cache response in Redis.`, {
+                            cacheKey,
+                            ttl,
+                            dataSize,
+                            error: err,
                         });
+                    });
                 }
 
                 res.setHeader('X-Cache', 'MISS');
@@ -144,8 +142,15 @@ export const redisCacheMiddleware = (ttl: number = 60) => {
  * Stale-while-revalidate middleware
  * Serves stale content while fetching fresh data in background
  */
-export const staleWhileRevalidate = (ttl: number = 60, staleTime: number = 300) => {
-    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const staleWhileRevalidate = (
+    ttl: number = 60,
+    staleTime: number = 300
+) => {
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
         if (req.method !== 'GET' || !redis) {
             next();
             return;
@@ -174,7 +179,7 @@ export const staleWhileRevalidate = (ttl: number = 60, staleTime: number = 300) 
                     res.setHeader('X-Cache', 'STALE');
                     res.setHeader('Age', Math.floor(age / 1000).toString());
                     res.send(cachedData);
-                    
+
                     // Continue to next() to trigger background revalidation
                     // Don't return, let the request continue
                 }
@@ -186,17 +191,24 @@ export const staleWhileRevalidate = (ttl: number = 60, staleTime: number = 300) 
             // Override send to cache the response
             res.send = function (data): Response {
                 if (res.statusCode === 200 && data) {
-                    const dataStr = typeof data === 'string' ? data : JSON.stringify(data);
+                    const dataStr =
+                        typeof data === 'string' ? data : JSON.stringify(data);
                     Promise.all([
                         redis.setex(cacheKey, staleTime, dataStr),
-                        redis.setex(timestampKey, staleTime, Date.now().toString()),
-                    ]).catch(err => console.error('Failed to cache response:', err));
+                        redis.setex(
+                            timestampKey,
+                            staleTime,
+                            Date.now().toString()
+                        ),
+                    ]).catch((err) =>
+                        console.error('Failed to cache response:', err)
+                    );
                 }
 
                 if (!res.headersSent) {
                     res.setHeader('X-Cache', 'MISS');
                 }
-                
+
                 return originalSend.call(this, data);
             };
 
@@ -222,7 +234,13 @@ export async function clearCache(pattern: string): Promise<void> {
         let cursor = '0';
         const keys: string[] = [];
         do {
-            const [nextCursor, foundKeys] = await redis.scan(cursor, 'MATCH', `cache:${pattern}*`, 'COUNT', 100);
+            const [nextCursor, foundKeys] = await redis.scan(
+                cursor,
+                'MATCH',
+                `cache:${pattern}*`,
+                'COUNT',
+                100
+            );
             cursor = nextCursor;
             if (Array.isArray(foundKeys)) {
                 keys.push(...foundKeys);
@@ -230,7 +248,9 @@ export async function clearCache(pattern: string): Promise<void> {
         } while (cursor !== '0');
         if (keys.length > 0) {
             await redis.del(...keys);
-            console.log(`Cleared ${keys.length} cache entries matching pattern: ${pattern}`);
+            console.log(
+                `Cleared ${keys.length} cache entries matching pattern: ${pattern}`
+            );
         }
     } catch (err) {
         console.error('Failed to clear cache:', err);

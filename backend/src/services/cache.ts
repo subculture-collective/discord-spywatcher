@@ -28,7 +28,7 @@ export interface CacheStats {
 
 /**
  * CacheService - Provides caching functionality with tag-based invalidation
- * 
+ *
  * Features:
  * - Cache-aside pattern (lazy loading)
  * - Tag-based invalidation
@@ -66,7 +66,11 @@ export class CacheService {
      * @param value - Value to cache
      * @param options - Cache options (TTL, tags)
      */
-    async set(key: string, value: unknown, options: CacheOptions = {}): Promise<void> {
+    async set(
+        key: string,
+        value: unknown,
+        options: CacheOptions = {}
+    ): Promise<void> {
         const redis = getRedisClient();
         if (!redis) {
             return;
@@ -123,7 +127,7 @@ export class CacheService {
         }
 
         try {
-            const fullKeys = keys.map(key => this.prefix + key);
+            const fullKeys = keys.map((key) => this.prefix + key);
             await redis.del(...fullKeys);
         } catch (error) {
             console.error('Cache deleteMany error:', error);
@@ -143,13 +147,15 @@ export class CacheService {
         try {
             const tagKey = `${this.prefix}${this.tagPrefix}${tag}`;
             const keys = await redis.smembers(tagKey);
-            
+
             if (keys.length > 0) {
                 // Delete all keys associated with this tag
                 await redis.del(...keys);
                 // Delete the tag set itself
                 await redis.del(tagKey);
-                console.log(`Invalidated ${keys.length} cache entries for tag: ${tag}`);
+                console.log(
+                    `Invalidated ${keys.length} cache entries for tag: ${tag}`
+                );
                 return keys.length;
             }
             return 0;
@@ -231,10 +237,15 @@ export class CacheService {
                 }
             } while (cursor !== '0');
 
-            console.log(`Cleared ${totalDeleted} cache entries matching pattern: ${pattern}`);
+            console.log(
+                `Cleared ${totalDeleted} cache entries matching pattern: ${pattern}`
+            );
             return totalDeleted;
         } catch (error) {
-            console.error(`Cache clearPattern error for pattern ${pattern}:`, error);
+            console.error(
+                `Cache clearPattern error for pattern ${pattern}:`,
+                error
+            );
             return 0;
         }
     }
@@ -269,7 +280,7 @@ export class CacheService {
             const [info, memory, keyCount] = await Promise.all([
                 redis.info('stats'),
                 redis.info('memory'),
-                this.countKeys()
+                this.countKeys(),
             ]);
 
             const hits = this.parseInfoValue(info, 'keyspace_hits') || 0;
@@ -281,9 +292,10 @@ export class CacheService {
                 hits,
                 misses,
                 hitRate: Math.round(hitRate * 100) / 100,
-                memoryUsed: this.parseInfoString(memory, 'used_memory_human') || 'N/A',
+                memoryUsed:
+                    this.parseInfoString(memory, 'used_memory_human') || 'N/A',
                 evictedKeys: this.parseInfoValue(info, 'evicted_keys') || 0,
-                keyCount
+                keyCount,
             };
         } catch (error) {
             console.error('Cache getStats error:', error);
@@ -352,7 +364,9 @@ export class CacheService {
      * Warm cache with initial data
      * @param entries - Array of cache entries to warm
      */
-    async warm(entries: Array<{ key: string; value: unknown; options?: CacheOptions }>): Promise<void> {
+    async warm(
+        entries: Array<{ key: string; value: unknown; options?: CacheOptions }>
+    ): Promise<void> {
         const redis = getRedisClient();
         if (!redis) {
             return;

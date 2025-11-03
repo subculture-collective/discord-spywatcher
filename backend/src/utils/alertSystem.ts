@@ -127,10 +127,7 @@ async function sendDiscordAlert(
 /**
  * Send alert to Slack webhook
  */
-async function sendSlackAlert(
-    webhookUrl: string,
-    alert: Alert
-): Promise<void> {
+async function sendSlackAlert(webhookUrl: string, alert: Alert): Promise<void> {
     const color = (() => {
         switch (alert.severity) {
             case 'LOW':
@@ -250,9 +247,7 @@ export async function checkAlertConditions(
 /**
  * Check for multiple failed login attempts and send alert if threshold exceeded
  */
-async function checkFailedLoginAttempts(
-    event: SecurityEvent
-): Promise<void> {
+async function checkFailedLoginAttempts(event: SecurityEvent): Promise<void> {
     if (!event.ipAddress) return;
 
     const recentFailures = await db.securityLog.count({
@@ -373,9 +368,7 @@ export async function getRecentAlerts(options: {
 /**
  * Get alert statistics
  */
-export async function getAlertStats(
-    timeWindow: number = 24 * 60 * 60 * 1000
-) {
+export async function getAlertStats(timeWindow: number = 24 * 60 * 60 * 1000) {
     const since = new Date(Date.now() - timeWindow);
 
     const [total, critical, high, medium, low] = await Promise.all([

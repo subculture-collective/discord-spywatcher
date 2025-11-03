@@ -38,11 +38,13 @@ export async function runBackupHealthCheck(): Promise<void> {
 
     try {
         const healthCheck = await checkBackupHealth();
-        
+
         if (healthCheck.healthy) {
             console.log('✓ Backup health check passed');
             if (healthCheck.lastBackup) {
-                console.log(`Last backup: ${healthCheck.lastBackup.toISOString()}`);
+                console.log(
+                    `Last backup: ${healthCheck.lastBackup.toISOString()}`
+                );
             }
         } else {
             console.warn('⚠ Backup health check found issues:');
@@ -63,28 +65,31 @@ export function startScheduledPrivacyTasks(): void {
     const now = new Date();
     const next2AM = new Date(now);
     next2AM.setHours(2, 0, 0, 0);
-    
+
     if (next2AM <= now) {
         // If it's already past 2 AM today, schedule for tomorrow
         next2AM.setDate(next2AM.getDate() + 1);
     }
-    
+
     const msUntilNext2AM = next2AM.getTime() - now.getTime();
-    
+
     console.log(`Scheduled privacy tasks will run at ${next2AM.toISOString()}`);
-    
+
     // Schedule first run
     setTimeout(() => {
         runScheduledPrivacyTasks().catch((err) => {
             console.error('Scheduled privacy tasks failed:', err);
         });
-        
+
         // Schedule recurring runs every 24 hours
-        setInterval(() => {
-            runScheduledPrivacyTasks().catch((err) => {
-                console.error('Scheduled privacy tasks failed:', err);
-            });
-        }, 24 * 60 * 60 * 1000);
+        setInterval(
+            () => {
+                runScheduledPrivacyTasks().catch((err) => {
+                    console.error('Scheduled privacy tasks failed:', err);
+                });
+            },
+            24 * 60 * 60 * 1000
+        );
     }, msUntilNext2AM);
 }
 
@@ -94,14 +99,14 @@ export function startScheduledPrivacyTasks(): void {
  */
 export function startBackupHealthChecks(): void {
     const SIX_HOURS = 6 * 60 * 60 * 1000;
-    
+
     console.log('Starting backup health check scheduler (every 6 hours)');
-    
+
     // Run immediately on startup
     runBackupHealthCheck().catch((err) => {
         console.error('Initial backup health check failed:', err);
     });
-    
+
     // Schedule recurring runs every 6 hours
     setInterval(() => {
         runBackupHealthCheck().catch((err) => {

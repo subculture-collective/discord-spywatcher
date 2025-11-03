@@ -1,9 +1,6 @@
 import { Router } from 'express';
 
-import {
-    calculateAdvancedSuspicion,
-    getSuspicionScores,
-} from '../analytics';
+import { calculateAdvancedSuspicion, getSuspicionScores } from '../analytics';
 import { excludeBannedUsers, requireAuth, validateGuild } from '../middleware';
 import { apiLimiter } from '../middleware/rateLimiter';
 

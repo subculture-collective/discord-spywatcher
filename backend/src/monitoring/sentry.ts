@@ -6,7 +6,9 @@ import { env } from '../utils/env';
 export function initSentry(_app: Express): void {
     // Only initialize if DSN is provided
     if (!env.SENTRY_DSN) {
-        console.log('⚠️  Sentry DSN not configured, skipping Sentry initialization');
+        console.log(
+            '⚠️  Sentry DSN not configured, skipping Sentry initialization'
+        );
         return;
     }
 
@@ -21,26 +23,26 @@ export function initSentry(_app: Express): void {
         ],
         // Performance Monitoring
         tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
-        
+
         // Error sampling
         sampleRate: env.SENTRY_SAMPLE_RATE,
-        
+
         // Maximum number of breadcrumbs
         maxBreadcrumbs: 50,
-        
+
         // Attach stack traces to messages
         attachStacktrace: true,
-        
+
         /**
          * Before send hook for data sanitization, filtering, and error enrichment.
-         * 
+         *
          * @param event - The Sentry event to be sent
          * @param hint - Additional context about the original exception or event.
          *   The hint object is provided by Sentry and may contain:
          *   - originalException: The original Error object (if available)
          *   - syntheticException: A synthetic Error object for stack traces
          *   - other context depending on the event source
-         * 
+         *
          * Used here to access the original exception and add its name and message
          * to the event's extra context for improved error reporting.
          */
@@ -88,7 +90,10 @@ export function initSentry(_app: Express): void {
             }
 
             // Filter console breadcrumbs in production
-            if (env.NODE_ENV === 'production' && breadcrumb.category === 'console') {
+            if (
+                env.NODE_ENV === 'production' &&
+                breadcrumb.category === 'console'
+            ) {
                 return null;
             }
 
@@ -116,7 +121,9 @@ export function initSentry(_app: Express): void {
         ],
     });
 
-    console.log(`✅ Sentry initialized (env: ${env.SENTRY_ENVIRONMENT || env.NODE_ENV}, release: ${env.SENTRY_RELEASE || 'not set'})`);
+    console.log(
+        `✅ Sentry initialized (env: ${env.SENTRY_ENVIRONMENT || env.NODE_ENV}, release: ${env.SENTRY_RELEASE || 'not set'})`
+    );
 }
 
 export function getSentryRequestHandler() {
@@ -259,7 +266,10 @@ export function setTags(tags: Record<string, string>): void {
  * @param name - Context name
  * @param context - Context data
  */
-export function setContext(name: string, context: Record<string, unknown> | null): void {
+export function setContext(
+    name: string,
+    context: Record<string, unknown> | null
+): void {
     if (!env.SENTRY_DSN) {
         return;
     }

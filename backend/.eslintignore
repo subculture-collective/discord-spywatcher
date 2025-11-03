@@ -1,0 +1,13 @@
+# Plugin files (JavaScript plugins don't need TypeScript linting)
+plugins/**/*.js
+plugin-data/
+
+# Build output
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/

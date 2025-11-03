@@ -126,8 +126,8 @@ router.patch(
 
         try {
             await updateRetentionPolicy(
-                dataType, 
-                retentionDays, 
+                dataType,
+                retentionDays,
                 enabled !== undefined ? Boolean(enabled) : true
             );
 
@@ -199,7 +199,9 @@ router.get(
                     where: {
                         action: 'DATA_EXPORTED',
                         createdAt: {
-                            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                            gte: new Date(
+                                Date.now() - 30 * 24 * 60 * 60 * 1000
+                            ),
                         },
                     },
                 }),

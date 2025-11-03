@@ -29,7 +29,10 @@ router.get('/usage', requireAuth, async (req: Request, res: Response) => {
             return;
         }
 
-        const usage = await getQuotaUsage(req.user!.userId, user.subscriptionTier);
+        const usage = await getQuotaUsage(
+            req.user!.userId,
+            user.subscriptionTier
+        );
         const limits = getQuotaLimitsForTier(user.subscriptionTier);
         const rateLimits = getRateLimitsForTier(user.subscriptionTier);
 
@@ -52,7 +55,8 @@ router.get('/usage', requireAuth, async (req: Request, res: Response) => {
 router.get('/limits', async (_req: Request, res: Response) => {
     try {
         const tiers: SubscriptionTier[] = ['FREE', 'PRO', 'ENTERPRISE'];
-        const limits: Record<string, { quotas: unknown; rateLimits: unknown }> = {};
+        const limits: Record<string, { quotas: unknown; rateLimits: unknown }> =
+            {};
 
         tiers.forEach((tier) => {
             // eslint-disable-next-line security/detect-object-injection
@@ -171,8 +175,17 @@ router.delete(
             const { category } = req.query as { category?: string };
 
             // Validate category parameter if provided
-            const allowedCategories: EndpointCategory[] = ['analytics', 'api', 'admin', 'public', 'total'];
-            if (category !== undefined && !allowedCategories.includes(category as EndpointCategory)) {
+            const allowedCategories: EndpointCategory[] = [
+                'analytics',
+                'api',
+                'admin',
+                'public',
+                'total',
+            ];
+            if (
+                category !== undefined &&
+                !allowedCategories.includes(category as EndpointCategory)
+            ) {
                 res.status(400).json({
                     error: `Invalid category. Must be one of: ${allowedCategories.join(', ')}`,
                 });

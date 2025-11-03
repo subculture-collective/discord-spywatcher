@@ -37,9 +37,7 @@ export async function logConsent(data: ConsentData): Promise<void> {
 /**
  * Get user's consent logs
  */
-export async function getUserConsentLogs(
-    userId: string
-): Promise<
+export async function getUserConsentLogs(userId: string): Promise<
     Array<{
         id: string;
         consentType: string;

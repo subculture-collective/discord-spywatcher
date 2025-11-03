@@ -82,7 +82,11 @@ interface TrackPerformanceOptions {
  */
 function anonymizeData(data: string | undefined): string | undefined {
     if (!data) return undefined;
-    return crypto.createHash('sha256').update(data).digest('hex').substring(0, 16);
+    return crypto
+        .createHash('sha256')
+        .update(data)
+        .digest('hex')
+        .substring(0, 16);
 }
 
 /**
@@ -110,13 +114,19 @@ export async function trackEvent(options: TrackEventOptions): Promise<void> {
         await prisma.userAnalyticsEvent.create({
             data: {
                 userId: shouldAnonymize ? anonymizeData(userId) : userId,
-                sessionId: shouldAnonymize ? anonymizeData(sessionId) : sessionId,
+                sessionId: shouldAnonymize
+                    ? anonymizeData(sessionId)
+                    : sessionId,
                 eventType,
                 eventName,
                 category,
                 properties: (properties || {}) as any,
-                ipAddress: shouldAnonymize ? anonymizeData(ipAddress) : ipAddress,
-                userAgent: shouldAnonymize ? anonymizeData(userAgent) : userAgent,
+                ipAddress: shouldAnonymize
+                    ? anonymizeData(ipAddress)
+                    : ipAddress,
+                userAgent: shouldAnonymize
+                    ? anonymizeData(userAgent)
+                    : userAgent,
                 referrer: shouldAnonymize ? anonymizeData(referrer) : referrer,
                 pathname,
                 consentGiven,
@@ -132,7 +142,9 @@ export async function trackEvent(options: TrackEventOptions): Promise<void> {
 /**
  * Track feature usage
  */
-export async function trackFeatureUsage(options: TrackFeatureOptions): Promise<void> {
+export async function trackFeatureUsage(
+    options: TrackFeatureOptions
+): Promise<void> {
     const { featureName, userId, metadata, consentGiven = false } = options;
 
     try {
@@ -153,9 +165,19 @@ export async function trackFeatureUsage(options: TrackFeatureOptions): Promise<v
 /**
  * Track performance metric
  */
-export async function trackPerformance(options: TrackPerformanceOptions): Promise<void> {
-    const { metricType, metricName, value, unit, endpoint, userId, sessionId, metadata } =
-        options;
+export async function trackPerformance(
+    options: TrackPerformanceOptions
+): Promise<void> {
+    const {
+        metricType,
+        metricName,
+        value,
+        unit,
+        endpoint,
+        userId,
+        sessionId,
+        metadata,
+    } = options;
 
     try {
         await prisma.performanceMetric.create({
@@ -209,8 +231,8 @@ export async function getAnalyticsSummary(
         where,
         orderBy: { summaryDate: 'desc' },
     });
-    
-    return results.map(r => ({
+
+    return results.map((r) => ({
         summaryDate: r.summaryDate,
         summaryType: r.summaryType,
         metric: r.metric,
@@ -285,7 +307,9 @@ export async function getUserActivityMetrics(
         },
     });
 
-    const uniqueUserIds = new Set(events.filter((e) => e.userId).map((e) => e.userId));
+    const uniqueUserIds = new Set(
+        events.filter((e) => e.userId).map((e) => e.userId)
+    );
     const consentedUserIds = new Set(
         events.filter((e) => e.userId && e.consentGiven).map((e) => e.userId)
     );
@@ -429,7 +453,9 @@ export async function aggregateDailySummary(date: Date): Promise<void> {
 /**
  * Clean old analytics data based on retention policy
  */
-export async function cleanOldAnalyticsData(retentionDays: number): Promise<void> {
+export async function cleanOldAnalyticsData(
+    retentionDays: number
+): Promise<void> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 

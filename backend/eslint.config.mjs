@@ -20,6 +20,8 @@ export default tseslint.config(
             'src/generated',
             'eslint.config.mjs',
             'jest.config.js',
+            'plugins/**/*.js',
+            'plugin-data',
         ],
     },
     // Base ESLint config for all files

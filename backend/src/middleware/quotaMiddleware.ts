@@ -39,7 +39,11 @@ export function quotaEnforcement() {
             const category = getEndpointCategory(req.path);
 
             // Atomically check and increment quota to prevent race conditions
-            const quotaCheck = await checkAndIncrementQuota(req.user.userId, tier, category);
+            const quotaCheck = await checkAndIncrementQuota(
+                req.user.userId,
+                tier,
+                category
+            );
 
             // Set quota headers
             res.setHeader('X-Quota-Limit', quotaCheck.limit);
@@ -90,7 +94,11 @@ export function quotaHeaders() {
 
             if (tier) {
                 const category = getEndpointCategory(req.path);
-                const quotaCheck = await checkQuota(req.user.userId, tier, category);
+                const quotaCheck = await checkQuota(
+                    req.user.userId,
+                    tier,
+                    category
+                );
 
                 res.setHeader('X-Quota-Limit', quotaCheck.limit);
                 res.setHeader('X-Quota-Remaining', quotaCheck.remaining);

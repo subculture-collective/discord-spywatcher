@@ -71,11 +71,17 @@ export class PluginLoader {
      */
     async discoverPlugins(): Promise<string[]> {
         const pluginDirs: string[] = [];
-        const entries = fs.readdirSync(this.config.pluginDir, { withFileTypes: true });
+        const entries = fs.readdirSync(this.config.pluginDir, {
+            withFileTypes: true,
+        });
 
         for (const entry of entries) {
             if (entry.isDirectory()) {
-                const manifestPath = path.join(this.config.pluginDir, entry.name, 'manifest.json');
+                const manifestPath = path.join(
+                    this.config.pluginDir,
+                    entry.name,
+                    'manifest.json'
+                );
                 if (fs.existsSync(manifestPath)) {
                     pluginDirs.push(entry.name);
                 }
@@ -175,7 +181,9 @@ export class PluginLoader {
 
         for (const depId of manifest.dependencies) {
             if (!this.plugins.has(depId)) {
-                throw new Error(`Plugin ${manifest.id} requires dependency ${depId} which is not loaded`);
+                throw new Error(
+                    `Plugin ${manifest.id} requires dependency ${depId} which is not loaded`
+                );
             }
         }
     }
@@ -183,7 +191,10 @@ export class PluginLoader {
     /**
      * Create plugin context with appropriate permissions
      */
-    private createPluginContext(manifest: PluginManifest, pluginPath: string): PluginContext {
+    private createPluginContext(
+        manifest: PluginManifest,
+        pluginPath: string
+    ): PluginContext {
         const permissions = manifest.permissions || [];
         const pluginDataDir = path.join(this.config.dataDir, manifest.id);
 
@@ -336,8 +347,13 @@ export class PluginLoader {
             throw new Error(`Plugin ${pluginId} not found`);
         }
 
-        if (instance.state !== PluginState.INITIALIZED && instance.state !== PluginState.STOPPED) {
-            throw new Error(`Plugin ${pluginId} cannot be started from state ${instance.state}`);
+        if (
+            instance.state !== PluginState.INITIALIZED &&
+            instance.state !== PluginState.STOPPED
+        ) {
+            throw new Error(
+                `Plugin ${pluginId} cannot be started from state ${instance.state}`
+            );
         }
 
         try {
@@ -424,7 +440,10 @@ export class PluginLoader {
 
         for (const handler of handlers) {
             try {
-                const handlerResult = await handler(result, this.createHookContext());
+                const handlerResult = await handler(
+                    result,
+                    this.createHookContext()
+                );
                 if (handlerResult !== undefined) {
                     result = handlerResult as T;
                 }
@@ -513,7 +532,9 @@ export class PluginLoader {
                 } catch (error) {
                     console.error(
                         `Failed to stop plugin ${pluginId}: ${
-                            error instanceof Error ? error.message : String(error)
+                            error instanceof Error
+                                ? error.message
+                                : String(error)
                         }`
                     );
                 }

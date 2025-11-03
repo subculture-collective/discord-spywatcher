@@ -1,9 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import {
-    logSecurityEvent,
-    SecurityActions,
-} from '../utils/securityLogger';
+import { logSecurityEvent, SecurityActions } from '../utils/securityLogger';
 
 /**
  * Middleware to log security-relevant HTTP responses
@@ -93,7 +90,9 @@ export function logAdminAction(
                     method: req.method,
                     body: sanitizeBody(req.body),
                 },
-            }).catch((err) => console.error('Failed to log admin action:', err));
+            }).catch((err) =>
+                console.error('Failed to log admin action:', err)
+            );
         });
     }
 

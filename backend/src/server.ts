@@ -63,7 +63,9 @@ const allowedOrigins =
         if (redis) {
             console.log('✅ Redis rate limiting enabled');
         } else {
-            console.log('⚠️  Redis not available, using in-memory rate limiting');
+            console.log(
+                '⚠️  Redis not available, using in-memory rate limiting'
+            );
         }
 
         // Security middleware - apply first (after monitoring initialization)
@@ -97,7 +99,9 @@ const allowedOrigins =
                     if (allowedOrigins.includes(origin)) {
                         callback(null, true);
                     } else {
-                        console.warn(`🚫 CORS blocked origin: ${sanitizeForLog(origin)}`);
+                        console.warn(
+                            `🚫 CORS blocked origin: ${sanitizeForLog(origin)}`
+                        );
                         callback(new Error('Not allowed by CORS'));
                     }
                 },
@@ -191,7 +195,7 @@ const allowedOrigins =
         const { pluginManager } = await import('./plugins');
         const pluginDir = path.join(__dirname, '../plugins');
         const dataDir = path.join(__dirname, '../plugin-data');
-        
+
         await pluginManager.initialize(
             {
                 pluginDir,
@@ -235,7 +239,7 @@ const allowedOrigins =
         console.log(
             `🛡️  Rate limiting: ${env.ENABLE_RATE_LIMITING ? 'enabled' : 'disabled'}`
         );
-        
+
         // Initialize GDPR compliance features
         import('./utils/dataRetention')
             .then(({ initializeRetentionPolicies }) => {
@@ -247,20 +251,20 @@ const allowedOrigins =
             .catch((err) => {
                 console.error('Failed to initialize retention policies:', err);
             });
-        
+
         // Start scheduled privacy tasks
         import('./utils/scheduledTasks')
             .then(({ startScheduledPrivacyTasks, startBackupHealthChecks }) => {
                 startScheduledPrivacyTasks();
                 console.log('✅ Scheduled privacy tasks started');
-                
+
                 startBackupHealthChecks();
                 console.log('✅ Backup health checks started');
             })
             .catch((err) => {
                 console.error('Failed to start scheduled tasks:', err);
             });
-        
+
         // Start status check job
         import('./services/statusCheck')
             .then(({ startStatusCheckJob }) => {

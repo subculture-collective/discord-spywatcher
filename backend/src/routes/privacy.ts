@@ -141,10 +141,7 @@ router.get(
                 }),
                 db.reactionTime.findMany({
                     where: {
-                        OR: [
-                            { observerId: discordId },
-                            { actorId: discordId },
-                        ],
+                        OR: [{ observerId: discordId }, { actorId: discordId }],
                     },
                     orderBy: { createdAt: 'desc' },
                 }),

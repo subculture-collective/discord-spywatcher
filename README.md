@@ -17,6 +17,7 @@ Spywatcher is a full-stack surveillance and analytics tool for Discord servers. 
 - **Official TypeScript/JavaScript SDK** for easy API access
 - **Tier-based quotas** with FREE, PRO, and ENTERPRISE subscription tiers
 - **Per-endpoint rate limiting** and daily usage quotas
+- **Plugin System** for extending functionality with custom features
 
 ## 🏗️ Tech Stack
 
@@ -394,6 +395,80 @@ const suspicions = await client.getSuspicionData();
 ### API Endpoints
 
 Access API documentation at `/api/public/docs` or see the [Public API Reference](./docs/PUBLIC_API.md).
+
+## 🔌 Plugin System
+
+SpyWatcher includes a comprehensive plugin system for extending functionality without modifying core code.
+
+### Features
+
+- ✅ **Dynamic Plugin Loading** - Load plugins at runtime
+- ✅ **Permission System** - Granular access control for plugins
+- ✅ **Event Hooks** - Hook into Discord events, API requests, and analytics
+- ✅ **API Routes** - Plugins can register custom API endpoints
+- ✅ **Service Access** - Access to database, cache, WebSocket, and more
+- ✅ **Lifecycle Management** - Start, stop, and reload plugins dynamically
+
+### Quick Start
+
+Create a new plugin:
+
+```bash
+# Copy the template
+cp -r backend/plugins/template backend/plugins/my-plugin
+
+# Edit manifest and implement your plugin
+cd backend/plugins/my-plugin
+nano manifest.json
+nano index.js
+
+# Restart SpyWatcher to load the plugin
+npm run dev:api
+```
+
+### Example Plugins
+
+The repository includes three example plugins:
+
+1. **Message Logger** (`backend/plugins/examples/message-logger/`)
+   - Logs all Discord messages to a file
+   - Demonstrates basic plugin structure and Discord event hooks
+
+2. **Analytics Extension** (`backend/plugins/examples/analytics-extension/`)
+   - Adds custom analytics API endpoints
+   - Shows database access and Redis caching
+
+3. **Webhook Notifier** (`backend/plugins/examples/webhook-notifier/`)
+   - Sends notifications to external webhooks
+   - Demonstrates network access and event monitoring
+
+### Plugin Management API
+
+Manage plugins via REST API:
+
+```bash
+# List all plugins
+GET /api/plugins
+
+# Get plugin details
+GET /api/plugins/:id
+
+# Start a plugin
+POST /api/plugins/:id/start
+
+# Stop a plugin
+POST /api/plugins/:id/stop
+
+# Check plugin health
+GET /api/plugins/:id/health
+```
+
+### Documentation
+
+- **[Plugin System Guide](./PLUGIN_SYSTEM.md)** - Complete developer guide
+- **[Plugin Template](./backend/plugins/template/)** - Ready-to-use template
+- **[Example Plugins](./backend/plugins/examples/)** - Working examples
+- **[Plugin README](./backend/plugins/README.md)** - Quick reference
 
 ## 📊 Frontend Dashboard
 
