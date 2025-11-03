@@ -5,6 +5,7 @@ This guide establishes safe database migration procedures for production deploym
 ## 🎯 Overview
 
 This document covers:
+
 - Migration testing procedures
 - Rollback strategies
 - Zero-downtime migration techniques
@@ -25,6 +26,7 @@ DB_PASSWORD=your_password ./scripts/test-migration.sh
 ```
 
 This script:
+
 - Creates an isolated test database
 - Applies pending migrations
 - Validates schema integrity
@@ -62,6 +64,7 @@ DB_PASSWORD=your_password ./scripts/validate-migration.sh
 ```
 
 This validates:
+
 - All required tables exist
 - Indexes are properly created
 - Foreign key constraints are valid
@@ -97,6 +100,7 @@ DB_PASSWORD=your_password ./scripts/rollback-migration.sh \
 ```
 
 This will:
+
 - Create a pre-rollback backup
 - Mark subsequent migrations as rolled back
 - Provide instructions for schema restoration
@@ -113,6 +117,7 @@ DB_PASSWORD=your_password ./scripts/rollback-migration.sh \
 ```
 
 This will:
+
 - Confirm the operation
 - Terminate active connections
 - Drop and recreate database
@@ -156,6 +161,7 @@ ALTER TABLE "User" ALTER COLUMN "oldField" DROP NOT NULL;
 For breaking changes, use multiple deployments:
 
 #### Phase 1: Add New Schema
+
 ```prisma
 model User {
   id        String @id
@@ -165,23 +171,26 @@ model User {
 ```
 
 Deploy with dual writes:
+
 ```typescript
 // Write to both fields
 await prisma.user.create({
-  data: {
-    email: userEmail,
-    emailNew: userEmail
-  }
+    data: {
+        email: userEmail,
+        emailNew: userEmail,
+    },
 });
 ```
 
 #### Phase 2: Migrate Data
+
 ```sql
 -- Copy data to new field
 UPDATE "User" SET "emailNew" = "email" WHERE "emailNew" IS NULL;
 ```
 
 #### Phase 3: Switch to New Field
+
 ```prisma
 model User {
   id       String @id
@@ -193,11 +202,12 @@ model User {
 Update application to use `emailNew`.
 
 #### Phase 4: Remove Old Field
+
 ```prisma
 model User {
   id       String @id
   emailNew String @map("email")
-  
+
   @@map("User")
 }
 ```
@@ -239,18 +249,21 @@ DB_PASSWORD=your_password ./scripts/validate-migration.sh
 Automatic checks include:
 
 #### 1. Schema Integrity
+
 - All tables exist
 - Correct column types
 - Proper indexes
 - Valid constraints
 
 #### 2. Data Integrity
+
 - No orphaned foreign keys
 - No NULL violations
 - No duplicate primary keys
 - Consistent data types
 
 #### 3. Migration Status
+
 - All migrations completed
 - No failed migrations
 - No pending migrations
@@ -283,46 +296,46 @@ The migration workflow is integrated into `.github/workflows/backend-ci.yml`:
 
 ```yaml
 migration-test:
-  name: Test Migrations
-  runs-on: ubuntu-latest
-  services:
-    postgres:
-      image: postgres:15
-      env:
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: spywatcher_test
-      options: >-
-        --health-cmd pg_isready
-        --health-interval 10s
-        --health-timeout 5s
-        --health-retries 5
-  
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v6
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: backend/package-lock.json
-    
-    - name: Install dependencies
-      working-directory: backend
-      run: npm ci
-    
-    - name: Test migrations
-      env:
-        DB_PASSWORD: postgres
-        TEST_DB_NAME: spywatcher_test
-      run: ./scripts/test-migration.sh
-    
-    - name: Validate schema
-      env:
-        DATABASE_URL: postgresql://spywatcher:postgres@localhost:5432/spywatcher_test
-      working-directory: backend
-      run: npx prisma validate
+    name: Test Migrations
+    runs-on: ubuntu-latest
+    services:
+        postgres:
+            image: postgres:15
+            env:
+                POSTGRES_PASSWORD: postgres
+                POSTGRES_DB: spywatcher_test
+            options: >-
+                --health-cmd pg_isready
+                --health-interval 10s
+                --health-timeout 5s
+                --health-retries 5
+
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v5
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v6
+          with:
+              node-version: '20'
+              cache: 'npm'
+              cache-dependency-path: backend/package-lock.json
+
+        - name: Install dependencies
+          working-directory: backend
+          run: npm ci
+
+        - name: Test migrations
+          env:
+              DB_PASSWORD: postgres
+              TEST_DB_NAME: spywatcher_test
+          run: ./scripts/test-migration.sh
+
+        - name: Validate schema
+          env:
+              DATABASE_URL: postgresql://spywatcher:postgres@localhost:5432/spywatcher_test
+          working-directory: backend
+          run: npx prisma validate
 ```
 
 ### Pre-Deployment Checks
@@ -331,51 +344,51 @@ Add to deployment workflow:
 
 ```yaml
 pre-deploy:
-  name: Pre-Deployment Validation
-  steps:
-    - name: Create backup
-      run: |
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-        DB_HOST=${{ secrets.DB_HOST }} \
-        ./scripts/backup.sh
-    
-    - name: Test migration
-      run: |
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-        ./scripts/test-migration.sh
-    
-    - name: Upload backup artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: pre-migration-backup
-        path: /var/backups/spywatcher/
-        retention-days: 7
+    name: Pre-Deployment Validation
+    steps:
+        - name: Create backup
+          run: |
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              DB_HOST=${{ secrets.DB_HOST }} \
+              ./scripts/backup.sh
+
+        - name: Test migration
+          run: |
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              ./scripts/test-migration.sh
+
+        - name: Upload backup artifact
+          uses: actions/upload-artifact@v4
+          with:
+              name: pre-migration-backup
+              path: /var/backups/spywatcher/
+              retention-days: 7
 ```
 
 ### Post-Deployment Checks
 
 ```yaml
 post-deploy:
-  name: Post-Deployment Validation
-  needs: deploy
-  steps:
-    - name: Validate migration
-      run: |
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-        DB_HOST=${{ secrets.DB_HOST }} \
-        ./scripts/validate-migration.sh
-    
-    - name: Health check
-      run: |
-        curl -f https://api.yourdomain.com/health || exit 1
-    
-    - name: Rollback on failure
-      if: failure()
-      run: |
-        echo "Migration validation failed, initiating rollback"
-        # Restore from backup created in pre-deploy
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-        ./scripts/rollback-migration.sh --backup $BACKUP_FILE
+    name: Post-Deployment Validation
+    needs: deploy
+    steps:
+        - name: Validate migration
+          run: |
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              DB_HOST=${{ secrets.DB_HOST }} \
+              ./scripts/validate-migration.sh
+
+        - name: Health check
+          run: |
+              curl -f https://api.yourdomain.com/health || exit 1
+
+        - name: Rollback on failure
+          if: failure()
+          run: |
+              echo "Migration validation failed, initiating rollback"
+              # Restore from backup created in pre-deploy
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              ./scripts/rollback-migration.sh --backup $BACKUP_FILE
 ```
 
 ## 📝 Migration Checklist
@@ -383,6 +396,7 @@ post-deploy:
 Use this checklist for every production migration:
 
 ### Pre-Migration
+
 - [ ] Review migration SQL/schema changes
 - [ ] Test migration in staging environment
 - [ ] Run `./scripts/test-migration.sh`
@@ -393,6 +407,7 @@ Use this checklist for every production migration:
 - [ ] Notify team of migration
 
 ### During Migration
+
 - [ ] Enable maintenance mode (if needed)
 - [ ] Apply migrations: `npx prisma migrate deploy`
 - [ ] Monitor application logs
@@ -400,6 +415,7 @@ Use this checklist for every production migration:
 - [ ] Watch for errors or warnings
 
 ### Post-Migration
+
 - [ ] Run `./scripts/validate-migration.sh`
 - [ ] Verify application functionality
 - [ ] Check critical user flows
@@ -410,6 +426,7 @@ Use this checklist for every production migration:
 - [ ] Keep backup for 7+ days
 
 ### Rollback (if needed)
+
 - [ ] Identify issue quickly
 - [ ] Execute rollback procedure
 - [ ] Restore from backup
@@ -421,6 +438,7 @@ Use this checklist for every production migration:
 ## 🛠️ Available Scripts
 
 ### Testing
+
 ```bash
 # Comprehensive migration testing
 DB_PASSWORD=pass ./scripts/test-migration.sh
@@ -430,6 +448,7 @@ VERBOSE=true DB_PASSWORD=pass ./scripts/test-migration.sh
 ```
 
 ### Validation
+
 ```bash
 # Validate current database state
 DB_PASSWORD=pass ./scripts/validate-migration.sh
@@ -439,6 +458,7 @@ VERBOSE=true DB_PASSWORD=pass ./scripts/validate-migration.sh
 ```
 
 ### Rollback
+
 ```bash
 # List migrations and backups
 DB_PASSWORD=pass ./scripts/rollback-migration.sh --list
@@ -453,6 +473,7 @@ DB_PASSWORD=pass ./scripts/rollback-migration.sh \
 ```
 
 ### Backup
+
 ```bash
 # Create backup
 DB_PASSWORD=pass ./scripts/backup.sh
@@ -462,6 +483,7 @@ S3_BUCKET=my-bucket DB_PASSWORD=pass ./scripts/backup.sh
 ```
 
 ### Maintenance
+
 ```bash
 # Run database maintenance
 DB_PASSWORD=pass ./scripts/maintenance.sh
@@ -484,27 +506,28 @@ DB_PASSWORD=pass ./scripts/maintenance.sh
 During and after migrations:
 
 1. **Application Metrics**
-   - Error rate
-   - Response time
-   - Request throughput
-   - Success rate
+    - Error rate
+    - Response time
+    - Request throughput
+    - Success rate
 
 2. **Database Metrics**
-   - Connection count
-   - Query latency
-   - Lock wait time
-   - Transaction rate
-   - CPU and memory usage
+    - Connection count
+    - Query latency
+    - Lock wait time
+    - Transaction rate
+    - CPU and memory usage
 
 3. **Migration Metrics**
-   - Migration duration
-   - Rows affected
-   - Rollback frequency
-   - Validation pass rate
+    - Migration duration
+    - Rows affected
+    - Rollback frequency
+    - Validation pass rate
 
 ### Alerting
 
 Set up alerts for:
+
 - Failed migrations
 - Schema validation failures
 - Data integrity issues
@@ -563,12 +586,13 @@ psql -U user -d db -c "
 ## 🤝 Support
 
 For migration issues:
+
 1. Check this guide
 2. Review script output and logs
 3. Check [MIGRATION.md](./MIGRATION.md) for database-specific guidance
 4. Open GitHub issue with:
-   - Migration name and SQL
-   - Error messages
-   - Database version
-   - Script output
-   - Steps to reproduce
+    - Migration name and SQL
+    - Error messages
+    - Database version
+    - Script output
+    - Steps to reproduce
