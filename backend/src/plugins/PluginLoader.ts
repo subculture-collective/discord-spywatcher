@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -119,7 +118,7 @@ export class PluginLoader {
             throw new Error(`Plugin ${manifest.id} is missing index.js`);
         }
 
-        let pluginModule: any;
+        let pluginModule: { default?: Plugin } | Plugin;
         try {
             // Dynamic import of the plugin
             pluginModule = require(indexPath);
@@ -129,7 +128,7 @@ export class PluginLoader {
             );
         }
 
-        const plugin: Plugin = pluginModule.default || pluginModule;
+        const plugin: Plugin = 'default' in pluginModule ? pluginModule.default! : (pluginModule as Plugin);
 
         // Create plugin context
         const context = this.createPluginContext(manifest, pluginPath);
@@ -487,7 +486,9 @@ export class PluginLoader {
     /**
      * Get plugin health status
      */
-    async getPluginHealth(pluginId: string): Promise<any> {
+    async getPluginHealth(
+        pluginId: string
+    ): Promise<{ healthy: boolean; state?: PluginState; error?: string; message?: string; details?: Record<string, unknown> }> {
         const instance = this.plugins.get(pluginId);
         if (!instance) {
             throw new Error(`Plugin ${pluginId} not found`);
