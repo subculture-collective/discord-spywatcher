@@ -8,7 +8,7 @@ import { cache } from '../services/cache';
 export async function getBehaviorShiftFlags(guildId: string, _since?: Date) {
     // Generate cache key based on parameters
     const cacheKey = `analytics:shifts:${guildId}:${_since?.getTime() || 'all'}`;
-    
+
     // Use cache.remember pattern - returns cached data or executes callback
     return cache.remember(
         cacheKey,
@@ -17,7 +17,7 @@ export async function getBehaviorShiftFlags(guildId: string, _since?: Date) {
             return getBehaviorShiftFlagsUncached(guildId, _since);
         },
         {
-            tags: [`guild:${guildId}`, 'analytics:shifts']
+            tags: [`guild:${guildId}`, 'analytics:shifts'],
         }
     );
 }
@@ -111,7 +111,10 @@ async function getBehaviorShiftFlagsUncached(guildId: string, _since?: Date) {
  * Legacy implementation kept for comparison
  * @deprecated Use getBehaviorShiftFlags for better performance
  */
-export async function getBehaviorShiftFlagsLegacy(guildId: string, _since?: Date) {
+export async function getBehaviorShiftFlagsLegacy(
+    guildId: string,
+    _since?: Date
+) {
     const now = Date.now();
     const oneWeek = 1000 * 60 * 60 * 24 * 7;
     const twoWeeksAgo = new Date(now - oneWeek * 2);

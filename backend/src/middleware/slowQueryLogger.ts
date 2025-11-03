@@ -61,7 +61,10 @@ function logSlowQuery(log: SlowQueryLog): void {
  * Get recent slow query logs for monitoring dashboard
  * Supports pagination via limit and offset parameters
  */
-export function getSlowQueryLogs(limit?: number, offset = 0): {
+export function getSlowQueryLogs(
+    limit?: number,
+    offset = 0
+): {
     logs: SlowQueryLog[];
     total: number;
 } {
@@ -114,7 +117,7 @@ export function clearSlowQueryLogs(): void {
 /**
  * Initialize slow query logging middleware for Prisma
  * This middleware intercepts all database queries and logs slow ones
- * 
+ *
  * Note: Prisma 6.x requires using extensions instead of $use middleware
  * This function provides a manual timing wrapper for critical queries
  */
@@ -130,7 +133,7 @@ export function initializeSlowQueryLogger(): void {
 /**
  * Wrapper for timing database operations
  * Use this to manually track query performance for critical operations
- * 
+ *
  * @example
  * const result = await trackQueryPerformance(
  *   'User',

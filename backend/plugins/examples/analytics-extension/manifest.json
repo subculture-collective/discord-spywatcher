@@ -1,0 +1,15 @@
+{
+  "id": "analytics-extension",
+  "name": "Analytics Extension",
+  "version": "1.0.0",
+  "author": "SpyWatcher Team",
+  "description": "Adds custom analytics endpoints for advanced data analysis",
+  "spywatcherVersion": ">=1.0.0",
+  "dependencies": [],
+  "permissions": [
+    "api:routes",
+    "database:access",
+    "cache:access"
+  ],
+  "homepage": "https://github.com/subculture-collective/discord-spywatcher"
+}

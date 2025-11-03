@@ -157,7 +157,8 @@ async function getUserActivityData(
     }
 
     // Get username from most recent message or join event
-    const username = messages[0]?.username || joinEvent?.username || 'Unknown User';
+    const username =
+        messages[0]?.username || joinEvent?.username || 'Unknown User';
 
     return {
         userId,
@@ -238,8 +239,7 @@ function calculateGhostScore(userData: UserActivityData): number {
 function calculateLurkerScore(userData: UserActivityData): number {
     if (userData.presenceCount === 0) return 0;
 
-    const hasActivity =
-        userData.messageCount > 0 || userData.typingCount > 0;
+    const hasActivity = userData.messageCount > 0 || userData.typingCount > 0;
     if (!hasActivity && userData.presenceCount >= 5) {
         return 100; // Pure lurker
     }
@@ -304,14 +304,16 @@ function calculateTimingAnomalies(
     const stdDev = Math.sqrt(variance);
 
     // Very low standard deviation = bot-like (too consistent)
-    const lowStdDevScore = stdDev < 100 ? 100 : Math.max(0, (1000 - stdDev) / 10);
+    const lowStdDevScore =
+        stdDev < 100 ? 100 : Math.max(0, (1000 - stdDev) / 10);
 
     // Consistently fast reactions = suspicious
     const fastReactionScore = avg < 500 ? (500 - avg) / 5 : 0;
 
     // Deviation from guild average
     // Guard against division by zero
-    const safeGuildReactionTime = guildAvg.reactionTime > 0 ? guildAvg.reactionTime : 5000;
+    const safeGuildReactionTime =
+        guildAvg.reactionTime > 0 ? guildAvg.reactionTime : 5000;
     const deviationFromNorm =
         Math.abs(avg - safeGuildReactionTime) / safeGuildReactionTime;
     const deviationScore = Math.min(100, deviationFromNorm * 100);
@@ -367,11 +369,11 @@ function calculateContentSimilarity(userData: UserActivityData): number {
     for (let i = 0; i < maxMessages; i++) {
         const messageI = messages[i];
         if (!messageI) continue;
-        
+
         for (let j = i + 1; j < maxMessages; j++) {
             const messageJ = messages[j];
             if (!messageJ) continue;
-            
+
             totalPairs++;
             const similarity = calculateStringSimilarity(messageI, messageJ);
             if (similarity > 0.8) {
@@ -399,9 +401,7 @@ function calculateStringSimilarity(str1: string, str2: string): number {
     const tokens1 = new Set(str1.toLowerCase().split(/\s+/));
     const tokens2 = new Set(str2.toLowerCase().split(/\s+/));
 
-    const intersection = new Set(
-        [...tokens1].filter((x) => tokens2.has(x))
-    );
+    const intersection = new Set([...tokens1].filter((x) => tokens2.has(x)));
     const union = new Set([...tokens1, ...tokens2]);
 
     return union.size > 0 ? intersection.size / union.size : 0;
@@ -429,9 +429,7 @@ function generateReasons(
     }
 
     if (factors.multiClientFreq > 70) {
-        reasons.push(
-            `Frequently online from multiple devices simultaneously`
-        );
+        reasons.push(`Frequently online from multiple devices simultaneously`);
     }
 
     if (factors.timingAnomalies > 70) {

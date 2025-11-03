@@ -4,13 +4,13 @@ import { cache } from '../services/cache';
 /**
  * Optimized multi-client login detection using database aggregation
  * Counts presence events where users have multiple clients (2+)
- * 
+ *
  * This function is cached for 5 minutes to reduce database load
  */
 export async function getMultiClientLoginCounts(guildId: string, since?: Date) {
     // Generate cache key based on parameters
     const cacheKey = `analytics:presence:${guildId}:${since?.getTime() || 'all'}`;
-    
+
     // Use cache.remember pattern - returns cached data or executes callback
     return cache.remember(
         cacheKey,
@@ -19,7 +19,7 @@ export async function getMultiClientLoginCounts(guildId: string, since?: Date) {
             return getMultiClientLoginCountsUncached(guildId, since);
         },
         {
-            tags: [`guild:${guildId}`, 'analytics:presence']
+            tags: [`guild:${guildId}`, 'analytics:presence'],
         }
     );
 }
@@ -27,7 +27,10 @@ export async function getMultiClientLoginCounts(guildId: string, since?: Date) {
 /**
  * Internal uncached implementation using optimized database aggregation
  */
-async function getMultiClientLoginCountsUncached(guildId: string, since?: Date) {
+async function getMultiClientLoginCountsUncached(
+    guildId: string,
+    since?: Date
+) {
     const sinceDate = since || new Date(0);
 
     // Single optimized query using database aggregation
@@ -62,7 +65,10 @@ async function getMultiClientLoginCountsUncached(guildId: string, since?: Date) 
  * Legacy implementation kept for comparison
  * @deprecated Use getMultiClientLoginCounts for better performance
  */
-export async function getMultiClientLoginCountsLegacy(_guildId: string, since?: Date) {
+export async function getMultiClientLoginCountsLegacy(
+    _guildId: string,
+    since?: Date
+) {
     const events = await db.presenceEvent.findMany({
         where: {
             createdAt: since ? { gte: since } : undefined,

@@ -71,9 +71,7 @@ function sanitizeMetadata(
 /**
  * Log security event to both Winston and database
  */
-export async function logSecurityEvent(
-    event: SecurityEvent
-): Promise<void> {
+export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
     try {
         // Sanitize event metadata before logging
         const sanitizedEvent = {
@@ -187,7 +185,9 @@ export async function getSecurityLogs(options: {
 /**
  * Get security statistics for dashboard
  */
-export async function getSecurityStats(timeWindow: number = 24 * 60 * 60 * 1000) {
+export async function getSecurityStats(
+    timeWindow: number = 24 * 60 * 60 * 1000
+) {
     const since = new Date(Date.now() - timeWindow);
 
     const [

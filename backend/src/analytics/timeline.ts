@@ -2,7 +2,13 @@ import { db as prisma } from '../db';
 
 export interface TimelineEvent {
     id: string;
-    type: 'presence' | 'message' | 'typing' | 'role' | 'join' | 'deleted_message';
+    type:
+        | 'presence'
+        | 'message'
+        | 'typing'
+        | 'role'
+        | 'join'
+        | 'deleted_message';
     userId: string;
     username: string;
     timestamp: Date;
@@ -33,13 +39,22 @@ export interface TimelineResult {
  * Fetches unified timeline of all user activity events
  * Uses cursor-based pagination for efficient scrolling
  */
-export async function getUserTimeline(query: TimelineQuery): Promise<TimelineResult> {
+export async function getUserTimeline(
+    query: TimelineQuery
+): Promise<TimelineResult> {
     const {
         userId,
         guildId,
         limit = 50,
         cursor,
-        eventTypes = ['presence', 'message', 'typing', 'role', 'join', 'deleted_message'],
+        eventTypes = [
+            'presence',
+            'message',
+            'typing',
+            'role',
+            'join',
+            'deleted_message',
+        ],
         startDate,
         endDate,
     } = query;
@@ -123,81 +138,93 @@ export async function getUserTimeline(query: TimelineQuery): Promise<TimelineRes
 
     // Transform and merge events
     const timeline: TimelineEvent[] = [
-        ...presenceEvents.map((e): TimelineEvent => ({
-            id: e.id,
-            type: 'presence' as const,
-            userId: e.userId,
-            username: e.username,
-            timestamp: e.createdAt,
-            metadata: {
-                clients: e.clients,
-                ...(e.metadata as Record<string, unknown>),
-            },
-        })),
-        ...messageEvents.map((e): TimelineEvent => ({
-            id: e.id,
-            type: 'message' as const,
-            userId: e.userId,
-            username: e.username,
-            timestamp: e.createdAt,
-            metadata: {
-                channelId: e.channelId,
-                channel: e.channel,
-                guildId: e.guildId,
-                content: e.content,
-                ...(e.metadata as Record<string, unknown>),
-            },
-        })),
-        ...typingEvents.map((e): TimelineEvent => ({
-            id: e.id,
-            type: 'typing' as const,
-            userId: e.userId,
-            username: e.username,
-            timestamp: e.createdAt,
-            metadata: {
-                channelId: e.channelId,
-                channel: e.channel,
-                guildId: e.guildId,
-                ...(e.metadata as Record<string, unknown>),
-            },
-        })),
-        ...roleEvents.map((e): TimelineEvent => ({
-            id: e.id,
-            type: 'role' as const,
-            userId: e.userId,
-            username: e.username,
-            timestamp: e.createdAt,
-            metadata: {
-                guildId: e.guildId,
-                addedRoles: e.addedRoles,
-                ...(e.metadata as Record<string, unknown>),
-            },
-        })),
-        ...joinEvents.map((e): TimelineEvent => ({
-            id: e.id,
-            type: 'join' as const,
-            userId: e.userId,
-            username: e.username,
-            timestamp: e.createdAt,
-            metadata: {
-                guildId: e.guildId,
-                accountAgeDays: e.accountAgeDays,
-                ...(e.metadata as Record<string, unknown>),
-            },
-        })),
-        ...deletedMessageEvents.map((e): TimelineEvent => ({
-            id: e.id,
-            type: 'deleted_message' as const,
-            userId: e.userId,
-            username: e.username,
-            timestamp: e.createdAt,
-            metadata: {
-                channelId: e.channelId,
-                channel: e.channel,
-                guildId: e.guildId,
-                ...(e.metadata as Record<string, unknown>),
-            },
-        })),
+        ...presenceEvents.map(
+            (e): TimelineEvent => ({
+                id: e.id,
+                type: 'presence' as const,
+                userId: e.userId,
+                username: e.username,
+                timestamp: e.createdAt,
+                metadata: {
+                    clients: e.clients,
+                    ...(e.metadata as Record<string, unknown>),
+                },
+            })
+        ),
+        ...messageEvents.map(
+            (e): TimelineEvent => ({
+                id: e.id,
+                type: 'message' as const,
+                userId: e.userId,
+                username: e.username,
+                timestamp: e.createdAt,
+                metadata: {
+                    channelId: e.channelId,
+                    channel: e.channel,
+                    guildId: e.guildId,
+                    content: e.content,
+                    ...(e.metadata as Record<string, unknown>),
+                },
+            })
+        ),
+        ...typingEvents.map(
+            (e): TimelineEvent => ({
+                id: e.id,
+                type: 'typing' as const,
+                userId: e.userId,
+                username: e.username,
+                timestamp: e.createdAt,
+                metadata: {
+                    channelId: e.channelId,
+                    channel: e.channel,
+                    guildId: e.guildId,
+                    ...(e.metadata as Record<string, unknown>),
+                },
+            })
+        ),
+        ...roleEvents.map(
+            (e): TimelineEvent => ({
+                id: e.id,
+                type: 'role' as const,
+                userId: e.userId,
+                username: e.username,
+                timestamp: e.createdAt,
+                metadata: {
+                    guildId: e.guildId,
+                    addedRoles: e.addedRoles,
+                    ...(e.metadata as Record<string, unknown>),
+                },
+            })
+        ),
+        ...joinEvents.map(
+            (e): TimelineEvent => ({
+                id: e.id,
+                type: 'join' as const,
+                userId: e.userId,
+                username: e.username,
+                timestamp: e.createdAt,
+                metadata: {
+                    guildId: e.guildId,
+                    accountAgeDays: e.accountAgeDays,
+                    ...(e.metadata as Record<string, unknown>),
+                },
+            })
+        ),
+        ...deletedMessageEvents.map(
+            (e): TimelineEvent => ({
+                id: e.id,
+                type: 'deleted_message' as const,
+                userId: e.userId,
+                username: e.username,
+                timestamp: e.createdAt,
+                metadata: {
+                    channelId: e.channelId,
+                    channel: e.channel,
+                    guildId: e.guildId,
+                    ...(e.metadata as Record<string, unknown>),
+                },
+            })
+        ),
     ];
 
     // Sort by timestamp descending
@@ -218,7 +245,13 @@ export async function getUserTimeline(query: TimelineQuery): Promise<TimelineRes
         : null;
 
     // Get total count (approximate for performance)
-    const totalCount = await getApproximateEventCount(userId, guildId, eventTypes, startDate, endDate);
+    const totalCount = await getApproximateEventCount(
+        userId,
+        guildId,
+        eventTypes,
+        startDate,
+        endDate
+    );
 
     return {
         events: enrichedTimeline,
@@ -238,7 +271,8 @@ function detectPatterns(events: TimelineEvent[]): TimelineEvent[] {
     for (let i = 1; i < events.length; i++) {
         const current = events[i];
         const previous = events[i - 1];
-        const timeDiff = previous.timestamp.getTime() - current.timestamp.getTime();
+        const timeDiff =
+            previous.timestamp.getTime() - current.timestamp.getTime();
 
         // Flag rapid typing/messaging (< 1 second apart)
         if (
@@ -265,7 +299,8 @@ function detectPatterns(events: TimelineEvent[]): TimelineEvent[] {
     for (let i = 1; i < events.length; i++) {
         const current = events[i];
         const previous = events[i - 1];
-        const timeDiff = previous.timestamp.getTime() - current.timestamp.getTime();
+        const timeDiff =
+            previous.timestamp.getTime() - current.timestamp.getTime();
 
         if (
             previous.type === 'message' &&

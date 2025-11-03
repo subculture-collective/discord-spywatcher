@@ -12,10 +12,8 @@ import { websocketService } from './websocket';
  * Service for broadcasting throttled analytics updates via WebSocket
  */
 export class AnalyticsBroadcaster {
-    private throttledBroadcasters: Map<
-        string,
-        ReturnType<typeof throttle>
-    > = new Map();
+    private throttledBroadcasters: Map<string, ReturnType<typeof throttle>> =
+        new Map();
 
     /**
      * Broadcast analytics update for a guild (throttled to 30 seconds)
@@ -45,9 +43,7 @@ export class AnalyticsBroadcaster {
      */
     private async performBroadcast(guildId: string): Promise<void> {
         try {
-            const since = new Date(
-                Date.now() - 1000 * 60 * 60 * 24 * 7
-            ); // Past 7 days
+            const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7); // Past 7 days
 
             // Fetch analytics data in parallel
             const [ghosts, lurkers, channelDiversity] = await Promise.all([

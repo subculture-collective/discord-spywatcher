@@ -1,6 +1,6 @@
 /**
  * Connection Pool Monitoring Utility
- * 
+ *
  * Provides monitoring and health check capabilities for database
  * and Redis connection pools.
  */
@@ -104,14 +104,18 @@ export async function getSystemHealth(): Promise<SystemHealth> {
             available: redisMetrics.available,
             connected: redisMetrics.connected,
             status: redisMetrics.status,
-            metrics: redisMetrics.available && redisMetrics.connected
-                ? {
-                      totalConnectionsReceived: redisMetrics.totalConnectionsReceived ?? 'N/A',
-                      totalCommandsProcessed: redisMetrics.totalCommandsProcessed ?? 'N/A',
-                      instantaneousOpsPerSec: redisMetrics.instantaneousOpsPerSec ?? 'N/A',
-                      usedMemory: redisMetrics.usedMemory ?? 'N/A',
-                  }
-                : undefined,
+            metrics:
+                redisMetrics.available && redisMetrics.connected
+                    ? {
+                          totalConnectionsReceived:
+                              redisMetrics.totalConnectionsReceived ?? 'N/A',
+                          totalCommandsProcessed:
+                              redisMetrics.totalCommandsProcessed ?? 'N/A',
+                          instantaneousOpsPerSec:
+                              redisMetrics.instantaneousOpsPerSec ?? 'N/A',
+                          usedMemory: redisMetrics.usedMemory ?? 'N/A',
+                      }
+                    : undefined,
             error: redisMetrics.error,
         },
     };
@@ -193,7 +197,9 @@ export async function logConnectionPoolMetrics(): Promise<void> {
 
     console.log('=== Connection Pool Metrics ===');
     console.log(`Timestamp: ${health.timestamp}`);
-    console.log(`Overall Health: ${health.healthy ? '✅ HEALTHY' : '❌ UNHEALTHY'}`);
+    console.log(
+        `Overall Health: ${health.healthy ? '✅ HEALTHY' : '❌ UNHEALTHY'}`
+    );
 
     console.log('\n--- Database ---');
     console.log(`Health: ${health.database.healthy ? '✅' : '❌'}`);
@@ -231,7 +237,9 @@ export async function logConnectionPoolMetrics(): Promise<void> {
         console.log(
             `  Total Commands: ${health.redis.metrics.totalCommandsProcessed}`
         );
-        console.log(`  Ops/sec: ${health.redis.metrics.instantaneousOpsPerSec}`);
+        console.log(
+            `  Ops/sec: ${health.redis.metrics.instantaneousOpsPerSec}`
+        );
         console.log(`  Memory Used: ${health.redis.metrics.usedMemory}`);
     }
     if (health.redis.error) {
@@ -253,7 +261,9 @@ export async function logConnectionPoolMetrics(): Promise<void> {
  * Start periodic connection pool monitoring
  * @param intervalMs - Monitoring interval in milliseconds (default: 60000 = 1 minute)
  */
-export function startConnectionPoolMonitoring(intervalMs: number = 60000): NodeJS.Timeout {
+export function startConnectionPoolMonitoring(
+    intervalMs: number = 60000
+): NodeJS.Timeout {
     console.log(
         `Starting connection pool monitoring (interval: ${intervalMs}ms)`
     );

@@ -91,10 +91,12 @@ export const isStrongSecret = (secret: string): boolean => {
     const hasSpecialChars = /[^a-zA-Z0-9]/.test(secret);
 
     // At least 3 of the 4 types
-    const complexityCount =
-        [hasLowerCase, hasUpperCase, hasNumbers, hasSpecialChars].filter(
-            Boolean
-        ).length;
+    const complexityCount = [
+        hasLowerCase,
+        hasUpperCase,
+        hasNumbers,
+        hasSpecialChars,
+    ].filter(Boolean).length;
 
     return complexityCount >= 3;
 };
@@ -126,12 +128,14 @@ export const sanitizeForLog = (input: unknown): string => {
     }
     // Replace newlines, carriage returns, and other control characters
     // with their escaped representations to prevent log injection
-    return str
-        .replace(/\r/g, '\\r')
-        .replace(/\n/g, '\\n')
-        .replace(/\t/g, '\\t')
-        // eslint-disable-next-line no-control-regex
-        .replace(/[\x00-\x1F\x7F]/g, (char) => {
-            return '\\x' + char.charCodeAt(0).toString(16).padStart(2, '0');
-        });
+    return (
+        str
+            .replace(/\r/g, '\\r')
+            .replace(/\n/g, '\\n')
+            .replace(/\t/g, '\\t')
+            // eslint-disable-next-line no-control-regex
+            .replace(/[\x00-\x1F\x7F]/g, (char) => {
+                return '\\x' + char.charCodeAt(0).toString(16).padStart(2, '0');
+            })
+    );
 };

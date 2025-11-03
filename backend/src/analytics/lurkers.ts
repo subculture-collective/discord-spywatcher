@@ -4,13 +4,13 @@ import { cache } from '../services/cache';
 /**
  * Optimized lurker detection using a single aggregation query
  * Lurkers are users with presence events but no typing or messaging activity
- * 
+ *
  * This function is cached for 5 minutes to reduce database load
  */
 export async function getLurkerFlags(guildId: string, since?: Date) {
     // Generate cache key based on parameters
     const cacheKey = `analytics:lurkers:${guildId}:${since?.getTime() || 'all'}`;
-    
+
     // Use cache.remember pattern - returns cached data or executes callback
     return cache.remember(
         cacheKey,
@@ -19,7 +19,7 @@ export async function getLurkerFlags(guildId: string, since?: Date) {
             return getLurkerFlagsUncached(guildId, since);
         },
         {
-            tags: [`guild:${guildId}`, 'analytics:lurkers']
+            tags: [`guild:${guildId}`, 'analytics:lurkers'],
         }
     );
 }

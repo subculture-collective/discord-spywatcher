@@ -63,10 +63,7 @@ export const loadSheddingMiddleware = (
  * Health check with system metrics
  * Provides detailed health information including load
  */
-export const healthCheckWithMetrics = (
-    _req: Request,
-    res: Response
-): void => {
+export const healthCheckWithMetrics = (_req: Request, res: Response): void => {
     const cpuUsage = os.loadavg()[0] / os.cpus().length;
     const memUsage = 1 - os.freemem() / os.totalmem();
     const uptime = process.uptime();

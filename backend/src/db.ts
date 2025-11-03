@@ -5,12 +5,12 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 // Determine if using PgBouncer based on connection string
 const isPgBouncer = (() => {
-  try {
-    const url = new URL(process.env.DATABASE_URL ?? '');
-    return url.searchParams.get('pgbouncer') === 'true';
-  } catch {
-    return false;
-  }
+    try {
+        const url = new URL(process.env.DATABASE_URL ?? '');
+        return url.searchParams.get('pgbouncer') === 'true';
+    } catch {
+        return false;
+    }
 })();
 
 // Configure connection pooling and logging based on environment
@@ -18,21 +18,22 @@ const isPgBouncer = (() => {
 // - Keep connection_limit low (1-5) since PgBouncer handles pooling
 // - Disable interactive transactions for better compatibility
 export const db =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'error', 'warn'] 
-      : ['error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
-  });
+    globalForPrisma.prisma ||
+    new PrismaClient({
+        log:
+            process.env.NODE_ENV === 'development'
+                ? ['query', 'error', 'warn']
+                : ['error'],
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL,
+            },
+        },
+    });
 
 // Prevent multiple instances in development (hot reload)
 if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = db;
+    globalForPrisma.prisma = db;
 }
 
 // Initialize slow query logger middleware
@@ -46,108 +47,112 @@ let isShuttingDown = false;
  * Get connection pool metrics
  */
 export async function getConnectionPoolMetrics() {
-  try {
-    // Query for active connections
-    const activeConnections = await db.$queryRaw<Array<{ count: bigint }>>`
+    try {
+        // Query for active connections
+        const activeConnections = await db.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(*) as count
       FROM pg_stat_activity
       WHERE datname = current_database()
         AND state = 'active'
     `;
 
-    // Query for idle connections
-    const idleConnections = await db.$queryRaw<Array<{ count: bigint }>>`
+        // Query for idle connections
+        const idleConnections = await db.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(*) as count
       FROM pg_stat_activity
       WHERE datname = current_database()
         AND state = 'idle'
     `;
 
-    // Query for total connections
-    const totalConnections = await db.$queryRaw<Array<{ count: bigint }>>`
+        // Query for total connections
+        const totalConnections = await db.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(*) as count
       FROM pg_stat_activity
       WHERE datname = current_database()
     `;
 
-    // Get max connections setting
-    const maxConnections = await db.$queryRaw<Array<{ setting: string }>>`
+        // Get max connections setting
+        const maxConnections = await db.$queryRaw<Array<{ setting: string }>>`
       SELECT setting
       FROM pg_settings
       WHERE name = 'max_connections'
     `;
 
-    return {
-      active: Number(activeConnections[0]?.count ?? 0),
-      idle: Number(idleConnections[0]?.count ?? 0),
-      total: Number(totalConnections[0]?.count ?? 0),
-      max: Number(maxConnections[0]?.setting ?? 0),
-      utilizationPercent: maxConnections[0]?.setting
-        ? ((Number(totalConnections[0]?.count ?? 0) / Number(maxConnections[0].setting)) * 100).toFixed(2)
-        : '0',
-      isPgBouncer,
-      isShuttingDown,
-    };
-  } catch (error) {
-    console.error('Error fetching connection pool metrics:', error);
-    return {
-      active: 0,
-      idle: 0,
-      total: 0,
-      max: 0,
-      utilizationPercent: '0',
-      isPgBouncer,
-      isShuttingDown,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
+        return {
+            active: Number(activeConnections[0]?.count ?? 0),
+            idle: Number(idleConnections[0]?.count ?? 0),
+            total: Number(totalConnections[0]?.count ?? 0),
+            max: Number(maxConnections[0]?.setting ?? 0),
+            utilizationPercent: maxConnections[0]?.setting
+                ? (
+                      (Number(totalConnections[0]?.count ?? 0) /
+                          Number(maxConnections[0].setting)) *
+                      100
+                  ).toFixed(2)
+                : '0',
+            isPgBouncer,
+            isShuttingDown,
+        };
+    } catch (error) {
+        console.error('Error fetching connection pool metrics:', error);
+        return {
+            active: 0,
+            idle: 0,
+            total: 0,
+            max: 0,
+            utilizationPercent: '0',
+            isPgBouncer,
+            isShuttingDown,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        };
+    }
 }
 
 /**
  * Health check for database connection
  */
 export async function checkDatabaseHealth(): Promise<{
-  healthy: boolean;
-  responseTime?: number;
-  error?: string;
+    healthy: boolean;
+    responseTime?: number;
+    error?: string;
 }> {
-  const startTime = Date.now();
-  try {
-    await db.$queryRaw`SELECT 1`;
-    const responseTime = Date.now() - startTime;
-    return { healthy: true, responseTime };
-  } catch (error) {
-    return {
-      healthy: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
+    const startTime = Date.now();
+    try {
+        await db.$queryRaw`SELECT 1`;
+        const responseTime = Date.now() - startTime;
+        return { healthy: true, responseTime };
+    } catch (error) {
+        return {
+            healthy: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        };
+    }
 }
 
 // Graceful shutdown handlers
 const gracefulShutdown = async (signal: string) => {
-  if (isShuttingDown) {
-    console.log('Shutdown already in progress...');
-    return;
-  }
+    if (isShuttingDown) {
+        console.log('Shutdown already in progress...');
+        return;
+    }
 
-  isShuttingDown = true;
-  console.log(`Received ${signal}, initiating graceful shutdown...`);
-  
-  try {
-    // Close database connections
-    console.log('Closing database connections...');
-    await db.$disconnect();
-    console.log('✅ Database connections closed successfully');
-    
-    // Close Redis connections
-    const { closeRedisConnection } = await import('./utils/redis');
-    await closeRedisConnection();
-  } catch (error) {
-    console.error('❌ Error during graceful shutdown:', error);
-  } finally {
-    process.exit(0);
-  }
+    isShuttingDown = true;
+    console.log(`Received ${signal}, initiating graceful shutdown...`);
+
+    try {
+        // Close database connections
+        console.log('Closing database connections...');
+        await db.$disconnect();
+        console.log('✅ Database connections closed successfully');
+
+        // Close Redis connections
+        const { closeRedisConnection } = await import('./utils/redis');
+        await closeRedisConnection();
+    } catch (error) {
+        console.error('❌ Error during graceful shutdown:', error);
+    } finally {
+        process.exit(0);
+    }
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
@@ -155,33 +160,39 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions and unhandled rejections
 process.on('uncaughtException', async (err) => {
-  console.error('❌ Uncaught Exception:', err);
-  if (!isShuttingDown) {
-    isShuttingDown = true;
-    try {
-      await db.$disconnect();
-      const { closeRedisConnection } = await import('./utils/redis');
-      await closeRedisConnection();
-    } catch (disconnectError) {
-      console.error('Error during emergency disconnect:', disconnectError);
+    console.error('❌ Uncaught Exception:', err);
+    if (!isShuttingDown) {
+        isShuttingDown = true;
+        try {
+            await db.$disconnect();
+            const { closeRedisConnection } = await import('./utils/redis');
+            await closeRedisConnection();
+        } catch (disconnectError) {
+            console.error(
+                'Error during emergency disconnect:',
+                disconnectError
+            );
+        }
     }
-  }
-  process.exit(1);
+    process.exit(1);
 });
 
 process.on('unhandledRejection', async (reason) => {
-  console.error('❌ Unhandled Rejection:', reason);
-  if (!isShuttingDown) {
-    isShuttingDown = true;
-    try {
-      await db.$disconnect();
-      const { closeRedisConnection } = await import('./utils/redis');
-      await closeRedisConnection();
-    } catch (disconnectError) {
-      console.error('Error during emergency disconnect:', disconnectError);
+    console.error('❌ Unhandled Rejection:', reason);
+    if (!isShuttingDown) {
+        isShuttingDown = true;
+        try {
+            await db.$disconnect();
+            const { closeRedisConnection } = await import('./utils/redis');
+            await closeRedisConnection();
+        } catch (disconnectError) {
+            console.error(
+                'Error during emergency disconnect:',
+                disconnectError
+            );
+        }
     }
-  }
-  process.exit(1);
+    process.exit(1);
 });
 
 // Connection pooling configuration:
@@ -198,4 +209,3 @@ process.on('unhandledRejection', async (reason) => {
 // - connection_limit: 10-20 for small apps, 20-50 for medium apps
 // - pool_timeout: 20 seconds (time to wait for available connection)
 // - connect_timeout: 10 seconds (time to wait for initial connection)
-

@@ -11,7 +11,10 @@ router.use(apiLimiter);
 
 // Validation schema for timeline query parameters
 const timelineQuerySchema = z.object({
-    limit: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 50)),
+    limit: z
+        .string()
+        .optional()
+        .transform((val) => (val ? parseInt(val, 10) : 50)),
     cursor: z.string().optional(),
     eventTypes: z
         .string()
@@ -109,7 +112,8 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
             });
         }
 
-        const { limit, cursor, eventTypes, startDate, endDate } = queryResult.data;
+        const { limit, cursor, eventTypes, startDate, endDate } =
+            queryResult.data;
 
         // Fetch timeline
         const timeline = await getUserTimeline({

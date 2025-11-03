@@ -6,10 +6,12 @@ import { createLogger, format, transports } from 'winston';
 import { env } from '../utils/env';
 
 // Custom format for console output (human-readable)
-const consoleFormat = format.printf(({ level, message, timestamp, ...meta }) => {
-    const metaStr = Object.keys(meta).length ? JSON.stringify(meta) : '';
-    return `[${timestamp}] ${level.toUpperCase()}: ${message} ${metaStr}`;
-});
+const consoleFormat = format.printf(
+    ({ level, message, timestamp, ...meta }) => {
+        const metaStr = Object.keys(meta).length ? JSON.stringify(meta) : '';
+        return `[${timestamp}] ${level.toUpperCase()}: ${message} ${metaStr}`;
+    }
+);
 
 // JSON format for file output (structured logging for aggregation)
 const jsonFormat = format.combine(
@@ -29,10 +31,7 @@ const logger = createLogger({
     transports: [
         new transports.Console({
             level: env.LOG_LEVEL,
-            format: format.combine(
-                format.colorize(),
-                consoleFormat
-            ),
+            format: format.combine(format.colorize(), consoleFormat),
         }),
         new transports.File({
             filename: path.join('logs', 'error.log'),

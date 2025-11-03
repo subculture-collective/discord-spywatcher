@@ -5,13 +5,13 @@ import { cache } from '../services/cache';
  * Optimized ghost detection query using a single aggregation
  * Ghost score = typing count / (message count + 1)
  * Higher scores indicate users who type but don't send messages (ghost typing)
- * 
+ *
  * This function is cached for 5 minutes to reduce database load
  */
 export async function getGhostScores(guildId: string, since?: Date) {
     // Generate cache key based on parameters
     const cacheKey = `analytics:ghosts:${guildId}:${since?.getTime() || 'all'}`;
-    
+
     // Use cache.remember pattern - returns cached data or executes callback
     return cache.remember(
         cacheKey,
@@ -20,7 +20,7 @@ export async function getGhostScores(guildId: string, since?: Date) {
             return getGhostScoresUncached(guildId, since);
         },
         {
-            tags: [`guild:${guildId}`, 'analytics:ghosts']
+            tags: [`guild:${guildId}`, 'analytics:ghosts'],
         }
     );
 }

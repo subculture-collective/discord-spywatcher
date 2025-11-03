@@ -1,0 +1,13 @@
+{
+  "id": "my-plugin",
+  "name": "My Plugin",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "A description of what your plugin does",
+  "spywatcherVersion": ">=1.0.0",
+  "dependencies": [],
+  "permissions": [
+    "discord:events"
+  ],
+  "homepage": "https://github.com/yourname/my-plugin"
+}

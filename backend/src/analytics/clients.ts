@@ -8,7 +8,7 @@ import { cache } from '../services/cache';
 export async function getClientDriftFlags(_guildId: string, _since?: Date) {
     // Generate cache key based on parameters
     const cacheKey = `analytics:clients:${_guildId}:${_since?.getTime() || 'all'}`;
-    
+
     // Use cache.remember pattern - returns cached data or executes callback
     return cache.remember(
         cacheKey,
@@ -17,7 +17,7 @@ export async function getClientDriftFlags(_guildId: string, _since?: Date) {
             return getClientDriftFlagsUncached(_guildId, _since);
         },
         {
-            tags: [`guild:${_guildId}`, 'analytics:clients']
+            tags: [`guild:${_guildId}`, 'analytics:clients'],
         }
     );
 }

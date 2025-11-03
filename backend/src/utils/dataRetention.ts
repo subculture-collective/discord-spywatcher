@@ -49,9 +49,7 @@ export async function initializeRetentionPolicies(): Promise<void> {
 /**
  * Get retention policy for a specific data type
  */
-export async function getRetentionPolicy(
-    dataType: DataType | string
-): Promise<{
+export async function getRetentionPolicy(dataType: DataType | string): Promise<{
     id: string;
     dataType: string;
     retentionDays: number;

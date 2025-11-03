@@ -31,13 +31,20 @@ function getCategoryFromPath(path: string): AnalyticsCategory {
  */
 function hasAnalyticsConsent(req: Request): boolean {
     // Check consent from user record or cookie
-    return req.cookies?.analyticsConsent === 'true' || req.user?.analyticsConsent === true;
+    return (
+        req.cookies?.analyticsConsent === 'true' ||
+        req.user?.analyticsConsent === true
+    );
 }
 
 /**
  * Middleware to track API requests
  */
-export function trackApiRequest(req: Request, res: Response, next: NextFunction): void {
+export function trackApiRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void {
     const startTime = Date.now();
 
     // Skip tracking for certain endpoints to avoid noise
@@ -54,7 +61,9 @@ export function trackApiRequest(req: Request, res: Response, next: NextFunction)
         // Track the API call event
         trackEvent({
             userId: req.user?.id,
-            sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
+            sessionId:
+                (req as any).sessionID ||
+                (req.headers['x-session-id'] as string),
             eventType: AnalyticsEventType.API_CALL,
             eventName: `${req.method} ${req.path}`,
             category: getCategoryFromPath(req.path),
@@ -62,7 +71,10 @@ export function trackApiRequest(req: Request, res: Response, next: NextFunction)
                 method: req.method,
                 statusCode: res.statusCode,
                 duration,
-                query: Object.keys(req.query).length > 0 ? Object.keys(req.query) : undefined,
+                query:
+                    Object.keys(req.query).length > 0
+                        ? Object.keys(req.query)
+                        : undefined,
             },
             ipAddress: req.ip,
             userAgent: req.headers['user-agent'],
@@ -80,7 +92,9 @@ export function trackApiRequest(req: Request, res: Response, next: NextFunction)
             unit: 'ms',
             endpoint: req.path,
             userId: req.user?.id,
-            sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
+            sessionId:
+                (req as any).sessionID ||
+                (req.headers['x-session-id'] as string),
             metadata: {
                 method: req.method,
                 statusCode: res.statusCode,
@@ -106,7 +120,8 @@ export function trackErrorEvent(
 
     trackEvent({
         userId: req.user?.id,
-        sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
+        sessionId:
+            (req as any).sessionID || (req.headers['x-session-id'] as string),
         eventType: AnalyticsEventType.ERROR,
         eventName: error.name || 'UnknownError',
         category: getCategoryFromPath(req.path),
@@ -131,12 +146,17 @@ export function trackErrorEvent(
  * Helper function to manually track custom events
  * Use this in route handlers for specific user actions
  */
-export function trackCustomEvent(req: Request, eventName: string, properties?: Record<string, unknown>): void {
+export function trackCustomEvent(
+    req: Request,
+    eventName: string,
+    properties?: Record<string, unknown>
+): void {
     const consentGiven = hasAnalyticsConsent(req);
 
     trackEvent({
         userId: req.user?.id,
-        sessionId: (req as any).sessionID || (req.headers['x-session-id'] as string),
+        sessionId:
+            (req as any).sessionID || (req.headers['x-session-id'] as string),
         eventType: AnalyticsEventType.FEATURE_USED,
         eventName,
         category: getCategoryFromPath(req.path),

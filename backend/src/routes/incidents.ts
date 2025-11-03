@@ -7,7 +7,12 @@ const router = Router();
 
 // Validation constants
 const VALID_SEVERITIES = ['MINOR', 'MAJOR', 'CRITICAL'] as const;
-const VALID_STATUSES = ['INVESTIGATING', 'IDENTIFIED', 'MONITORING', 'RESOLVED'] as const;
+const VALID_STATUSES = [
+    'INVESTIGATING',
+    'IDENTIFIED',
+    'MONITORING',
+    'RESOLVED',
+] as const;
 
 // All routes require authentication and admin role
 router.use(requireAuth);
@@ -44,7 +49,12 @@ router.post('/', async (req: Request, res: Response) => {
         }
 
         // Validate severity
-        if (severity && !VALID_SEVERITIES.includes(severity as typeof VALID_SEVERITIES[number])) {
+        if (
+            severity &&
+            !VALID_SEVERITIES.includes(
+                severity as (typeof VALID_SEVERITIES)[number]
+            )
+        ) {
             res.status(400).json({
                 error: `Invalid severity. Must be one of: ${VALID_SEVERITIES.join(', ')}`,
             });
@@ -52,7 +62,10 @@ router.post('/', async (req: Request, res: Response) => {
         }
 
         // Validate status
-        if (status && !VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
+        if (
+            status &&
+            !VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])
+        ) {
             res.status(400).json({
                 error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
             });
@@ -71,14 +84,25 @@ router.post('/', async (req: Request, res: Response) => {
             data: {
                 title,
                 description,
-                severity: (severity as 'MINOR' | 'MAJOR' | 'CRITICAL') || 'MINOR',
-                status: (status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED') || 'INVESTIGATING',
+                severity:
+                    (severity as 'MINOR' | 'MAJOR' | 'CRITICAL') || 'MINOR',
+                status:
+                    (status as
+                        | 'INVESTIGATING'
+                        | 'IDENTIFIED'
+                        | 'MONITORING'
+                        | 'RESOLVED') || 'INVESTIGATING',
                 affectedServices: affectedServices || [],
                 updates: initialUpdate
                     ? {
                           create: {
                               message: initialUpdate,
-                              status: (status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED') || 'INVESTIGATING',
+                              status:
+                                  (status as
+                                      | 'INVESTIGATING'
+                                      | 'IDENTIFIED'
+                                      | 'MONITORING'
+                                      | 'RESOLVED') || 'INVESTIGATING',
                           },
                       }
                     : undefined,
@@ -139,7 +163,12 @@ router.patch('/:id', async (req: Request, res: Response) => {
         }
 
         // Validate severity if provided
-        if (severity && !VALID_SEVERITIES.includes(severity as typeof VALID_SEVERITIES[number])) {
+        if (
+            severity &&
+            !VALID_SEVERITIES.includes(
+                severity as (typeof VALID_SEVERITIES)[number]
+            )
+        ) {
             res.status(400).json({
                 error: `Invalid severity. Must be one of: ${VALID_SEVERITIES.join(', ')}`,
             });
@@ -147,7 +176,10 @@ router.patch('/:id', async (req: Request, res: Response) => {
         }
 
         // Validate status if provided
-        if (status && !VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
+        if (
+            status &&
+            !VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])
+        ) {
             res.status(400).json({
                 error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
             });
@@ -173,15 +205,25 @@ router.patch('/:id', async (req: Request, res: Response) => {
             updates?: {
                 create: {
                     message: string;
-                    status?: 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED';
+                    status?:
+                        | 'INVESTIGATING'
+                        | 'IDENTIFIED'
+                        | 'MONITORING'
+                        | 'RESOLVED';
                 };
             };
         } = {};
 
         if (title !== undefined) updateData.title = title;
         if (description !== undefined) updateData.description = description;
-        if (severity !== undefined) updateData.severity = severity as 'MINOR' | 'MAJOR' | 'CRITICAL';
-        if (status !== undefined) updateData.status = status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED';
+        if (severity !== undefined)
+            updateData.severity = severity as 'MINOR' | 'MAJOR' | 'CRITICAL';
+        if (status !== undefined)
+            updateData.status = status as
+                | 'INVESTIGATING'
+                | 'IDENTIFIED'
+                | 'MONITORING'
+                | 'RESOLVED';
         if (affectedServices !== undefined)
             updateData.affectedServices = affectedServices;
 
@@ -197,7 +239,12 @@ router.patch('/:id', async (req: Request, res: Response) => {
             updateData.updates = {
                 create: {
                     message: updateMessage,
-                    status: (status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED') || existingIncident.status,
+                    status:
+                        (status as
+                            | 'INVESTIGATING'
+                            | 'IDENTIFIED'
+                            | 'MONITORING'
+                            | 'RESOLVED') || existingIncident.status,
                 },
             };
         }
@@ -243,7 +290,10 @@ router.post('/:id/updates', async (req: Request, res: Response) => {
         }
 
         // Validate status if provided
-        if (status && !VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
+        if (
+            status &&
+            !VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])
+        ) {
             res.status(400).json({
                 error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
             });
@@ -265,7 +315,12 @@ router.post('/:id/updates', async (req: Request, res: Response) => {
             data: {
                 incidentId: id,
                 message,
-                status: status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED' | undefined,
+                status: status as
+                    | 'INVESTIGATING'
+                    | 'IDENTIFIED'
+                    | 'MONITORING'
+                    | 'RESOLVED'
+                    | undefined,
             },
         });
 
@@ -274,7 +329,11 @@ router.post('/:id/updates', async (req: Request, res: Response) => {
             await db.incident.update({
                 where: { id },
                 data: {
-                    status: status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED',
+                    status: status as
+                        | 'INVESTIGATING'
+                        | 'IDENTIFIED'
+                        | 'MONITORING'
+                        | 'RESOLVED',
                     resolvedAt:
                         status === 'RESOLVED' && !incident.resolvedAt
                             ? new Date()
@@ -367,7 +426,11 @@ router.get('/', async (req: Request, res: Response) => {
         } = {};
 
         if (status) {
-            where.status = status as 'INVESTIGATING' | 'IDENTIFIED' | 'MONITORING' | 'RESOLVED';
+            where.status = status as
+                | 'INVESTIGATING'
+                | 'IDENTIFIED'
+                | 'MONITORING'
+                | 'RESOLVED';
         }
         if (severity) {
             where.severity = severity as 'MINOR' | 'MAJOR' | 'CRITICAL';

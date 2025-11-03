@@ -50,7 +50,12 @@ export const RATE_LIMITS_BY_TIER = {
 /**
  * Endpoint categories for quota tracking
  */
-export type EndpointCategory = 'analytics' | 'api' | 'admin' | 'public' | 'total';
+export type EndpointCategory =
+    | 'analytics'
+    | 'api'
+    | 'admin'
+    | 'public'
+    | 'total';
 
 /**
  * Get the endpoint category from the request path
@@ -104,7 +109,7 @@ export async function checkAndIncrementQuota(
     // Get quota limits for the user's tier
     const quotaConfig = QUOTA_LIMITS[tier];
     const categoryLimit = quotaConfig[category];
-    
+
     // If limit is 0, access is not allowed
     if (categoryLimit.requests === 0) {
         return {
@@ -133,15 +138,15 @@ export async function checkAndIncrementQuota(
         // Use Redis transaction with WATCH to atomically check and increment
         // This prevents race conditions when multiple requests arrive simultaneously
         const multi = redis.multi();
-        
+
         // Increment both counters atomically
         multi.incr(key);
         multi.expire(key, ttl);
         multi.incr(totalKey);
         multi.expire(totalKey, ttl);
-        
+
         const results = await multi.exec();
-        
+
         if (!results) {
             // Transaction failed, fail open
             return {
@@ -199,7 +204,7 @@ export async function checkQuota(
     // Get quota limits for the user's tier
     const quotaConfig = QUOTA_LIMITS[tier];
     const categoryLimit = quotaConfig[category];
-    
+
     // If limit is 0, access is not allowed
     if (categoryLimit.requests === 0) {
         return {
@@ -303,13 +308,22 @@ export async function getQuotaUsage(
     }
 
     const quotaConfig = QUOTA_LIMITS[tier];
-    const categories: EndpointCategory[] = ['analytics', 'api', 'admin', 'public', 'total'];
+    const categories: EndpointCategory[] = [
+        'analytics',
+        'api',
+        'admin',
+        'public',
+        'total',
+    ];
 
     try {
         const keys = categories.map((cat) => getQuotaKey(userId, cat));
         const values = await redis.mget(...keys);
 
-        const usage: Record<string, { used: number; limit: number; remaining: number }> = {};
+        const usage: Record<
+            string,
+            { used: number; limit: number; remaining: number }
+        > = {};
 
         categories.forEach((category, index) => {
             const used = parseInt(values[index] || '0', 10);
@@ -346,7 +360,13 @@ export async function resetQuota(
             await redis.del(key);
         } else {
             // Reset all categories
-            const categories: EndpointCategory[] = ['analytics', 'api', 'admin', 'public', 'total'];
+            const categories: EndpointCategory[] = [
+                'analytics',
+                'api',
+                'admin',
+                'public',
+                'total',
+            ];
             const keys = categories.map((cat) => getQuotaKey(userId, cat));
             await redis.del(...keys);
         }

@@ -1,0 +1,26 @@
+{
+  "id": "webhook-notifier",
+  "name": "Webhook Notifier",
+  "version": "1.0.0",
+  "author": "SpyWatcher Team",
+  "description": "Sends notifications to external webhooks for important events",
+  "spywatcherVersion": ">=1.0.0",
+  "dependencies": [],
+  "permissions": [
+    "discord:events",
+    "network:access"
+  ],
+  "configSchema": {
+    "webhookUrl": {
+      "type": "string",
+      "description": "Webhook URL to send notifications to",
+      "required": true
+    },
+    "events": {
+      "type": "array",
+      "description": "Events to notify about",
+      "default": ["multi-client", "suspicious-activity"]
+    }
+  },
+  "homepage": "https://github.com/subculture-collective/discord-spywatcher"
+}

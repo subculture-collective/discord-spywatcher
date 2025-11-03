@@ -12,6 +12,7 @@ import incidentsRoutes from './incidents';
 import ipManagementRoutes from './ipManagement';
 import metricsAnalyticsRoutes from './metricsAnalytics';
 import monitoringRoutes from './monitoring';
+import pluginsRoutes from './plugins';
 import privacyRoutes from './privacy';
 import publicApiRoutes from './publicApi';
 import quotaManagementRoutes from './quotaManagement';
@@ -28,10 +29,13 @@ router.get('/health', (_req, res) => {
 
 // OpenAPI/Swagger documentation endpoints
 router.use('/docs', swaggerUi.serve);
-router.get('/docs', swaggerUi.setup(swaggerSpec, {
-    customSiteTitle: 'Spywatcher API Documentation',
-    customCss: '.swagger-ui .topbar { display: none }',
-}));
+router.get(
+    '/docs',
+    swaggerUi.setup(swaggerSpec, {
+        customSiteTitle: 'Spywatcher API Documentation',
+        customCss: '.swagger-ui .topbar { display: none }',
+    })
+);
 
 // Serve OpenAPI spec as JSON
 router.get('/openapi.json', (_req, res) => {
@@ -40,19 +44,22 @@ router.get('/openapi.json', (_req, res) => {
 });
 
 // ReDoc documentation - alternative clean view
-router.get('/redoc', redoc({
-    title: 'Spywatcher API Documentation',
-    specUrl: '/api/openapi.json',
-    redocOptions: {
-        theme: {
-            colors: {
-                primary: {
-                    main: '#5865F2' // Discord blue
-                }
-            }
-        }
-    }
-}));
+router.get(
+    '/redoc',
+    redoc({
+        title: 'Spywatcher API Documentation',
+        specUrl: '/api/openapi.json',
+        redocOptions: {
+            theme: {
+                colors: {
+                    primary: {
+                        main: '#5865F2', // Discord blue
+                    },
+                },
+            },
+        },
+    })
+);
 
 // Public API documentation routes
 router.use('/public', publicApiRoutes);
@@ -68,6 +75,7 @@ router.use('/admin/monitoring', monitoringRoutes);
 router.use('/admin/incidents', incidentsRoutes);
 router.use('/quota', quotaManagementRoutes);
 router.use('/metrics', metricsAnalyticsRoutes);
+router.use('/plugins', pluginsRoutes);
 router.use('/analytics', analyticsRulesRoutes);
 router.use(analyticsRoutes);
 router.use(suspicionRoutes);

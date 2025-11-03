@@ -33,7 +33,10 @@ export function requireAuth(
 
         // Check if user is banned
         if (payload.role === 'BANNED') {
-            console.warn('❌ Banned user attempted access:', sanitizeForLog(payload.discordId));
+            console.warn(
+                '❌ Banned user attempted access:',
+                sanitizeForLog(payload.discordId)
+            );
             res.status(403).json({ error: 'Account is banned' });
             return;
         }

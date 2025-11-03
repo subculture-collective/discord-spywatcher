@@ -105,14 +105,20 @@ export const isValidDiscordToken = (token: string): boolean => {
 export const privacySchemas = {
     deleteRequest: z.object({
         body: z.object({
-            reason: z.string().max(500, 'Reason must be 500 characters or less').optional(),
+            reason: z
+                .string()
+                .max(500, 'Reason must be 500 characters or less')
+                .optional(),
         }),
     }),
 
     updateProfile: z.object({
         body: z.object({
             email: z.string().email('Invalid email address').optional(),
-            locale: z.string().max(10, 'Locale must be 10 characters or less').optional(),
+            locale: z
+                .string()
+                .max(10, 'Locale must be 10 characters or less')
+                .optional(),
         }),
     }),
 
@@ -128,7 +134,10 @@ export const privacySchemas = {
             dataType: z.string().min(1, 'Data type is required'),
         }),
         body: z.object({
-            retentionDays: z.number().int().min(1, 'Retention days must be at least 1'),
+            retentionDays: z
+                .number()
+                .int()
+                .min(1, 'Retention days must be at least 1'),
             enabled: z.boolean().optional(),
         }),
     }),

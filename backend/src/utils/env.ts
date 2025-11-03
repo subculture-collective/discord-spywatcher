@@ -105,13 +105,11 @@ try {
     env = envSchema.parse(process.env);
 } catch (error) {
     if (error instanceof z.ZodError) {
-         
         console.error('❌ Invalid environment configuration:\n');
         error.issues.forEach((err: z.ZodIssue) => {
-             
             console.error(`  - ${err.path.join('.')}: ${err.message}`);
         });
-         
+
         console.error(
             '\n💡 Check your .env file and ensure all required variables are set correctly.'
         );

@@ -73,9 +73,12 @@ export const requestValidationMiddleware = (
     // Validate Content-Type for POST/PUT/PATCH requests
     if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
         const contentType = req.headers['content-type'];
-        if (contentType && !contentType.includes('application/json') && 
+        if (
+            contentType &&
+            !contentType.includes('application/json') &&
             !contentType.includes('application/x-www-form-urlencoded') &&
-            !contentType.includes('multipart/form-data')) {
+            !contentType.includes('multipart/form-data')
+        ) {
             res.status(415).json({
                 error: 'Unsupported Media Type',
                 acceptedTypes: [
@@ -226,7 +229,9 @@ export const abuseDetectionMiddleware = (
                 // If too many violations, auto-block
                 if (violations >= 10) {
                     await redis.set(`blocked:${ip}`, '1', 'EX', 3600);
-                    console.warn(`IP ${sanitizeForLog(ip)} auto-blocked after ${violations} rate limit violations`);
+                    console.warn(
+                        `IP ${sanitizeForLog(ip)} auto-blocked after ${violations} rate limit violations`
+                    );
 
                     // Log auto-block to audit log
                     await db.auditLog.create({

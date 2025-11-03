@@ -15,11 +15,12 @@ interface ServiceHealthStatus {
 }
 
 // Cache Discord API health check to reduce load on Discord's API
-let discordApiCache: { healthy: boolean; latency: number; timestamp: number } = {
-    healthy: true,
-    latency: 0,
-    timestamp: 0,
-};
+let discordApiCache: { healthy: boolean; latency: number; timestamp: number } =
+    {
+        healthy: true,
+        latency: 0,
+        timestamp: 0,
+    };
 const DISCORD_CACHE_TTL = 60000; // 60 seconds
 
 /**
@@ -72,7 +73,7 @@ async function checkRedisHealth(): Promise<HealthCheckResult> {
  */
 async function checkDiscordHealth(): Promise<HealthCheckResult> {
     const now = Date.now();
-    
+
     // Return cached result if still valid
     if (now - discordApiCache.timestamp < DISCORD_CACHE_TTL) {
         return {
@@ -260,40 +261,41 @@ export async function cleanupOldStatusChecks(): Promise<number> {
 
 /**
  * Start periodic status check job
- * 
+ *
  * Starts a background job that periodically checks the health of all services
  * and records the results in the database for historical tracking.
- * 
+ *
  * @param intervalMinutes - Interval between checks in minutes (default: 5)
  * @returns NodeJS.Timeout - The interval timer that can be cleared to stop the job
- * 
+ *
  * @example
  * ```typescript
  * // Start status checks every 5 minutes
  * const timer = startStatusCheckJob();
- * 
+ *
  * // Start status checks every 10 minutes
  * const timer = startStatusCheckJob(10);
- * 
+ *
  * // Stop the status check job
  * clearInterval(timer);
  * ```
  */
 export function startStatusCheckJob(intervalMinutes = 5): NodeJS.Timeout {
-    console.log(
-        `Starting status check job (every ${intervalMinutes} minutes)`
-    );
+    console.log(`Starting status check job (every ${intervalMinutes} minutes)`);
 
-    const interval = setInterval(() => {
-        void (async () => {
-            try {
-                const healthStatus = await performHealthCheck();
-                await recordStatusCheck(healthStatus);
-            } catch (error) {
-                console.error('Status check job failed:', error);
-            }
-        })();
-    }, intervalMinutes * 60 * 1000);
+    const interval = setInterval(
+        () => {
+            void (async () => {
+                try {
+                    const healthStatus = await performHealthCheck();
+                    await recordStatusCheck(healthStatus);
+                } catch (error) {
+                    console.error('Status check job failed:', error);
+                }
+            })();
+        },
+        intervalMinutes * 60 * 1000
+    );
 
     // Run immediately on start
     void (async () => {

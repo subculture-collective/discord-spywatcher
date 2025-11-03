@@ -7,7 +7,9 @@ export function setupDatabaseMonitoring(): void {
     // and we rely on Prisma's built-in logging capabilities
 
     // Log slow query detection can be configured in Prisma schema with log levels
-    console.log('✅ Database monitoring configured (using Sentry Prisma integration)');
+    console.log(
+        '✅ Database monitoring configured (using Sentry Prisma integration)'
+    );
 }
 
 // Helper function to manually record database metrics if needed

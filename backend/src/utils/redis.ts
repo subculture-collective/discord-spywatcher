@@ -118,7 +118,8 @@ export async function getRedisMetrics() {
             available: true,
             connected: client.status === 'ready',
             status: client.status,
-            totalConnectionsReceived: stats['total_connections_received'] ?? 'N/A',
+            totalConnectionsReceived:
+                stats['total_connections_received'] ?? 'N/A',
             totalCommandsProcessed: stats['total_commands_processed'] ?? 'N/A',
             instantaneousOpsPerSec: stats['instantaneous_ops_per_sec'] ?? 'N/A',
             usedMemory: stats['used_memory_human'] ?? 'N/A',
@@ -166,19 +167,22 @@ export async function closeRedisConnection(): Promise<void> {
 /**
  * Scan Redis keys matching a pattern using SCAN command (non-blocking)
  * This is a safer alternative to KEYS command for production use
- * 
+ *
  * @param pattern - Redis key pattern (e.g., 'violations:*', 'blocked:*')
  * @param count - Approximate number of keys to return per iteration (default: 100)
  * @returns Array of matching keys
- * 
+ *
  * @example
  * // Get all violation keys
  * const violationKeys = await scanKeys('violations:*');
- * 
+ *
  * // Get all blocked IP keys
  * const blockedKeys = await scanKeys('blocked:*');
  */
-export async function scanKeys(pattern: string, count: number = 100): Promise<string[]> {
+export async function scanKeys(
+    pattern: string,
+    count: number = 100
+): Promise<string[]> {
     const client = getRedisClient();
     if (!client) {
         return [];
@@ -211,11 +215,11 @@ export async function scanKeys(pattern: string, count: number = 100): Promise<st
 /**
  * Delete all keys matching a pattern using SCAN (non-blocking)
  * Useful for cleanup operations
- * 
+ *
  * @param pattern - Redis key pattern to delete
  * @param batchSize - Number of keys to delete per batch (default: 100)
  * @returns Number of keys deleted
- * 
+ *
  * @example
  * // Clean up all expired violations
  * const deleted = await deleteKeysByPattern('violations:*');
@@ -258,11 +262,11 @@ export async function deleteKeysByPattern(
 
 /**
  * Get all keys and their values matching a pattern using SCAN (non-blocking)
- * 
+ *
  * @param pattern - Redis key pattern
  * @param count - Approximate number of keys to scan per iteration (default: 100)
  * @returns Map of keys to their values
- * 
+ *
  * @example
  * // Get all violations with their counts
  * const violations = await getKeyValuesByPattern('violations:*');
@@ -313,18 +317,21 @@ export async function getKeyValuesByPattern(
 
         return result;
     } catch (error) {
-        console.error(`Error getting key-values with pattern ${pattern}:`, error);
+        console.error(
+            `Error getting key-values with pattern ${pattern}:`,
+            error
+        );
         return result;
     }
 }
 
 /**
  * Count keys matching a pattern using SCAN (non-blocking)
- * 
+ *
  * @param pattern - Redis key pattern
  * @param count - Approximate number of keys to scan per iteration (default: 100)
  * @returns Number of matching keys
- * 
+ *
  * @example
  * // Count active violations
  * const violationCount = await countKeysByPattern('violations:*');
