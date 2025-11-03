@@ -30,6 +30,7 @@
     "error": "Fehler",
     "success": "Erfolg",
     "save": "Speichern",
+    "changeLanguage": "Sprache ändern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
     "edit": "Bearbeiten",
@@ -77,7 +78,8 @@
     },
     "filters": {
       "hideBanned": "Gesperrte Nutzer ausblenden",
-      "showAll": "Alle Nutzer anzeigen"
+      "showAll": "Alle Nutzer anzeigen",
+      "hideBannedHelp": "Umschalten zum Ein- oder Ausblenden gesperrter Nutzer in der Liste"
     },
     "table": {
       "user": "Nutzer",
@@ -90,6 +92,8 @@
       "days_other": "{{count}} Tage",
       "avgReaction": "Durchschn. Reaktion",
       "fastReactions": "Schnelle Reaktionen",
+      "fastReactionsAbbr": "Schnelle Rkt.",
+      "accountAgeAbbr": "Alter",
       "ms": "{{value}}ms",
       "noData": "Keine Daten verfügbar"
     }

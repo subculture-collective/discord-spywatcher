@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../../config/i18n';
 
 export function LanguageSwitcher() {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-ctp-surface0 hover:bg-ctp-surface1 text-ctp-text transition-colors focus:outline-none focus:ring-2 focus:ring-ctp-blue focus:ring-offset-2 border border-ctp-surface1"
-                aria-label="Change language"
+                aria-label={t('common.changeLanguage')}
                 aria-expanded={isOpen}
                 aria-haspopup="true"
             >

@@ -128,7 +128,7 @@ function Dashboard() {
                                         />
                                         {t('dashboard.filters.hideBanned')}
                                     </label>
-                                    <span id="filter-help" className="sr-only">{t('dashboard.filters.showAll')}</span>
+                                    <span id="filter-help" className="sr-only">{t('dashboard.filters.hideBannedHelp')}</span>
                                 </div>
                             </div>
                         </CardHeader>
@@ -146,8 +146,8 @@ function Dashboard() {
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.ghostScore')}</th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.clients')}</th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('dashboard.table.channels')}</th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title={t('dashboard.table.fastReactions')}>{t('dashboard.table.fastReactions')}</abbr></th>
-                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title={t('dashboard.table.accountAge')}>{t('dashboard.table.accountAge')}</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title={t('dashboard.table.fastReactions')}>{t('dashboard.table.fastReactionsAbbr')}</abbr></th>
+                                                <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text"><abbr title={t('dashboard.table.accountAge')}>{t('dashboard.table.accountAgeAbbr')}</abbr></th>
                                                 <th scope="col" className="text-center px-4 py-3 text-sm font-semibold text-ctp-text">{t('common.actions')}</th>
                                             </tr>
                                         </thead>

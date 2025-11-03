@@ -30,6 +30,7 @@
     "error": "Error",
     "success": "Success",
     "save": "Save",
+    "changeLanguage": "Change language",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -77,7 +78,8 @@
     },
     "filters": {
       "hideBanned": "Hide banned users",
-      "showAll": "Show all users"
+      "showAll": "Show all users",
+      "hideBannedHelp": "Toggle to hide or show banned users in the list"
     },
     "table": {
       "user": "User",
@@ -90,6 +92,8 @@
       "days_other": "{{count}} days",
       "avgReaction": "Avg. Reaction",
       "fastReactions": "Fast Reactions",
+      "fastReactionsAbbr": "Fast RT",
+      "accountAgeAbbr": "Age",
       "ms": "{{value}}ms",
       "noData": "No data available"
     }
