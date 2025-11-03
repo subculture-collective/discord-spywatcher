@@ -336,7 +336,12 @@ router.post('/rules/:id/execute', async (req, res) => {
 
         // Execute asynchronously
         executeRule(id).catch((error: unknown) => {
-            logger.error('Rule execution failed', { ruleId: id, error: error as Error });
+            const errorMessage =
+                error instanceof Error ? error.message : String(error);
+            logger.error('Rule execution failed', {
+                ruleId: id,
+                error: errorMessage,
+            });
         });
 
         res.status(202).json({ message: 'Rule execution started' });

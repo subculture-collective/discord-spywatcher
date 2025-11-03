@@ -83,13 +83,11 @@ export function evaluateCondition(
                 !fieldValue.includes(conditionValue)
             );
         case 'IN':
-            return (
-                Array.isArray(conditionValue) && conditionValue.includes(fieldValue as never)
-            );
+            if (!Array.isArray(conditionValue)) return false;
+            return conditionValue.some((val) => val === fieldValue);
         case 'NOT_IN':
-            return (
-                Array.isArray(conditionValue) && !conditionValue.includes(fieldValue as never)
-            );
+            if (!Array.isArray(conditionValue)) return false;
+            return !conditionValue.some((val) => val === fieldValue);
         default:
             return false;
     }

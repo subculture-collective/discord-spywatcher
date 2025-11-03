@@ -1,6 +1,7 @@
 import { Plus, Play, Pause, Trash2, Edit } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -9,6 +10,7 @@ import api from '../lib/api';
 import type { AnalyticsRule, RuleTemplate } from '../types/rules';
 
 function Rules() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [rules, setRules] = useState<AnalyticsRule[]>([]);
     const [templates, setTemplates] = useState<RuleTemplate[]>([]);
@@ -113,7 +115,7 @@ function Rules() {
                         Create custom rules to automate alerts and actions
                     </p>
                 </div>
-                <Button onClick={() => (window.location.href = '/rules/new')}>
+                <Button onClick={() => navigate('/rules/new')}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Rule
                 </Button>
@@ -170,7 +172,7 @@ function Rules() {
                             <p className="text-surface-text-secondary mb-4">
                                 No rules created yet
                             </p>
-                            <Button onClick={() => (window.location.href = '/rules/new')}>
+                            <Button onClick={() => navigate('/rules/new')}>
                                 <Plus className="w-4 h-4 mr-2" />
                                 Create Your First Rule
                             </Button>
@@ -240,7 +242,7 @@ function Rules() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() =>
-                                                    (window.location.href = `/rules/${rule.id}/edit`)
+                                                    navigate(`/rules/${rule.id}/edit`)
                                                 }
                                             >
                                                 <Edit className="w-4 h-4" />
