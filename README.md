@@ -45,6 +45,19 @@ Comprehensive documentation is available at multiple levels:
 - **[Developer Guide](./docs/developer/)** - Architecture and contributing
 - **[API Reference](./docs/api/)** - Complete API documentation
 
+### 🌐 Interactive API Documentation
+
+Explore and test the API using our interactive documentation portals:
+
+- **[Swagger UI](http://localhost:3001/api/docs)** - Try it out! Test endpoints directly in your browser
+- **[ReDoc](http://localhost:3001/api/redoc)** - Clean, professional API documentation view
+- **[OpenAPI Spec](http://localhost:3001/api/openapi.json)** - Raw OpenAPI 3.0 specification
+
+**Quick Links:**
+- 📖 [Interactive API Guide](./docs/api/INTERACTIVE_API_GUIDE.md) - Code examples in 6+ languages
+- 🔐 [Authentication Guide](./docs/api/AUTHENTICATION_GUIDE.md) - OAuth2 setup and JWT management
+- ⚡ [Rate Limiting Guide](./docs/api/RATE_LIMITING_GUIDE.md) - Best practices and optimization
+
 ### Building Documentation Locally
 
 ```bash
