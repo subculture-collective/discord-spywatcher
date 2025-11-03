@@ -87,6 +87,8 @@ export default defineConfig({
           items: [
             { text: 'Video Tutorials', link: '/guide/tutorials' },
             { text: 'Best Practices', link: '/guide/best-practices' },
+            { text: 'Quick Reference', link: '/guide/quick-reference' },
+            { text: 'Screenshots Guide', link: '/guide/screenshots' },
             { text: 'Glossary', link: '/guide/glossary' },
           ],
         },

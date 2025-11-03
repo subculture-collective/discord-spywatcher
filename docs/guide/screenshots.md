@@ -19,7 +19,10 @@ The main dashboard provides an at-a-glance view of your server's health and acti
 3. **Activity Feed** - Real-time updates of server events
 4. **Quick Actions** - Common tasks and shortcuts
 
-![Dashboard Overview](../images/dashboard-overview.png)
+::: info Coming Soon
+**Screenshot:** Dashboard Overview  
+A comprehensive view showing the navigation bar, metrics cards, activity feed, and quick actions panel.
+:::
 
 ::: tip
 Hover over any metric card to see a detailed breakdown and trend information.
@@ -28,26 +31,32 @@ Hover over any metric card to see a detailed breakdown and trend information.
 ### Metrics Cards Explained
 
 **Total Users Card**
+
 - Shows current member count
 - Trend indicator (↑ ↓) shows growth/decline
 - Click to view user list and details
 
 **Active Users Card**
+
 - Users active in last 24 hours
 - Percentage of total user base
 - Breakdown by activity type (messages, voice, presence)
 
 **Ghost Users Card**
+
 - Detected ghost accounts
 - Risk level indicator
 - Click for detailed ghost analysis
 
 **Suspicion Score Card**
+
 - Overall server security rating (0-100)
 - Color-coded by risk level
 - Click for suspicious users list
 
-![Metrics Cards](../images/metrics-cards.png)
+:::info Screenshot Coming Soon
+**Metrics Cards**
+:::
 
 ## Analytics Features
 
@@ -56,14 +65,18 @@ Hover over any metric card to see a detailed breakdown and trend information.
 Track server activity over time with interactive charts.
 
 **Features:**
+
 - Multiple chart types (line, bar, area)
 - Customizable date ranges
 - Export functionality
 - Drill-down capabilities
 
-![Activity Charts](../images/activity-charts.png)
+:::info Screenshot Coming Soon
+**Activity Charts**
+:::
 
 **Chart Controls:**
+
 1. **Date Range Selector** - Choose time period to analyze
 2. **Chart Type Toggle** - Switch between visualization types
 3. **Export Button** - Download data as CSV/PNG
@@ -73,17 +86,21 @@ Track server activity over time with interactive charts.
 
 See when your server is most active with the activity heatmap.
 
-![Activity Heatmap](../images/heatmap.png)
+:::info Screenshot Coming Soon
+**Activity Heatmap**
+:::
 
 **Reading the Heatmap:**
+
 - **X-axis**: Time of day (24-hour format)
 - **Y-axis**: Day of week
 - **Color Intensity**: Activity level
-  - Light colors = Low activity
-  - Dark colors = High activity
+    - Light colors = Low activity
+    - Dark colors = High activity
 - **Hover**: See exact numbers
 
 **Use Cases:**
+
 - Find optimal times for events
 - Plan moderation coverage
 - Identify unusual activity patterns
@@ -92,9 +109,12 @@ See when your server is most active with the activity heatmap.
 
 Track individual user behavior over time with detailed timelines.
 
-![User Timeline](../images/user-timeline.png)
+:::info Screenshot Coming Soon
+**User Timeline**
+:::
 
 **Timeline Events:**
+
 - 🟢 **Online** - User came online
 - ⚫ **Offline** - User went offline
 - 💬 **Message** - User sent a message
@@ -103,6 +123,7 @@ Track individual user behavior over time with detailed timelines.
 - 💻 **Client Change** - Different device/platform
 
 **Timeline Controls:**
+
 1. **Zoom Controls** - Adjust time scale
 2. **Filter Events** - Show/hide event types
 3. **Export Timeline** - Save as image or CSV
@@ -114,9 +135,12 @@ Track individual user behavior over time with detailed timelines.
 
 View and manage detected ghost accounts.
 
-![Ghost Detection](../images/ghost-detection.png)
+:::info Screenshot Coming Soon
+**Ghost Detection**
+:::
 
 **List Columns:**
+
 - **Username** - User's Discord name
 - **Presence Time** - Hours online
 - **Message Count** - Total messages sent
@@ -125,6 +149,7 @@ View and manage detected ghost accounts.
 - **Actions** - Quick action buttons
 
 **Actions:**
+
 - 🔍 **Investigate** - View detailed analysis
 - ✅ **Clear** - Mark as false positive
 - 🚫 **Ban** - Remove from server
@@ -134,9 +159,12 @@ View and manage detected ghost accounts.
 
 Detailed analysis of a specific ghost account.
 
-![Ghost Detail](../images/ghost-detail.png)
+:::info Screenshot Coming Soon
+**Ghost Detail**
+:::
 
 **Analysis Sections:**
+
 1. **Presence Pattern** - When they're online
 2. **Activity History** - What they've done
 3. **Client Information** - Devices used
@@ -150,9 +178,12 @@ Detailed analysis of a specific ghost account.
 
 Monitor users with unusual behavior patterns.
 
-![Suspicion Dashboard](../images/suspicion-dashboard.png)
+:::info Screenshot Coming Soon
+**Suspicion Dashboard**
+:::
 
 **Risk Levels:**
+
 - 🟢 **Low (0-20)** - Normal behavior
 - 🟡 **Moderate (21-40)** - Minor anomalies
 - 🟠 **Elevated (41-60)** - Worth investigating
@@ -163,9 +194,12 @@ Monitor users with unusual behavior patterns.
 
 Understand what contributes to a suspicion score.
 
-![Score Breakdown](../images/score-breakdown.png)
+:::info Screenshot Coming Soon
+**Score Breakdown**
+:::
 
 **Score Components:**
+
 - **Activity Anomalies** (25%) - Unusual patterns
 - **Client Behavior** (20%) - Device/platform usage
 - **Presence Patterns** (20%) - Online/offline cycles
@@ -178,15 +212,19 @@ Understand what contributes to a suspicion score.
 
 Find exactly what you're looking for with powerful filters.
 
-![Filter Interface](../images/filters.png)
+:::info Screenshot Coming Soon
+**Filter Interface**
+:::
 
 **Filter Types:**
+
 - **User Filters** - Name, role, join date
 - **Activity Filters** - Message count, presence
 - **Behavior Filters** - Ghost status, suspicion
 - **Time Filters** - Date ranges, specific periods
 
 **Example Filters:**
+
 ```
 # High suspicion users
 suspicion:>70
@@ -202,9 +240,12 @@ role:moderator AND messages:<10
 
 View and interact with search results.
 
-![Search Results](../images/search-results.png)
+:::info Screenshot Coming Soon
+**Search Results**
+:::
 
 **Features:**
+
 - **Sort Options** - By relevance, date, score
 - **Bulk Actions** - Act on multiple results
 - **Export Results** - Save filtered data
@@ -216,9 +257,12 @@ View and interact with search results.
 
 Customize Spywatcher to your needs.
 
-![General Settings](../images/settings-general.png)
+:::info Screenshot Coming Soon
+**General Settings**
+:::
 
 **Setting Categories:**
+
 - **Appearance** - Theme, language, layout
 - **Notifications** - Alert preferences
 - **Privacy** - Data collection settings
@@ -229,9 +273,12 @@ Customize Spywatcher to your needs.
 
 Manage who can access Spywatcher features.
 
-![User Management](../images/user-management.png)
+:::info Screenshot Coming Soon
+**User Management**
+:::
 
 **User Roles:**
+
 - **Owner** - Full access to everything
 - **Admin** - Full access except ownership transfer
 - **Moderator** - View and export data
@@ -239,14 +286,14 @@ Manage who can access Spywatcher features.
 
 **Permission Matrix:**
 
-| Feature | Owner | Admin | Moderator | Viewer |
-|---------|-------|-------|-----------|--------|
-| View Dashboard | ✅ | ✅ | ✅ | ✅ |
-| View Analytics | ✅ | ✅ | ✅ | ✅ |
-| Export Data | ✅ | ✅ | ✅ | ❌ |
-| Manage Bans | ✅ | ✅ | ⚠️ | ❌ |
-| Change Settings | ✅ | ✅ | ❌ | ❌ |
-| Manage Users | ✅ | ⚠️ | ❌ | ❌ |
+| Feature         | Owner | Admin | Moderator | Viewer |
+| --------------- | ----- | ----- | --------- | ------ |
+| View Dashboard  | ✅    | ✅    | ✅        | ✅     |
+| View Analytics  | ✅    | ✅    | ✅        | ✅     |
+| Export Data     | ✅    | ✅    | ✅        | ❌     |
+| Manage Bans     | ✅    | ✅    | ⚠️        | ❌     |
+| Change Settings | ✅    | ✅    | ❌        | ❌     |
+| Manage Users    | ✅    | ⚠️    | ❌        | ❌     |
 
 ## Mobile Interface
 
@@ -254,9 +301,12 @@ Manage who can access Spywatcher features.
 
 Spywatcher is fully responsive on mobile devices.
 
-![Mobile Dashboard](../images/mobile-dashboard.png)
+:::info Screenshot Coming Soon
+**Mobile Dashboard**
+:::
 
 **Mobile Features:**
+
 - **Touch Optimized** - Swipe and tap gestures
 - **Responsive Layout** - Adapts to screen size
 - **Mobile Navigation** - Burger menu and tabs
@@ -266,9 +316,12 @@ Spywatcher is fully responsive on mobile devices.
 
 Charts adapt for mobile viewing.
 
-![Mobile Charts](../images/mobile-charts.png)
+:::info Screenshot Coming Soon
+**Mobile Charts**
+:::
 
 **Mobile Optimizations:**
+
 - Simplified chart types
 - Touch-friendly controls
 - Horizontal scrolling for timelines
@@ -280,14 +333,18 @@ Charts adapt for mobile viewing.
 
 Spywatcher includes a full dark mode for comfortable viewing.
 
-![Dark Mode Dashboard](../images/dark-mode.png)
+:::info Screenshot Coming Soon
+**Dark Mode Dashboard**
+:::
 
 **Theme Options:**
+
 - **Light** - Bright, high contrast
 - **Dark** - Easy on the eyes
 - **Auto** - Matches system preference
 
 **Toggle Theme:**
+
 1. Click profile icon
 2. Select Settings
 3. Choose Appearance
@@ -299,15 +356,19 @@ Spywatcher includes a full dark mode for comfortable viewing.
 
 Export data in multiple formats for external analysis.
 
-![Export Dialog](../images/export-dialog.png)
+:::info Screenshot Coming Soon
+**Export Dialog**
+:::
 
 **Export Formats:**
+
 - **CSV** - Spreadsheet compatible
 - **JSON** - Programmatic access
 - **PDF** - Printable reports
 - **Excel** - Advanced spreadsheets (Pro)
 
 **Export Options:**
+
 - Date range selection
 - Include/exclude columns
 - Format preferences
@@ -319,9 +380,12 @@ Export data in multiple formats for external analysis.
 
 See server activity as it happens.
 
-![Live Feed](../images/live-feed.png)
+:::info Screenshot Coming Soon
+**Live Feed**
+:::
 
 **Real-time Features:**
+
 - **Presence Updates** - Online/offline changes
 - **Message Events** - New messages (count only)
 - **Role Changes** - Role assignments
@@ -329,6 +393,7 @@ See server activity as it happens.
 - **System Events** - Bans, warnings, etc.
 
 **Feed Controls:**
+
 - **Pause/Resume** - Stop/start live updates
 - **Filter Events** - Show only specific types
 - **Auto-scroll** - Follow latest events
@@ -340,15 +405,19 @@ See server activity as it happens.
 
 Install and configure plugins to extend functionality.
 
-![Plugin Management](../images/plugin-management.png)
+:::info Screenshot Coming Soon
+**Plugin Management**
+:::
 
 **Plugin Card:**
+
 - **Plugin Name** - Identifier
 - **Status** - Active/Inactive
 - **Version** - Current version
 - **Controls** - Enable/disable, configure
 
 **Plugin Actions:**
+
 - **Install** - Add new plugin
 - **Configure** - Set plugin options
 - **Enable/Disable** - Toggle functionality
@@ -363,36 +432,37 @@ Install and configure plugins to extend functionality.
 This guide contains placeholder image references. To complete this documentation:
 
 1. **Take Screenshots**
-   - Run Spywatcher locally
-   - Use demo/anonymized data
-   - Capture at 1920x1080 resolution
-   - Use consistent browser width
+    - Run Spywatcher locally
+    - Use demo/anonymized data
+    - Capture at 1920x1080 resolution
+    - Use consistent browser width
 
 2. **Add Annotations**
-   - Use tools like Snagit or Skitch
-   - Add arrows, boxes, and labels
-   - Keep annotations consistent
-   - Use theme colors
+    - Use tools like Snagit or Skitch
+    - Add arrows, boxes, and labels
+    - Keep annotations consistent
+    - Use theme colors
 
 3. **Save Images**
-   - Location: `docs/images/`
-   - Format: PNG (for quality)
-   - Names match references in this file
-   - Optimize file size (< 500KB each)
+    - Location: `docs/images/`
+    - Format: PNG (for quality)
+    - Names match references in this file
+    - Optimize file size (< 500KB each)
 
 4. **Update This File**
-   - Remove this warning block
-   - Verify all image paths
-   - Test image display in docs
+    - Remove this warning block
+    - Verify all image paths
+    - Test image display in docs
 
 **Priority Screenshots:**
+
 1. Dashboard overview (main page)
 2. Analytics charts
 3. Ghost detection list
 4. Suspicion score breakdown
 5. Heatmap visualization
 6. Settings interface
-:::
+   :::
 
 ---
 
@@ -400,4 +470,4 @@ This guide contains placeholder image references. To complete this documentation
 Screenshots are taken with demo data to protect user privacy. Your actual dashboard will show your server's real data.
 :::
 
-*Last updated: November 2024*
+_Last updated: November 2024_
