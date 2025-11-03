@@ -1,0 +1,14 @@
+{
+  "id": "message-logger",
+  "name": "Message Logger",
+  "version": "1.0.0",
+  "author": "SpyWatcher Team",
+  "description": "Logs all Discord messages to a file for analysis",
+  "spywatcherVersion": ">=1.0.0",
+  "dependencies": [],
+  "permissions": [
+    "discord:events",
+    "fs:access"
+  ],
+  "homepage": "https://github.com/subculture-collective/discord-spywatcher"
+}
