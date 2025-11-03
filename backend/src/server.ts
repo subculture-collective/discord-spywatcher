@@ -185,6 +185,28 @@ const allowedOrigins =
         return;
     }
 
+    // Initialize plugin system
+    try {
+        const path = await import('path');
+        const { pluginManager } = await import('./plugins');
+        const pluginDir = path.join(__dirname, '../plugins');
+        const dataDir = path.join(__dirname, '../plugin-data');
+        
+        await pluginManager.initialize(
+            {
+                pluginDir,
+                dataDir,
+                autoStart: true,
+            },
+            undefined, // Discord client will be set from bot
+            app
+        );
+        console.log('✅ Plugin system initialized');
+    } catch (err) {
+        console.error('⚠️  Failed to initialize plugin system:', err);
+        // Don't exit - continue without plugins
+    }
+
     // Sentry error handler - must be after all routes and before other error handlers
     if (env.SENTRY_DSN) {
         app.use(getSentryErrorHandler());

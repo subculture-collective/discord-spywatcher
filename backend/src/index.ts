@@ -299,3 +299,26 @@ client.on('error', (err) => {
 client.on('shardError', (error) => {
     console.error('❌ A websocket connection encountered an error:', error);
 });
+
+// Initialize plugin system with Discord client once ready
+client.once('ready', async () => {
+    try {
+        const path = await import('path');
+        const { pluginManager } = await import('./plugins');
+        const pluginDir = path.join(__dirname, '../plugins');
+        const dataDir = path.join(__dirname, '../plugin-data');
+        
+        await pluginManager.initialize(
+            {
+                pluginDir,
+                dataDir,
+                autoStart: true,
+            },
+            client,
+            undefined // Express app is set from server
+        );
+        console.log('✅ Plugin system initialized with Discord client');
+    } catch (err) {
+        console.error('⚠️  Failed to initialize plugin system with Discord client:', err);
+    }
+});
