@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 
 import { Button } from '../ui/Button';
 
-
 interface ChartExportProps {
     elementId: string;
     filename?: string;

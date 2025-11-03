@@ -119,15 +119,16 @@ function ChordDiagram({ data, width = 600, height = 600 }: ChordDiagramProps) {
             });
 
         // Draw the chords (ribbons)
+        const ribbon = d3.ribbon<d3.Chord, d3.ChordSubgroup>()
+            .radius(innerRadius);
+
         svg
             .append('g')
             .attr('fill-opacity', 0.67)
             .selectAll('path')
             .data(chords)
             .join('path')
-            .attr('d', d3.ribbon<any, any>()
-                .radius(innerRadius)
-            )
+            .attr('d', ribbon)
             .attr('fill', (d) => color(d.source.index.toString()) as string)
             .attr('stroke', '#1e1e2e')
             .style('mix-blend-mode', 'multiply')

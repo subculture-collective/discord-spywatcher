@@ -78,8 +78,9 @@ function SankeyDiagram({ data, width = 800, height = 500 }: SankeyDiagramProps) 
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
         // Create Sankey generator
-        // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-        const sankeyGenerator = sankey<SankeyNode<{ name: string; category?: string }, {}>, SankeyLink<SankeyNode<{ name: string; category?: string }, {}>, {}>>()
+        type NodeData = { name: string; category?: string };
+        type LinkData = Record<string, never>;
+        const sankeyGenerator = sankey<SankeyNode<NodeData, LinkData>, SankeyLink<SankeyNode<NodeData, LinkData>, LinkData>>()
             .nodeWidth(15)
             .nodePadding(10)
             .extent([

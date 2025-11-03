@@ -1,20 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { DataSet, Network } from 'vis-network/standalone';
 
-interface NetworkNode {
-    id: string;
-    label: string;
-    group?: string;
-    value?: number;
-    title?: string;
-}
-
-interface NetworkEdge {
-    from: string;
-    to: string;
-    value?: number;
-    title?: string;
-}
+import type { NetworkNode, NetworkEdge } from '../../types/vis-network';
 
 interface NetworkGraphProps {
     data: {
