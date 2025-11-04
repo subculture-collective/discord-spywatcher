@@ -103,7 +103,7 @@ const timelineQuerySchema = z.object({
  *       429:
  *         $ref: '#/components/responses/TooManyRequests'
  */
-router.get('/timeline/:userId', requireAuth, async (req, res): Promise<void> => {
+router.get('/timeline/:userId', requireAuth, async (req, res) => {
     try {
         const { userId } = req.params;
         const guildId = req.guildId as string;

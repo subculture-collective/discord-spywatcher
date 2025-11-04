@@ -88,11 +88,17 @@ function UserTimeline() {
                 }
 
                 if (startDate) {
-                    params.startDate = new Date(startDate).toISOString();
+                    const startDateObj = new Date(startDate);
+                    if (!isNaN(startDateObj.getTime())) {
+                        params.startDate = startDateObj.toISOString();
+                    }
                 }
 
                 if (endDate) {
-                    params.endDate = new Date(endDate).toISOString();
+                    const endDateObj = new Date(endDate);
+                    if (!isNaN(endDateObj.getTime())) {
+                        params.endDate = endDateObj.toISOString();
+                    }
                 }
 
                 const response = await api.get<TimelineResponse>(
