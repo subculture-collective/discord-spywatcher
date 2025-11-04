@@ -11,6 +11,7 @@ All analytics queries have been optimized to use database-level aggregation inst
 ### 1. Ghost Detection (`src/analytics/ghosts.ts`)
 
 **Original Implementation:**
+
 ```typescript
 // Two separate groupBy queries
 const typings = await db.typingEvent.groupBy({ ... });
@@ -19,9 +20,10 @@ const messages = await db.messageEvent.groupBy({ ... });
 ```
 
 **Optimized Implementation:**
+
 ```sql
 -- Single query with FULL OUTER JOIN
-SELECT 
+SELECT
   COALESCE(t."userId", m."userId") as "userId",
   COALESCE(t.username, m.username) as username,
   COALESCE(t.typing_count, 0) as typing_count,
@@ -45,6 +47,7 @@ LIMIT 100
 ### 2. Lurker Detection (`src/analytics/lurkers.ts`)
 
 **Original Implementation:**
+
 ```typescript
 // Three separate findMany calls
 const presence = await db.presenceEvent.findMany({ ... });
@@ -54,6 +57,7 @@ const messages = await db.messageEvent.findMany({ ... });
 ```
 
 **Optimized Implementation:**
+
 ```sql
 -- Single query with LEFT JOIN and UNION
 SELECT p."userId", p.username, ...
@@ -79,14 +83,16 @@ WHERE COALESCE(a.activity_count, 0) = 0
 ### 3. Reaction Stats (`src/analytics/reactions.ts`)
 
 **Original Implementation:**
+
 ```typescript
 const reactions = await db.reactionTime.findMany({ ... });
 // In-memory aggregation with Map
 ```
 
 **Optimized Implementation:**
+
 ```sql
-SELECT 
+SELECT
   "observerId" as "userId",
   MAX("observerName") as username,
   AVG("deltaMs")::float as avg_reaction_time,
@@ -104,14 +110,16 @@ ORDER BY avg_reaction_time ASC
 ### 4. Channel Diversity (`src/analytics/channels.ts`)
 
 **Original Implementation:**
+
 ```typescript
 const events = await db.typingEvent.findMany({ ... });
 // Build Map with Set for unique channels per user
 ```
 
 **Optimized Implementation:**
+
 ```sql
-SELECT 
+SELECT
   "userId",
   MAX("username") as username,
   COUNT(DISTINCT "channelId") as channel_count
@@ -129,14 +137,16 @@ LIMIT 100
 ### 5. Multi-Client Login Counts (`src/analytics/presence.ts`)
 
 **Original Implementation:**
+
 ```typescript
 const events = await db.presenceEvent.findMany({ ... });
 // Filter events with 2+ clients in memory
 ```
 
 **Optimized Implementation:**
+
 ```sql
-SELECT 
+SELECT
   "userId",
   MAX("username") as username,
   COUNT(*) as multi_client_count
@@ -155,14 +165,16 @@ LIMIT 100
 ### 6. Role Drift Detection (`src/analytics/roles.ts`)
 
 **Original Implementation:**
+
 ```typescript
 const events = await db.roleChangeEvent.findMany({ ... });
 // Aggregate in Map
 ```
 
 **Optimized Implementation:**
+
 ```sql
-SELECT 
+SELECT
   "userId",
   MAX("username") as username,
   COUNT(*) as role_change_count
@@ -179,6 +191,7 @@ LIMIT 100
 ### 7. Behavior Shift Detection (`src/analytics/shifts.ts`)
 
 **Original Implementation:**
+
 ```typescript
 // FOUR separate findMany queries
 const pastMessages = await db.messageEvent.findMany({ ... });
@@ -189,6 +202,7 @@ const recentTyping = await db.typingEvent.findMany({ ... });
 ```
 
 **Optimized Implementation:**
+
 ```sql
 -- Single query with 4 CTEs
 WITH past_messages AS (
@@ -232,18 +246,19 @@ Provides consistent pagination across all API endpoints:
 ### Paginated Endpoints
 
 1. **Audit Logs** (`GET /api/admin/privacy/audit-logs`)
-   - Query params: `?page=1&limit=50`
-   - Returns: `{ data: [], pagination: { total, page, limit, totalPages, hasNextPage, hasPreviousPage } }`
+    - Query params: `?page=1&limit=50`
+    - Returns: `{ data: [], pagination: { total, page, limit, totalPages, hasNextPage, hasPreviousPage } }`
 
 2. **Slow Queries** (`GET /api/admin/monitoring/database/slow-queries`)
-   - Query params: `?limit=20&offset=0`
-   - Returns: `{ data: [], pagination: { total, limit, offset }, stats: {} }`
+    - Query params: `?limit=20&offset=0`
+    - Returns: `{ data: [], pagination: { total, limit, offset }, stats: {} }`
 
 ## Slow Query Monitoring Enhancements
 
 ### Enhanced Tracking (`src/middleware/slowQueryLogger.ts`)
 
 Added features:
+
 - **Query text tracking** for raw SQL queries
 - **Rows affected/returned** tracking
 - **Pagination support** for query logs with `limit` and `offset`
@@ -252,6 +267,7 @@ Added features:
 ### Configuration
 
 Environment variables:
+
 ```bash
 SLOW_QUERY_THRESHOLD_MS=100      # Warning threshold
 CRITICAL_QUERY_THRESHOLD_MS=1000 # Critical threshold
@@ -274,38 +290,42 @@ const result = await trackQueryPerformance(
 All optimized queries leverage existing indexes:
 
 ### Composite Indexes (from Prisma schema)
+
 - `PresenceEvent`: `(userId, createdAt DESC)`, `(userId)`, `(createdAt)`
 - `MessageEvent`: `(userId, createdAt DESC)`, `(guildId, channelId)`, `(guildId, createdAt DESC)`
 - `TypingEvent`: `(userId, channelId)`, `(guildId, createdAt DESC)`
 - `ReactionTime`: `(observerId, createdAt DESC)`, `(guildId, createdAt DESC)`, `(deltaMs)`
 
 ### Partial Indexes (from `scripts/add-performance-indexes.sql`)
+
 - `idx_presence_multi_client`: Only rows with `array_length(clients, 1) > 1`
 - `idx_reaction_fast_delta`: Only rows with `deltaMs < 5000`
 - `idx_message_recent`: Only last 90 days
 - `idx_typing_recent`: Only last 90 days
 
 ### GIN Indexes
+
 - All metadata JSONB columns have GIN indexes for efficient JSON queries
 
 ## Redis Caching Strategy
 
 All analytics functions use Redis caching:
 
-| Function | TTL | Reason |
-|----------|-----|--------|
-| Ghost Scores | 5 min | Moderately volatile data |
-| Lurkers | 5 min | Moderately volatile data |
-| Reaction Stats | No cache | Real-time data needed |
-| Channels | 5 min | Moderately volatile data |
-| Multi-Client | 5 min | Moderately volatile data |
-| Role Drift | 10 min | Slower changing data |
-| Behavior Shifts | 5 min | Moderately volatile data |
-| Client Drift | 2 min | Rapidly changing data |
+| Function        | TTL      | Reason                   |
+| --------------- | -------- | ------------------------ |
+| Ghost Scores    | 5 min    | Moderately volatile data |
+| Lurkers         | 5 min    | Moderately volatile data |
+| Reaction Stats  | No cache | Real-time data needed    |
+| Channels        | 5 min    | Moderately volatile data |
+| Multi-Client    | 5 min    | Moderately volatile data |
+| Role Drift      | 10 min   | Slower changing data     |
+| Behavior Shifts | 5 min    | Moderately volatile data |
+| Client Drift    | 2 min    | Rapidly changing data    |
 
 ### Cache Invalidation
 
 Cache keys include:
+
 - Guild ID
 - Query parameters (e.g., `since` timestamp)
 - Cache keys are tagged for bulk invalidation if needed
@@ -317,6 +337,7 @@ Example: `analytics:ghosts:guild123:1704067200000`
 ### Query Time Targets
 
 From issue requirements:
+
 - ✅ All queries under 100ms (p95)
 - ✅ Critical queries under 50ms (p95)
 - ✅ No N+1 query problems
@@ -324,17 +345,17 @@ From issue requirements:
 
 ### Measured Improvements
 
-| Analytics Function | Before | After | Improvement |
-|-------------------|--------|-------|-------------|
-| Ghost Detection | ~350ms | ~100ms | 71% faster |
-| Lurker Detection | ~400ms | ~100ms | 75% faster |
-| Channel Diversity | ~250ms | ~70ms | 72% faster |
-| Multi-Client Logins | ~200ms | ~80ms | 60% faster |
-| Role Drift | ~180ms | ~90ms | 50% faster |
-| Behavior Shifts | ~500ms | ~120ms | 76% faster |
-| Reaction Stats | ~220ms | ~85ms | 61% faster |
+| Analytics Function  | Before | After  | Improvement |
+| ------------------- | ------ | ------ | ----------- |
+| Ghost Detection     | ~350ms | ~100ms | 71% faster  |
+| Lurker Detection    | ~400ms | ~100ms | 75% faster  |
+| Channel Diversity   | ~250ms | ~70ms  | 72% faster  |
+| Multi-Client Logins | ~200ms | ~80ms  | 60% faster  |
+| Role Drift          | ~180ms | ~90ms  | 50% faster  |
+| Behavior Shifts     | ~500ms | ~120ms | 76% faster  |
+| Reaction Stats      | ~220ms | ~85ms  | 61% faster  |
 
-*Benchmarks on dataset with ~10k events per table, PostgreSQL 14*
+_Benchmarks on dataset with ~10k events per table, PostgreSQL 14_
 
 ## Query Analysis Tools
 
@@ -347,6 +368,7 @@ EXPLAIN ANALYZE SELECT ...
 ```
 
 Key metrics to look for:
+
 - **Seq Scan**: Should be avoided on large tables
 - **Index Scan**: Good, indicates proper index usage
 - **Execution Time**: Should be < 100ms
@@ -356,25 +378,25 @@ Key metrics to look for:
 Admin endpoints for query monitoring:
 
 1. `GET /api/admin/monitoring/database/health`
-   - Database connection status
-   - PostgreSQL version
+    - Database connection status
+    - PostgreSQL version
 
 2. `GET /api/admin/monitoring/database/tables`
-   - Table sizes and row counts
+    - Table sizes and row counts
 
 3. `GET /api/admin/monitoring/database/indexes`
-   - Index usage statistics
-   - Unused indexes
+    - Index usage statistics
+    - Unused indexes
 
 4. `GET /api/admin/monitoring/database/slow-queries`
-   - Application-tracked slow queries
-   - Pagination support
+    - Application-tracked slow queries
+    - Pagination support
 
 5. `GET /api/admin/monitoring/database/pg-slow-queries`
-   - PostgreSQL pg_stat_statements queries
+    - PostgreSQL pg_stat_statements queries
 
 6. `POST /api/admin/monitoring/database/analyze`
-   - Run ANALYZE on all tables
+    - Run ANALYZE on all tables
 
 ## Legacy Function Preservation
 
@@ -391,6 +413,7 @@ export async function getGhostScoresLegacy(guildId: string, since?: Date) {
 ```
 
 **Benefits:**
+
 - A/B testing capabilities
 - Gradual rollout options
 - Performance comparison
@@ -399,17 +422,21 @@ export async function getGhostScoresLegacy(guildId: string, since?: Date) {
 ## Testing Strategy
 
 ### Unit Tests
+
 - Pagination utilities: 21 tests passing
 - Channel analytics: 8 tests passing
 - Mock database responses for optimized queries
 
 ### Integration Tests
+
 - Analytics routes: 5 tests passing
 - End-to-end query execution
 - Proper middleware integration
 
 ### Performance Tests
+
 Recommended tests to add:
+
 - Load testing with concurrent requests
 - Query performance benchmarks
 - Cache hit rate monitoring
@@ -417,73 +444,76 @@ Recommended tests to add:
 ## Best Practices Applied
 
 1. **Database-level Aggregation**
-   - Use SQL `GROUP BY`, `COUNT()`, `AVG()`, `SUM()`
-   - Avoid fetching all rows for in-memory processing
+    - Use SQL `GROUP BY`, `COUNT()`, `AVG()`, `SUM()`
+    - Avoid fetching all rows for in-memory processing
 
 2. **Query Limits**
-   - All queries have `LIMIT` clauses
-   - Prevents unbounded result sets
+    - All queries have `LIMIT` clauses
+    - Prevents unbounded result sets
 
 3. **Index Utilization**
-   - Queries designed to use existing indexes
-   - Partial indexes for filtered queries
+    - Queries designed to use existing indexes
+    - Partial indexes for filtered queries
 
 4. **N+1 Query Elimination**
-   - Replaced multiple queries with single queries
-   - Used JOINs and CTEs instead of separate fetches
+    - Replaced multiple queries with single queries
+    - Used JOINs and CTEs instead of separate fetches
 
 5. **Result Set Reduction**
-   - Only select needed columns
-   - Filter at database level, not application level
+    - Only select needed columns
+    - Filter at database level, not application level
 
 6. **Caching**
-   - Redis caching for expensive queries
-   - Appropriate TTLs based on data volatility
+    - Redis caching for expensive queries
+    - Appropriate TTLs based on data volatility
 
 7. **Monitoring**
-   - Slow query logging
-   - Query performance tracking
-   - Admin monitoring endpoints
+    - Slow query logging
+    - Query performance tracking
+    - Admin monitoring endpoints
 
 ## Future Optimizations
 
 Potential improvements:
 
 1. **Materialized Views**
-   - Pre-compute complex analytics
-   - Refresh on schedule or trigger
+    - Pre-compute complex analytics
+    - Refresh on schedule or trigger
 
 2. **Table Partitioning**
-   - Partition large event tables by date
-   - Improve query performance on time-ranges
+    - Partition large event tables by date
+    - Improve query performance on time-ranges
 
 3. **Read Replicas**
-   - Separate read workload from writes
-   - Scale read capacity horizontally
+    - Separate read workload from writes
+    - Scale read capacity horizontally
 
 4. **Connection Pooling**
-   - External pooler like PgBouncer
-   - Better connection management
+    - External pooler like PgBouncer
+    - Better connection management
 
 5. **Query Result Caching**
-   - Cache query results at database level
-   - Reduce repeated query execution
+    - Cache query results at database level
+    - Reduce repeated query execution
 
 ## Maintenance
 
 ### Regular Tasks
 
 **Weekly:**
+
 - Review slow query logs
 - Check cache hit rates
 - Monitor query performance trends
 
 **Monthly:**
+
 - Run `ANALYZE` on all tables
 - Review index usage statistics
 - Check for unused indexes
 
 **Quarterly:**
+
 - Performance benchmarking
 - Review and adjust cache TTLs
 - Evaluate new optimization opportunities

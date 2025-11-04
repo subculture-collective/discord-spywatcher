@@ -7,12 +7,14 @@ This guide explains how to migrate your Discord Spywatcher database from SQLite 
 The application now uses PostgreSQL as the primary database for production deployments. This provides:
 
 ### Standard Benefits
+
 - Better concurrency handling
 - Improved data integrity
 - Enhanced scalability
 - Production-ready features
 
 ### PostgreSQL-Specific Enhancements
+
 - **JSONB Fields**: Flexible metadata storage with efficient querying
 - **Array Types**: Native array support for multi-value fields (clients, roles)
 - **UUID Primary Keys**: Better distribution and security for event models
@@ -25,15 +27,15 @@ The application now uses PostgreSQL as the primary database for production deplo
 ### What Changed in the Schema
 
 1. **Event Models** (PresenceEvent, TypingEvent, MessageEvent, etc.):
-   - IDs changed from `Int` to `String` (UUID)
-   - Added `metadata Json? @db.JsonB` field
-   - Timestamps now use `@db.Timestamptz`
-   - Comma-separated strings converted to arrays
+    - IDs changed from `Int` to `String` (UUID)
+    - Added `metadata Json? @db.JsonB` field
+    - Timestamps now use `@db.Timestamptz`
+    - Comma-separated strings converted to arrays
 
 2. **All Models**:
-   - All timestamps upgraded to timezone-aware
-   - Added strategic indexes for performance
-   - JSONB for all JSON fields
+    - All timestamps upgraded to timezone-aware
+    - Added strategic indexes for performance
+    - JSONB for all JSON fields
 
 For complete PostgreSQL feature documentation, see [POSTGRESQL.md](./POSTGRESQL.md).
 
@@ -42,9 +44,10 @@ For complete PostgreSQL feature documentation, see [POSTGRESQL.md](./POSTGRESQL.
 If you're starting fresh with Docker, no migration is needed. Simply:
 
 1. Start the Docker environment:
-   ```bash
-   docker-compose -f docker-compose.dev.yml up
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml up
+    ```
 
 2. The PostgreSQL database will be initialized automatically with all migrations.
 
@@ -98,6 +101,7 @@ SQLITE_DATABASE_URL="file:./prisma/dev.db" \
 ```
 
 The migration script will:
+
 - Convert integer IDs to UUIDs
 - Transform comma-separated strings to arrays
 - Batch process large datasets (1000 records at a time)
@@ -128,14 +132,16 @@ If your existing data is test data or not critical:
 If your existing data is test data or not critical:
 
 1. Backup your existing data (optional):
-   ```bash
-   cp backend/prisma/dev.db backend/prisma/dev.db.backup
-   ```
+
+    ```bash
+    cp backend/prisma/dev.db backend/prisma/dev.db.backup
+    ```
 
 2. Start with Docker:
-   ```bash
-   docker-compose -f docker-compose.dev.yml up
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml up
+    ```
 
 3. Your data will be in the new PostgreSQL database (empty initially).
 
@@ -158,27 +164,29 @@ npx prisma studio
 #### Step 2: Transform and Import to PostgreSQL
 
 1. Start PostgreSQL with Docker:
-   ```bash
-   docker-compose -f docker-compose.dev.yml up postgres -d
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml up postgres -d
+    ```
 
 2. Run migrations on PostgreSQL:
-   ```bash
-   docker-compose -f docker-compose.dev.yml exec postgres psql -U spywatcher -d spywatcher
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml exec postgres psql -U spywatcher -d spywatcher
+    ```
 
 3. Transform SQLite SQL to PostgreSQL format:
-   
-   SQLite and PostgreSQL have syntax differences. You'll need to:
-   - Remove SQLite-specific syntax
-   - Adjust data types
-   - Handle AUTOINCREMENT → SERIAL/BIGSERIAL conversions
-   - Fix boolean values (0/1 → false/true)
+
+    SQLite and PostgreSQL have syntax differences. You'll need to:
+    - Remove SQLite-specific syntax
+    - Adjust data types
+    - Handle AUTOINCREMENT → SERIAL/BIGSERIAL conversions
+    - Fix boolean values (0/1 → false/true)
 
 4. Import the transformed data:
-   ```bash
-   docker-compose -f docker-compose.dev.yml exec -T postgres psql -U spywatcher -d spywatcher < postgres_import.sql
-   ```
+    ```bash
+    docker-compose -f docker-compose.dev.yml exec -T postgres psql -U spywatcher -d spywatcher < postgres_import.sql
+    ```
 
 #### Step 3: Verify Data
 
@@ -226,44 +234,54 @@ pgloader migrate.load
 The schema has been significantly enhanced for PostgreSQL:
 
 ### Event Models (Breaking Changes)
+
 All event models have been updated with PostgreSQL-specific features:
 
 #### ID Fields
+
 - **Before**: `id Int @id @default(autoincrement())`
 - **After**: `id String @id @default(uuid())`
 - **Impact**: IDs are now UUIDs instead of sequential integers
 
 #### Array Fields
-- **PresenceEvent.clients**: 
-  - Before: `String` (comma-separated: "desktop,web")
-  - After: `String[]` (array: ["desktop", "web"])
+
+- **PresenceEvent.clients**:
+    - Before: `String` (comma-separated: "desktop,web")
+    - After: `String[]` (array: ["desktop", "web"])
 - **RoleChangeEvent.addedRoles**:
-  - Before: `String` (comma-separated role IDs)
-  - After: `String[]` (array of role IDs)
+    - Before: `String` (comma-separated role IDs)
+    - After: `String[]` (array of role IDs)
 
 #### Metadata Fields
+
 All event models now include:
+
 ```prisma
 metadata Json? @db.JsonB
 ```
 
 #### Timestamp Fields
+
 - **Before**: `createdAt DateTime @default(now())`
 - **After**: `createdAt DateTime @default(now()) @db.Timestamptz`
 - **Impact**: Timezone-aware timestamps
 
 ### Guild Model
+
 - **SQLite**: `permissions Int`
 - **PostgreSQL**: `permissions BigInt`
 - **Reason**: Discord permission values can exceed 32-bit integer limits
 
 ### User and Security Models
+
 - All timestamps upgraded to `@db.Timestamptz`
 - All JSON fields upgraded to `@db.JsonB`
 - Additional indexes added for performance
 
 ### Full-Text Search
+
 MessageEvent now supports full-text search via:
+
 - Generated `content_search` tsvector column
 - GIN index for efficient searches
 - Setup via `npm run db:fulltext`
@@ -279,12 +297,12 @@ If your code directly accesses ID fields as integers, update to handle UUIDs:
 ```typescript
 // Before
 const event = await db.presenceEvent.findUnique({
-  where: { id: 123 }
+    where: { id: 123 },
 });
 
 // After
 const event = await db.presenceEvent.findUnique({
-  where: { id: "550e8400-e29b-41d4-a716-446655440000" }
+    where: { id: '550e8400-e29b-41d4-a716-446655440000' },
 });
 ```
 
@@ -303,25 +321,25 @@ const clients = event.clients; // Already an array
 ```typescript
 // Store flexible data in metadata
 await db.presenceEvent.create({
-  data: {
-    userId: "123",
-    username: "user",
-    clients: ["desktop", "mobile"],
-    metadata: {
-      status: "online",
-      customField: "value"
-    }
-  }
+    data: {
+        userId: '123',
+        username: 'user',
+        clients: ['desktop', 'mobile'],
+        metadata: {
+            status: 'online',
+            customField: 'value',
+        },
+    },
 });
 
 // Query JSONB data
 const events = await db.presenceEvent.findMany({
-  where: {
-    metadata: {
-      path: ['status'],
-      equals: 'online'
-    }
-  }
+    where: {
+        metadata: {
+            path: ['status'],
+            equals: 'online',
+        },
+    },
 });
 ```
 
@@ -384,6 +402,7 @@ For production deployment with PostgreSQL:
 ### 1. Set up PostgreSQL Database
 
 Use a managed PostgreSQL service:
+
 - AWS RDS
 - Google Cloud SQL
 - Azure Database for PostgreSQL
@@ -451,11 +470,13 @@ docker-compose -f docker-compose.prod.yml exec backend npx prisma studio
 ### Connection Issues
 
 **Problem**: Cannot connect to PostgreSQL
+
 ```
 Error: P1001: Can't reach database server at `postgres:5432`
 ```
 
-**Solution**: 
+**Solution**:
+
 - Ensure PostgreSQL container is running: `docker-compose -f docker-compose.dev.yml ps`
 - Check network connectivity between containers
 - Verify DATABASE_URL is correct
@@ -463,11 +484,13 @@ Error: P1001: Can't reach database server at `postgres:5432`
 ### Migration Failures
 
 **Problem**: Migration fails with schema mismatch
+
 ```
 Error: P3009: migrate found failed migrations
 ```
 
 **Solution**:
+
 ```bash
 # Reset migrations (WARNING: This will delete all data)
 docker-compose -f docker-compose.dev.yml exec backend npx prisma migrate reset
@@ -479,30 +502,34 @@ docker-compose -f docker-compose.dev.yml exec backend npx prisma migrate resolve
 ### Permission Errors
 
 **Problem**: Permission denied for PostgreSQL
+
 ```
 Error: FATAL: password authentication failed for user "spywatcher"
 ```
 
 **Solution**:
+
 - Check DB_PASSWORD in `.env` matches PostgreSQL configuration
 - Recreate PostgreSQL container with correct credentials:
-  ```bash
-  docker-compose -f docker-compose.dev.yml down -v
-  docker-compose -f docker-compose.dev.yml up postgres -d
-  ```
+    ```bash
+    docker-compose -f docker-compose.dev.yml down -v
+    docker-compose -f docker-compose.dev.yml up postgres -d
+    ```
 
 ### Data Type Issues
 
 **Problem**: UUID type errors
+
 ```
 Type 'number' is not assignable to type 'string'
 ```
 
 **Solution**:
 Update code to handle UUID strings instead of integers:
+
 ```typescript
 // Use UUID strings
-const id = "550e8400-e29b-41d4-a716-446655440000";
+const id = '550e8400-e29b-41d4-a716-446655440000';
 
 // Generate new UUIDs
 import { randomUUID } from 'crypto';
@@ -510,12 +537,14 @@ const newId = randomUUID();
 ```
 
 **Problem**: Array field errors
+
 ```
 Cannot read property 'split' of undefined
 ```
 
 **Solution**:
 Update code to handle native arrays:
+
 ```typescript
 // Before
 const clients = event.clients.split(',');
@@ -525,15 +554,17 @@ const clients = event.clients; // Already an array
 ```
 
 **Problem**: BigInt serialization errors in JavaScript
+
 ```
 Do not know how to serialize a BigInt
 ```
 
 **Solution**:
 Add BigInt serialization support in your code:
+
 ```javascript
-BigInt.prototype.toJSON = function() {
-  return this.toString();
+BigInt.prototype.toJSON = function () {
+    return this.toString();
 };
 ```
 
@@ -553,15 +584,18 @@ BigInt.prototype.toJSON = function() {
 ## Available Scripts and Tools
 
 ### Migration and Setup
+
 - `npm run db:migrate` - Migrate data from SQLite to PostgreSQL
 - `npm run db:migrate:dry` - Test migration without writing data
 - `npm run db:fulltext` - Setup full-text search on messages
 
 ### Backup and Recovery
+
 - `npm run db:backup` - Create compressed database backup
 - `npm run db:restore <file>` - Restore from backup file
 
 ### Maintenance
+
 - `npm run db:maintenance` - Run routine maintenance tasks
 - `npx prisma studio` - Open visual database browser
 - `npx prisma migrate deploy` - Apply pending migrations
@@ -574,20 +608,22 @@ BigInt.prototype.toJSON = function() {
 - **PostgreSQL Documentation**: https://www.postgresql.org/docs/
 - **Prisma PostgreSQL Guide**: https://www.prisma.io/docs/concepts/database-connectors/postgresql
 - **PostgreSQL Performance Tuning**: https://wiki.postgresql.org/wiki/Performance_Optimization
+
 5. **Update application code**: Ensure your application properly handles BigInt types for Discord permissions
 
 ## Support
 
 For issues or questions about database migration:
+
 - Check this guide and [POSTGRESQL.md](./POSTGRESQL.md)
 - Review script documentation in [scripts/README.md](./scripts/README.md)
 - Check [DOCKER.md](./DOCKER.md) for Docker-specific troubleshooting
 - Review [Prisma Migration Docs](https://www.prisma.io/docs/concepts/components/prisma-migrate)
 - Open an issue on GitHub with:
-  - Migration script output
-  - Error messages
-  - Database versions (SQLite and PostgreSQL)
-  - Row counts before and after migration
+    - Migration script output
+    - Error messages
+    - Database versions (SQLite and PostgreSQL)
+    - Row counts before and after migration
 
 ## Migration Checklist
 

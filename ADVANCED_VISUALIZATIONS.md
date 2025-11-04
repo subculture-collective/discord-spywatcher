@@ -7,68 +7,74 @@ The Discord Spywatcher application now includes advanced visualization capabilit
 ## Features
 
 ### 1. Network/Relationship Graph
+
 - **Technology**: Vis-network
 - **Purpose**: Visualizes relationships between users and channels as an interactive network
 - **Features**:
-  - Interactive node dragging and zooming
-  - Node size represents activity level (suspicion + ghost scores)
-  - Color-coded nodes (users in blue, channels in green)
-  - Hover tooltips showing detailed information
-  - Physics-based layout for natural clustering
-  - Real-time updates
+    - Interactive node dragging and zooming
+    - Node size represents activity level (suspicion + ghost scores)
+    - Color-coded nodes (users in blue, channels in green)
+    - Hover tooltips showing detailed information
+    - Physics-based layout for natural clustering
+    - Real-time updates
 
 ### 2. Sankey Flow Diagram
+
 - **Technology**: D3.js with d3-sankey
 - **Purpose**: Shows the flow of interactions from users to channels
 - **Features**:
-  - Flow width represents interaction volume
-  - Left side shows users, right side shows channels
-  - Color-coded by source entity type
-  - Hover tooltips with interaction counts
-  - Smooth, animated transitions
-  - Responsive layout
+    - Flow width represents interaction volume
+    - Left side shows users, right side shows channels
+    - Color-coded by source entity type
+    - Hover tooltips with interaction counts
+    - Smooth, animated transitions
+    - Responsive layout
 
 ### 3. Chord Diagram
+
 - **Technology**: D3.js chord layout
 - **Purpose**: Displays circular interaction patterns between all entities
 - **Features**:
-  - Circular layout showing all relationships
-  - Arc width represents total interactions
-  - Ribbons show interaction strength between entities
-  - Color-coded by entity
-  - Interactive hover effects
-  - Compact visualization for complex relationships
+    - Circular layout showing all relationships
+    - Arc width represents total interactions
+    - Ribbons show interaction strength between entities
+    - Color-coded by entity
+    - Interactive hover effects
+    - Compact visualization for complex relationships
 
 ### 4. Interactive Filtering
+
 - **Purpose**: Real-time data filtering and exploration
 - **Features**:
-  - Suspicion score range filter (0-100)
-  - Ghost score range filter (0-100)
-  - Minimum interactions threshold
-  - User search by name
-  - Channel search by name
-  - Active filter count indicator
-  - One-click filter reset
-  - Filters apply to all visualizations
+    - Suspicion score range filter (0-100)
+    - Ghost score range filter (0-100)
+    - Minimum interactions threshold
+    - User search by name
+    - Channel search by name
+    - Active filter count indicator
+    - One-click filter reset
+    - Filters apply to all visualizations
 
 ### 5. Chart Export
+
 - **Technology**: html2canvas
 - **Purpose**: Export visualizations as PNG images
 - **Features**:
-  - High-quality 2x resolution export
-  - Automatic filename with timestamp
-  - Dark theme preserved in export
-  - One-click download
-  - Works with all chart types
+    - High-quality 2x resolution export
+    - Automatic filename with timestamp
+    - Dark theme preserved in export
+    - One-click download
+    - Works with all chart types
 
 ### 6. Drill-Down Panel
+
 - **Purpose**: Detailed entity information modal
 - **Features**:
-  - User and channel detail views
-  - Metrics display (suspicion, ghost scores, message counts)
-  - Recent activity timeline
-  - Smooth animations
-  - Click outside to close
+    - User and channel detail views
+    - Metrics display (suspicion, ghost scores, message counts)
+    - Recent activity timeline
+    - Smooth animations
+    - Click outside to close
 
 ## Usage
 
@@ -81,6 +87,7 @@ The Discord Spywatcher application now includes advanced visualization capabilit
 ### Switching Between Visualizations
 
 Use the view toggle buttons at the top of the page:
+
 - **Network Graph**: Best for understanding relationships
 - **Sankey Flow**: Best for tracking interaction flows
 - **Chord Diagram**: Best for comparing all interactions
@@ -105,13 +112,13 @@ Use the view toggle buttons at the top of the page:
 
 ```json
 {
-  "d3": "^7.9.0",
-  "d3-sankey": "^0.12.3",
-  "@types/d3": "^7.4.3",
-  "@types/d3-sankey": "^0.12.4",
-  "vis-network": "^10.0.2",
-  "vis-data": "^8.0.3",
-  "html2canvas": "^1.4.1"
+    "d3": "^7.9.0",
+    "d3-sankey": "^0.12.3",
+    "@types/d3": "^7.4.3",
+    "@types/d3-sankey": "^0.12.4",
+    "vis-network": "^10.0.2",
+    "vis-data": "^8.0.3",
+    "html2canvas": "^1.4.1"
 }
 ```
 
@@ -249,6 +256,7 @@ Potential additions for future versions:
 ## Support
 
 For issues or questions:
+
 - Check existing GitHub issues
 - Review the main [README.md](./README.md)
 - Consult [CONTRIBUTING.md](./CONTRIBUTING.md)

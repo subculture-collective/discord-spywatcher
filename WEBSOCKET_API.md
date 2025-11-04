@@ -21,39 +21,42 @@ All WebSocket connections require JWT authentication. Include your access token 
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3001', {
-  auth: {
-    token: 'your-jwt-access-token'
-  },
-  transports: ['websocket', 'polling']
+    auth: {
+        token: 'your-jwt-access-token',
+    },
+    transports: ['websocket', 'polling'],
 });
 ```
 
 ### Connection Events
 
 #### `connect`
+
 Fired when the client successfully connects to the server.
 
 ```typescript
 socket.on('connect', () => {
-  console.log('Connected to WebSocket server');
+    console.log('Connected to WebSocket server');
 });
 ```
 
 #### `disconnect`
+
 Fired when the client disconnects from the server.
 
 ```typescript
 socket.on('disconnect', (reason) => {
-  console.log('Disconnected:', reason);
+    console.log('Disconnected:', reason);
 });
 ```
 
 #### `connect_error`
+
 Fired when a connection error occurs (e.g., authentication failure).
 
 ```typescript
 socket.on('connect_error', (error) => {
-  console.error('Connection error:', error.message);
+    console.error('Connection error:', error.message);
 });
 ```
 
@@ -70,6 +73,7 @@ socket.emit('subscribe:analytics', guildId);
 ```
 
 **Parameters:**
+
 - `guildId` (string): The Discord guild ID to subscribe to
 
 #### Unsubscribe
@@ -79,6 +83,7 @@ socket.emit('unsubscribe:analytics', guildId);
 ```
 
 **Parameters:**
+
 - `guildId` (string): The Discord guild ID to unsubscribe from
 
 ### Guild Events Room
@@ -92,6 +97,7 @@ socket.emit('subscribe:guild', guildId);
 ```
 
 **Parameters:**
+
 - `guildId` (string): The Discord guild ID to subscribe to
 
 #### Unsubscribe
@@ -101,6 +107,7 @@ socket.emit('unsubscribe:guild', guildId);
 ```
 
 **Parameters:**
+
 - `guildId` (string): The Discord guild ID to unsubscribe from
 
 ## Server Events
@@ -112,37 +119,39 @@ socket.emit('unsubscribe:guild', guildId);
 Receives throttled analytics updates (maximum once per 30 seconds per guild).
 
 **Event Data:**
+
 ```typescript
 {
-  guildId: string;
-  data: {
-    ghosts: Array<{
-      userId: string;
-      username: string;
-      ghostScore: number;
-    }>;
-    lurkers: Array<{
-      userId: string;
-      username: string;
-      lurkerScore: number;
-      channelCount: number;
-    }>;
-    channelDiversity: Array<{
-      userId: string;
-      username: string;
-      channelCount: number;
-    }>;
+    guildId: string;
+    data: {
+        ghosts: Array<{
+            userId: string;
+            username: string;
+            ghostScore: number;
+        }>;
+        lurkers: Array<{
+            userId: string;
+            username: string;
+            lurkerScore: number;
+            channelCount: number;
+        }>;
+        channelDiversity: Array<{
+            userId: string;
+            username: string;
+            channelCount: number;
+        }>;
+        timestamp: string;
+    }
     timestamp: string;
-  };
-  timestamp: string;
 }
 ```
 
 **Example:**
+
 ```typescript
 socket.on('analytics:update', (data) => {
-  console.log('Analytics update:', data);
-  // Update your dashboard with new analytics
+    console.log('Analytics update:', data);
+    // Update your dashboard with new analytics
 });
 ```
 
@@ -153,20 +162,22 @@ socket.on('analytics:update', (data) => {
 Receives real-time notifications when a new message is created in the guild.
 
 **Event Data:**
+
 ```typescript
 {
-  userId: string;
-  username: string;
-  channelId: string;
-  channelName: string;
-  timestamp: string; // ISO 8601 format
+    userId: string;
+    username: string;
+    channelId: string;
+    channelName: string;
+    timestamp: string; // ISO 8601 format
 }
 ```
 
 **Example:**
+
 ```typescript
 socket.on('message:new', (data) => {
-  console.log(`New message from ${data.username} in #${data.channelName}`);
+    console.log(`New message from ${data.username} in #${data.channelName}`);
 });
 ```
 
@@ -175,6 +186,7 @@ socket.on('message:new', (data) => {
 Receives alerts when a user is detected on multiple clients simultaneously.
 
 **Event Data:**
+
 ```typescript
 {
   userId: string;
@@ -185,9 +197,12 @@ Receives alerts when a user is detected on multiple clients simultaneously.
 ```
 
 **Example:**
+
 ```typescript
 socket.on('alert:multiClient', (data) => {
-  console.warn(`Multi-client detected: ${data.username} on ${data.platforms.join(', ')}`);
+    console.warn(
+        `Multi-client detected: ${data.username} on ${data.platforms.join(', ')}`
+    );
 });
 ```
 
@@ -196,19 +211,21 @@ socket.on('alert:multiClient', (data) => {
 Receives real-time presence updates for guild members.
 
 **Event Data:**
+
 ```typescript
 {
-  userId: string;
-  username: string;
-  status: string; // 'online', 'idle', 'dnd', 'offline'
-  timestamp: string; // ISO 8601 format
+    userId: string;
+    username: string;
+    status: string; // 'online', 'idle', 'dnd', 'offline'
+    timestamp: string; // ISO 8601 format
 }
 ```
 
 **Example:**
+
 ```typescript
 socket.on('presence:update', (data) => {
-  console.log(`${data.username} is now ${data.status}`);
+    console.log(`${data.username} is now ${data.status}`);
 });
 ```
 
@@ -217,6 +234,7 @@ socket.on('presence:update', (data) => {
 Receives notifications when a user's roles change in the guild.
 
 **Event Data:**
+
 ```typescript
 {
   userId: string;
@@ -227,9 +245,10 @@ Receives notifications when a user's roles change in the guild.
 ```
 
 **Example:**
+
 ```typescript
 socket.on('role:change', (data) => {
-  console.log(`${data.username} gained roles: ${data.addedRoles.join(', ')}`);
+    console.log(`${data.username} gained roles: ${data.addedRoles.join(', ')}`);
 });
 ```
 
@@ -238,19 +257,23 @@ socket.on('role:change', (data) => {
 Receives notifications when a new user joins the guild.
 
 **Event Data:**
+
 ```typescript
 {
-  userId: string;
-  username: string;
-  accountAgeDays: number; // Age of the Discord account in days
-  timestamp: string; // ISO 8601 format
+    userId: string;
+    username: string;
+    accountAgeDays: number; // Age of the Discord account in days
+    timestamp: string; // ISO 8601 format
 }
 ```
 
 **Example:**
+
 ```typescript
 socket.on('user:join', (data) => {
-  console.log(`${data.username} joined (account age: ${data.accountAgeDays} days)`);
+    console.log(
+        `${data.username} joined (account age: ${data.accountAgeDays} days)`
+    );
 });
 ```
 
@@ -261,16 +284,18 @@ socket.on('user:join', (data) => {
 Receives error messages from the server.
 
 **Event Data:**
+
 ```typescript
 {
-  message: string;
+    message: string;
 }
 ```
 
 **Example:**
+
 ```typescript
 socket.on('error', (data) => {
-  console.error('Server error:', data.message);
+    console.error('Server error:', data.message);
 });
 ```
 
@@ -285,11 +310,11 @@ socket.on('error', (data) => {
 ```typescript
 // React example
 useEffect(() => {
-  const socket = socketService.connect();
-  
-  return () => {
-    socketService.disconnect();
-  };
+    const socket = socketService.connect();
+
+    return () => {
+        socketService.disconnect();
+    };
 }, []);
 ```
 
@@ -301,13 +326,13 @@ useEffect(() => {
 
 ```typescript
 useEffect(() => {
-  socketService.subscribeToGuild(guildId);
-  socketService.subscribeToAnalytics(guildId, handleAnalyticsUpdate);
-  
-  return () => {
-    socketService.unsubscribeFromGuild(guildId);
-    socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
-  };
+    socketService.subscribeToGuild(guildId);
+    socketService.subscribeToAnalytics(guildId, handleAnalyticsUpdate);
+
+    return () => {
+        socketService.unsubscribeFromGuild(guildId);
+        socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
+    };
 }, [guildId]);
 ```
 
@@ -320,7 +345,7 @@ useEffect(() => {
 ```typescript
 // Good practice
 const handleNewMessage = (data) => {
-  console.log('New message:', data);
+    console.log('New message:', data);
 };
 
 socket.on('message:new', handleNewMessage);
@@ -353,45 +378,45 @@ The server uses a Redis adapter for horizontal scaling, allowing multiple server
 import { io, Socket } from 'socket.io-client';
 
 class SocketService {
-  private socket: Socket | null = null;
+    private socket: Socket | null = null;
 
-  connect(token: string): Socket {
-    if (this.socket?.connected) {
-      return this.socket;
+    connect(token: string): Socket {
+        if (this.socket?.connected) {
+            return this.socket;
+        }
+
+        this.socket = io('http://localhost:3001', {
+            auth: { token },
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+        });
+
+        this.socket.on('connect', () => {
+            console.log('WebSocket connected');
+        });
+
+        this.socket.on('disconnect', () => {
+            console.log('WebSocket disconnected');
+        });
+
+        return this.socket;
     }
 
-    this.socket = io('http://localhost:3001', {
-      auth: { token },
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
+    subscribeToAnalytics(guildId: string, callback: (data: any) => void) {
+        if (!this.socket) return;
 
-    this.socket.on('connect', () => {
-      console.log('WebSocket connected');
-    });
-
-    this.socket.on('disconnect', () => {
-      console.log('WebSocket disconnected');
-    });
-
-    return this.socket;
-  }
-
-  subscribeToAnalytics(guildId: string, callback: (data: any) => void) {
-    if (!this.socket) return;
-    
-    this.socket.emit('subscribe:analytics', guildId);
-    this.socket.on('analytics:update', callback);
-  }
-
-  disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+        this.socket.emit('subscribe:analytics', guildId);
+        this.socket.on('analytics:update', callback);
     }
-  }
+
+    disconnect() {
+        if (this.socket) {
+            this.socket.disconnect();
+            this.socket = null;
+        }
+    }
 }
 
 export const socketService = new SocketService();
@@ -452,7 +477,7 @@ export function LiveAnalyticsDashboard({ guildId, token }) {
           </ul>
         </div>
       )}
-      
+
       <h3>Recent Messages</h3>
       <ul>
         {recentMessages.map((msg, i) => (
@@ -491,21 +516,25 @@ export function LiveAnalyticsDashboard({ guildId, token }) {
 ### Common Issues
 
 #### Connection Refused
+
 - Verify the WebSocket server is running
 - Check that the port (3001) is not blocked by firewall
 - Ensure CORS settings allow your origin
 
 #### Authentication Failed
+
 - Verify your JWT token is valid and not expired
 - Check that the token includes required fields (discordId, access, role)
 - Ensure the token is passed in the auth object during connection
 
 #### Events Not Received
+
 - Confirm you've subscribed to the correct room
 - Check that event listeners are attached before events fire
 - Verify the guild ID is correct
 
 #### Multiple Connections
+
 - Use a singleton pattern to ensure only one connection
 - Check for duplicate connection attempts in your code
 - Implement proper cleanup in component unmount

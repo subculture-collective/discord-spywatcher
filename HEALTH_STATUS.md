@@ -26,8 +26,8 @@ Checks if the service is running. Always returns 200 if the server is up.
 
 ```json
 {
-  "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "status": "ok",
+    "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -45,13 +45,13 @@ Checks if the service is ready to handle requests by verifying:
 
 ```json
 {
-  "status": "healthy",
-  "checks": {
-    "database": true,
-    "redis": true,
-    "discord": true
-  },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "status": "healthy",
+    "checks": {
+        "database": true,
+        "redis": true,
+        "discord": true
+    },
+    "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -59,13 +59,13 @@ Checks if the service is ready to handle requests by verifying:
 
 ```json
 {
-  "status": "unhealthy",
-  "checks": {
-    "database": false,
-    "redis": true,
-    "discord": true
-  },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "status": "unhealthy",
+    "checks": {
+        "database": false,
+        "redis": true,
+        "discord": true
+    },
+    "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -81,32 +81,32 @@ Returns current system status, uptime statistics, and active incidents.
 
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "services": {
-    "database": {
-      "status": "operational",
-      "latency": 10
+    "status": "healthy",
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "services": {
+        "database": {
+            "status": "operational",
+            "latency": 10
+        },
+        "redis": {
+            "status": "operational",
+            "latency": 5
+        },
+        "discord": {
+            "status": "operational",
+            "latency": 50
+        }
     },
-    "redis": {
-      "status": "operational",
-      "latency": 5
+    "uptime": {
+        "24h": 99.9,
+        "7d": 99.5,
+        "30d": 99.0
     },
-    "discord": {
-      "status": "operational",
-      "latency": 50
+    "incidents": {
+        "active": 0,
+        "critical": 0,
+        "major": 0
     }
-  },
-  "uptime": {
-    "24h": 99.9,
-    "7d": 99.5,
-    "30d": 99.0
-  },
-  "incidents": {
-    "active": 0,
-    "critical": 0,
-    "major": 0
-  }
 }
 ```
 
@@ -131,30 +131,30 @@ Returns historical status data for uptime charts.
 
 ```json
 {
-  "period": {
-    "hours": 24,
-    "since": "2024-01-01T00:00:00.000Z"
-  },
-  "uptime": 99.9,
-  "checks": 288,
-  "avgLatency": {
-    "database": 12.5,
-    "redis": 6.2,
-    "discord": 52.1
-  },
-  "history": [
-    {
-      "timestamp": "2024-01-01T00:00:00.000Z",
-      "status": "healthy",
-      "overall": true,
-      "database": true,
-      "databaseLatency": 10,
-      "redis": true,
-      "redisLatency": 5,
-      "discord": true,
-      "discordLatency": 50
-    }
-  ]
+    "period": {
+        "hours": 24,
+        "since": "2024-01-01T00:00:00.000Z"
+    },
+    "uptime": 99.9,
+    "checks": 288,
+    "avgLatency": {
+        "database": 12.5,
+        "redis": 6.2,
+        "discord": 52.1
+    },
+    "history": [
+        {
+            "timestamp": "2024-01-01T00:00:00.000Z",
+            "status": "healthy",
+            "overall": true,
+            "database": true,
+            "databaseLatency": 10,
+            "redis": true,
+            "redisLatency": 5,
+            "discord": true,
+            "discordLatency": 50
+        }
+    ]
 }
 ```
 
@@ -173,27 +173,27 @@ Returns list of incidents.
 
 ```json
 {
-  "incidents": [
-    {
-      "id": "1",
-      "title": "Database Latency Issues",
-      "description": "Investigating high database latency",
-      "status": "INVESTIGATING",
-      "severity": "MAJOR",
-      "startedAt": "2024-01-01T00:00:00.000Z",
-      "resolvedAt": null,
-      "affectedServices": ["database"],
-      "updates": [
+    "incidents": [
         {
-          "id": "u1",
-          "message": "We are investigating the issue",
-          "status": "INVESTIGATING",
-          "createdAt": "2024-01-01T00:05:00.000Z"
+            "id": "1",
+            "title": "Database Latency Issues",
+            "description": "Investigating high database latency",
+            "status": "INVESTIGATING",
+            "severity": "MAJOR",
+            "startedAt": "2024-01-01T00:00:00.000Z",
+            "resolvedAt": null,
+            "affectedServices": ["database"],
+            "updates": [
+                {
+                    "id": "u1",
+                    "message": "We are investigating the issue",
+                    "status": "INVESTIGATING",
+                    "createdAt": "2024-01-01T00:05:00.000Z"
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "count": 1
+    ],
+    "count": 1
 }
 ```
 
@@ -228,12 +228,12 @@ All admin endpoints require authentication and admin role.
 
 ```json
 {
-  "title": "Database Outage",
-  "description": "Database is experiencing connectivity issues",
-  "severity": "CRITICAL",
-  "status": "INVESTIGATING",
-  "affectedServices": ["database"],
-  "initialUpdate": "We are investigating the issue"
+    "title": "Database Outage",
+    "description": "Database is experiencing connectivity issues",
+    "severity": "CRITICAL",
+    "status": "INVESTIGATING",
+    "affectedServices": ["database"],
+    "initialUpdate": "We are investigating the issue"
 }
 ```
 
@@ -257,12 +257,12 @@ All admin endpoints require authentication and admin role.
 
 ```json
 {
-  "title": "Updated Title",
-  "description": "Updated description",
-  "severity": "MAJOR",
-  "status": "IDENTIFIED",
-  "affectedServices": ["database", "api"],
-  "updateMessage": "We have identified the root cause"
+    "title": "Updated Title",
+    "description": "Updated description",
+    "severity": "MAJOR",
+    "status": "IDENTIFIED",
+    "affectedServices": ["database", "api"],
+    "updateMessage": "We have identified the root cause"
 }
 ```
 
@@ -279,8 +279,8 @@ All admin endpoints require authentication and admin role.
 
 ```json
 {
-  "message": "Issue has been resolved",
-  "status": "RESOLVED"
+    "message": "Issue has been resolved",
+    "status": "RESOLVED"
 }
 ```
 
@@ -403,19 +403,19 @@ No additional environment variables required. The feature uses existing database
 
 ```yaml
 livenessProbe:
-  httpGet:
-    path: /health/live
-    port: 3001
-  initialDelaySeconds: 30
-  periodSeconds: 10
+    httpGet:
+        path: /health/live
+        port: 3001
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
 readinessProbe:
-  httpGet:
-    path: /health/ready
-    port: 3001
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  failureThreshold: 3
+    httpGet:
+        path: /health/ready
+        port: 3001
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    failureThreshold: 3
 ```
 
 ### Docker Health Checks
@@ -483,14 +483,14 @@ The existing `/metrics` endpoint includes system health metrics. You can add ale
   expr: (healthy_checks / total_checks) < 0.95
   for: 5m
   annotations:
-    summary: "Uptime below 95% in last 24 hours"
+      summary: 'Uptime below 95% in last 24 hours'
 
 # Alert on high latency
 - alert: HighDatabaseLatency
   expr: avg_database_latency_ms > 100
   for: 10m
   annotations:
-    summary: "Database latency above 100ms"
+      summary: 'Database latency above 100ms'
 ```
 
 ## Best Practices

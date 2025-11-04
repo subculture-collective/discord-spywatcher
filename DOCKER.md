@@ -11,48 +11,55 @@ This guide explains how to run the Discord Spywatcher application using Docker a
 ## Quick Start (Development)
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/subculture-collective/discord-spywatcher.git
-   cd discord-spywatcher
-   ```
+
+    ```bash
+    git clone https://github.com/subculture-collective/discord-spywatcher.git
+    cd discord-spywatcher
+    ```
 
 2. **Create environment file**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and fill in your Discord credentials and other required values.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Edit `.env` and fill in your Discord credentials and other required values.
 
 3. **Start the development environment**
-   ```bash
-   docker-compose -f docker-compose.dev.yml up
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml up
+    ```
 
 4. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3001
-   - PostgreSQL: localhost:5432
+    - Frontend: http://localhost:5173
+    - Backend API: http://localhost:3001
+    - PostgreSQL: localhost:5432
 
 ## Environment Setup
 
 ### Development Environment
 
 The development environment includes:
+
 - **PostgreSQL 15**: Database with persistent volumes
 - **Backend**: Node.js API with hot reload
 - **Frontend**: Vite dev server with hot module replacement
 
 **Start development environment:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml up
 ```
 
 **Stop development environment:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml down
 ```
 
 **Stop and remove volumes (clean start):**
+
 ```bash
 docker-compose -f docker-compose.dev.yml down -v
 ```
@@ -60,22 +67,26 @@ docker-compose -f docker-compose.dev.yml down -v
 ### Production Environment
 
 The production environment includes:
+
 - **PostgreSQL 15**: Production database
 - **Backend**: Optimized Node.js API
 - **Frontend**: Nginx serving static files
 - **Nginx**: Reverse proxy with SSL support
 
 **Build and start production environment:**
+
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
 **View logs:**
+
 ```bash
 docker-compose -f docker-compose.prod.yml logs -f
 ```
 
 **Stop production environment:**
+
 ```bash
 docker-compose -f docker-compose.prod.yml down
 ```
@@ -85,6 +96,7 @@ docker-compose -f docker-compose.prod.yml down
 The testing environment runs all tests in isolated containers:
 
 **Run all tests:**
+
 ```bash
 docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ```
@@ -94,16 +106,19 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ### Building Images
 
 **Build all images:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml build
 ```
 
 **Build specific service:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml build backend
 ```
 
 **Build without cache:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml build --no-cache
 ```
@@ -111,26 +126,31 @@ docker-compose -f docker-compose.dev.yml build --no-cache
 ### Managing Containers
 
 **Start services in background:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml up -d
 ```
 
 **View running containers:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml ps
 ```
 
 **View logs:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml logs -f [service_name]
 ```
 
 **Restart a service:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml restart backend
 ```
 
 **Execute commands in a container:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend sh
 ```
@@ -138,31 +158,37 @@ docker-compose -f docker-compose.dev.yml exec backend sh
 ### Database Management
 
 **Run Prisma migrations:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npx prisma migrate dev
 ```
 
 **Generate Prisma Client:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npx prisma generate
 ```
 
 **Open Prisma Studio:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npx prisma studio
 ```
 
 **Access PostgreSQL CLI:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec postgres psql -U spywatcher -d spywatcher
 ```
 
 **Backup database:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec postgres pg_dump -U spywatcher spywatcher > backup.sql
 ```
 
 **Restore database:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec -T postgres psql -U spywatcher -d spywatcher < backup.sql
 ```
@@ -172,12 +198,14 @@ docker-compose -f docker-compose.dev.yml exec -T postgres psql -U spywatcher -d 
 ### Hot Reload
 
 Both frontend and backend support hot reload in development mode:
+
 - **Backend**: Changes to `.ts` files automatically restart the server
 - **Frontend**: Changes are reflected instantly via Vite HMR
 
 ### Installing New Dependencies
 
 **Backend:**
+
 ```bash
 # Stop containers
 docker-compose -f docker-compose.dev.yml down
@@ -193,6 +221,7 @@ docker-compose -f docker-compose.dev.yml up
 ```
 
 **Frontend:**
+
 ```bash
 # Stop containers
 docker-compose -f docker-compose.dev.yml down
@@ -210,17 +239,20 @@ docker-compose -f docker-compose.dev.yml up
 ### Running Backend Tests
 
 **Run all backend tests:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npm test
 ```
 
 **Run specific test suite:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npm run test:unit
 docker-compose -f docker-compose.dev.yml exec backend npm run test:integration
 ```
 
 **Run tests with coverage:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec backend npm run test:coverage
 ```
@@ -228,11 +260,13 @@ docker-compose -f docker-compose.dev.yml exec backend npm run test:coverage
 ### Running Frontend Tests
 
 **Run all frontend tests:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec frontend npm test
 ```
 
 **Run E2E tests:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml exec frontend npm run test:e2e
 ```
@@ -242,12 +276,14 @@ docker-compose -f docker-compose.dev.yml exec frontend npm run test:e2e
 ### Image Optimization
 
 Production images are optimized using:
+
 - Multi-stage builds
 - Layer caching
 - Minimal base images (Alpine Linux)
 - Non-root user execution
 
 **Check image sizes:**
+
 ```bash
 docker images | grep spywatcher
 ```
@@ -255,11 +291,13 @@ docker images | grep spywatcher
 ### Health Checks
 
 All services include health checks:
+
 - **Backend**: `GET /api/health`
 - **Frontend**: `GET /health`
 - **PostgreSQL**: `pg_isready`
 
 **Check service health:**
+
 ```bash
 docker-compose -f docker-compose.prod.yml ps
 ```
@@ -267,6 +305,7 @@ docker-compose -f docker-compose.prod.yml ps
 ### Resource Limits
 
 Production compose file includes resource limits:
+
 - **Backend**: 1 CPU, 512MB RAM
 - **Frontend**: 0.5 CPU, 256MB RAM
 - **PostgreSQL**: 1 CPU, 512MB RAM
@@ -296,13 +335,14 @@ VITE_DISCORD_CLIENT_ID=your_client_id
 For production with SSL:
 
 1. Create SSL certificates directory:
-   ```bash
-   mkdir -p nginx/ssl
-   ```
+
+    ```bash
+    mkdir -p nginx/ssl
+    ```
 
 2. Place your SSL certificates in `nginx/ssl/`:
-   - `nginx/ssl/cert.pem`
-   - `nginx/ssl/key.pem`
+    - `nginx/ssl/cert.pem`
+    - `nginx/ssl/key.pem`
 
 3. Update `nginx/nginx.conf` for SSL configuration
 
@@ -314,32 +354,35 @@ If ports are already in use, modify the port mappings in `docker-compose.*.yml`:
 
 ```yaml
 ports:
-  - "3002:3001"  # Map host port 3002 to container port 3001
+    - '3002:3001' # Map host port 3002 to container port 3001
 ```
 
 ### Container Won't Start
 
 1. Check logs:
-   ```bash
-   docker-compose -f docker-compose.dev.yml logs [service_name]
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml logs [service_name]
+    ```
 
 2. Check container status:
-   ```bash
-   docker-compose -f docker-compose.dev.yml ps
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml ps
+    ```
 
 3. Rebuild without cache:
-   ```bash
-   docker-compose -f docker-compose.dev.yml build --no-cache
-   ```
+    ```bash
+    docker-compose -f docker-compose.dev.yml build --no-cache
+    ```
 
 ### Database Connection Issues
 
 1. Ensure PostgreSQL is healthy:
-   ```bash
-   docker-compose -f docker-compose.dev.yml exec postgres pg_isready -U spywatcher
-   ```
+
+    ```bash
+    docker-compose -f docker-compose.dev.yml exec postgres pg_isready -U spywatcher
+    ```
 
 2. Check DATABASE_URL environment variable
 3. Verify network connectivity between services
@@ -388,6 +431,7 @@ Add to `~/.bashrc` or `~/.zshrc` for persistence.
 ### Layer Caching
 
 The Dockerfiles are optimized for layer caching:
+
 1. Package files are copied first
 2. Dependencies are installed
 3. Source code is copied last
@@ -416,6 +460,7 @@ The repository includes a comprehensive Docker build workflow (`.github/workflow
 5. **Reports image sizes** as PR comments
 
 The workflow runs on:
+
 - Pushes to main/develop branches
 - Pull requests targeting main/develop
 - Changes to Docker-related files
@@ -444,12 +489,14 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ### Image Registry
 
 **Tag and push to Docker Hub:**
+
 ```bash
 docker tag spywatcher-backend:latest your-username/spywatcher-backend:latest
 docker push your-username/spywatcher-backend:latest
 ```
 
 **Tag and push to GitHub Container Registry:**
+
 ```bash
 docker tag spywatcher-backend:latest ghcr.io/your-org/spywatcher-backend:latest
 docker push ghcr.io/your-org/spywatcher-backend:latest
@@ -461,9 +508,9 @@ docker push ghcr.io/your-org/spywatcher-backend:latest
 2. **Use strong passwords** for database and secrets
 3. **Keep base images updated** - Regularly rebuild with latest Alpine/Node images
 4. **Scan for vulnerabilities**:
-   ```bash
-   docker scan spywatcher-backend:latest
-   ```
+    ```bash
+    docker scan spywatcher-backend:latest
+    ```
 5. **Run as non-root user** - All production images use non-root users
 6. **Use secret management** - For production, consider Docker secrets or external secret managers
 
@@ -477,6 +524,7 @@ docker push ghcr.io/your-org/spywatcher-backend:latest
 ## Support
 
 For issues or questions:
+
 - Open an issue on GitHub
 - Check existing issues and discussions
 - Review the main README.md for general setup
