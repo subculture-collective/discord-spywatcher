@@ -11,8 +11,35 @@ import { publicApiLimiter } from '../middleware/rateLimiter';
 const router = express.Router();
 
 /**
- * API Documentation endpoint
- * Returns comprehensive API documentation in JSON format
+ * @openapi
+ * /public/docs:
+ *   get:
+ *     tags:
+ *       - Public API
+ *     summary: Get public API documentation
+ *     description: Returns comprehensive API documentation in JSON format including endpoints, rate limits, and authentication info
+ *     responses:
+ *       200:
+ *         description: API documentation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 version:
+ *                   type: string
+ *                 title:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 authentication:
+ *                   type: object
+ *                 rateLimits:
+ *                   type: object
+ *                 endpoints:
+ *                   type: object
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get('/docs', publicApiLimiter, (_req, res) => {
     const apiDocs = {

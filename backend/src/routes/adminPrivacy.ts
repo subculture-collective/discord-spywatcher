@@ -20,9 +20,47 @@ import {
 const router = Router();
 
 /**
- * Get all audit logs (admin only)
- * GET /api/admin/privacy/audit-logs
- * Supports pagination via ?page=1&limit=50
+ * @openapi
+ * /admin/privacy/audit-logs:
+ *   get:
+ *     tags:
+ *       - Admin Privacy
+ *     summary: Get all audit logs
+ *     description: |
+ *       Retrieve all privacy-related audit logs with pagination.
+ *       Admin only. Supports pagination via query parameters.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/PageQuery'
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 50
+ *         description: Number of results per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of audit logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 pagination:
+ *                   type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get(
     '/audit-logs',
@@ -51,8 +89,33 @@ router.get(
 );
 
 /**
- * Get all pending deletion requests (admin only)
- * GET /api/admin/privacy/deletion-requests
+ * @openapi
+ * /admin/privacy/deletion-requests:
+ *   get:
+ *     tags:
+ *       - Admin Privacy
+ *     summary: Get all pending deletion requests
+ *     description: Retrieve all pending account deletion requests. Admin only.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of pending deletion requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 requests:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get(
     '/deletion-requests',
@@ -74,8 +137,33 @@ router.get(
 );
 
 /**
- * Get all data retention policies (admin only)
- * GET /api/admin/privacy/retention-policies
+ * @openapi
+ * /admin/privacy/retention-policies:
+ *   get:
+ *     tags:
+ *       - Admin Privacy
+ *     summary: Get all data retention policies
+ *     description: Retrieve all configured data retention policies. Admin only.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of retention policies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 policies:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get(
     '/retention-policies',

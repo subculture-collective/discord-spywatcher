@@ -10,8 +10,46 @@ import { AuditAction, createAuditLog } from '../utils/auditLog';
 const router = Router();
 
 /**
- * Export user data (GDPR Article 15 - Right to Access)
- * GET /api/privacy/export
+ * @openapi
+ * /privacy/export:
+ *   get:
+ *     tags:
+ *       - Privacy
+ *     summary: Export user data (GDPR Article 15)
+ *     description: |
+ *       Export all user data in JSON format for GDPR compliance.
+ *       This endpoint implements the Right to Access (Article 15) by providing
+ *       a complete export of all user data stored in the system.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User data export
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exportedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 profile:
+ *                   $ref: '#/components/schemas/User'
+ *                 guilds:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Session'
+ *                 activityData:
+ *                   type: object
+ *                   description: All activity and event data
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get(
     '/export',
@@ -195,8 +233,45 @@ router.get(
 );
 
 /**
- * Request account deletion (GDPR Article 17 - Right to Erasure)
- * POST /api/privacy/delete-request
+ * @openapi
+ * /privacy/delete-request:
+ *   post:
+ *     tags:
+ *       - Privacy
+ *     summary: Request account deletion (GDPR Article 17)
+ *     description: |
+ *       Submit a request to delete your account and all associated data.
+ *       This implements the Right to Erasure (Article 17).
+ *       Account deletion occurs after a 30-day waiting period.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 description: Optional reason for deletion
+ *     responses:
+ *       200:
+ *         description: Deletion request created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 deletionDate:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.post(
     '/delete-request',
@@ -276,8 +351,24 @@ router.post(
 );
 
 /**
- * Cancel account deletion request
- * POST /api/privacy/cancel-deletion
+ * @openapi
+ * /privacy/cancel-deletion:
+ *   post:
+ *     tags:
+ *       - Privacy
+ *     summary: Cancel account deletion request
+ *     description: Cancel a pending account deletion request before it's processed
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Deletion request cancelled
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.post(
     '/cancel-deletion',
@@ -330,8 +421,33 @@ router.post(
 );
 
 /**
- * Get deletion request status
- * GET /api/privacy/deletion-status
+ * @openapi
+ * /privacy/deletion-status:
+ *   get:
+ *     tags:
+ *       - Privacy
+ *     summary: Get deletion request status
+ *     description: Check if there's a pending account deletion request and when it will be processed
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Deletion request status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 hasPendingRequest:
+ *                   type: boolean
+ *                 deletionDate:
+ *                   type: string
+ *                   format: date-time
+ *                   nullable: true
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.get(
     '/deletion-status',
@@ -365,8 +481,44 @@ router.get(
 );
 
 /**
- * Update user profile (GDPR Article 16 - Right to Rectification)
- * PATCH /api/privacy/profile
+ * @openapi
+ * /privacy/profile:
+ *   patch:
+ *     tags:
+ *       - Privacy
+ *     summary: Update user profile (GDPR Article 16)
+ *     description: |
+ *       Update user profile information implementing the Right to Rectification (Article 16).
+ *       Users can update their email and locale preferences.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: New email address
+ *               locale:
+ *                 type: string
+ *                 description: Preferred locale (e.g., en-US)
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/TooManyRequests'
  */
 router.patch(
     '/profile',

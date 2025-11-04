@@ -8,7 +8,46 @@ const options: swaggerJsdoc.Options = {
         info: {
             title: 'Spywatcher API',
             version: '1.0.0',
-            description: 'Discord surveillance and analytics API',
+            description: `# Discord Spywatcher API
+
+A comprehensive Discord surveillance and analytics API that provides insights into user behavior, activity patterns, and security monitoring.
+
+## Features
+- 🔐 **Discord OAuth2 Authentication** - Secure authentication using Discord
+- 📊 **Analytics & Insights** - Ghost detection, lurker analysis, activity heatmaps
+- 🛡️ **Security Monitoring** - Suspicious activity detection and IP management
+- 🔌 **Plugin System** - Extensible plugin architecture
+- 🔒 **GDPR Compliant** - Full data export, deletion, and audit logging
+- ⚡ **Rate Limited** - Built-in rate limiting for API stability
+
+## Authentication
+
+Most endpoints require authentication using JWT Bearer tokens obtained through Discord OAuth2:
+
+\`\`\`
+Authorization: Bearer <your-jwt-token>
+\`\`\`
+
+To authenticate:
+1. Direct users to Discord OAuth2 authorization URL
+2. Handle the callback at \`GET /api/auth/discord\`
+3. Use the returned \`accessToken\` for subsequent API calls
+4. Refresh tokens when needed using \`POST /api/auth/refresh\`
+
+## Rate Limiting
+
+The API implements multiple rate limiting tiers:
+- **Global API**: 100 requests per 15 minutes
+- **Analytics**: 30 requests per minute
+- **Authentication**: Separate limits for login attempts
+- **Public API**: 60 requests per minute
+
+Rate limit information is returned in response headers:
+- \`X-RateLimit-Limit\`: Maximum requests allowed
+- \`X-RateLimit-Remaining\`: Requests remaining in window
+- \`X-RateLimit-Reset\`: Time when the limit resets
+
+When rate limited, you'll receive a \`429 Too Many Requests\` response with a \`Retry-After\` header.`,
             contact: {
                 name: 'API Support',
                 email: 'support@spywatcher.dev',
@@ -159,6 +198,93 @@ const options: swaggerJsdoc.Options = {
                             type: 'string',
                             format: 'date-time',
                             description: 'Ban creation timestamp',
+                        },
+                    },
+                },
+                Plugin: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            description: 'Plugin unique identifier',
+                        },
+                        name: {
+                            type: 'string',
+                            description: 'Plugin display name',
+                        },
+                        version: {
+                            type: 'string',
+                            description: 'Plugin version',
+                        },
+                        author: {
+                            type: 'string',
+                            description: 'Plugin author',
+                        },
+                        description: {
+                            type: 'string',
+                            description: 'Plugin description',
+                        },
+                        state: {
+                            type: 'string',
+                            enum: ['LOADED', 'UNLOADED', 'ERROR'],
+                            description: 'Current plugin state',
+                        },
+                    },
+                },
+                Session: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            description: 'Session ID',
+                        },
+                        userAgent: {
+                            type: 'string',
+                            nullable: true,
+                            description: 'Browser user agent',
+                        },
+                        ipAddress: {
+                            type: 'string',
+                            nullable: true,
+                            description: 'IP address',
+                        },
+                        lastActivity: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Last activity timestamp',
+                        },
+                        expiresAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Session expiration time',
+                        },
+                    },
+                },
+                AnalyticsRule: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            description: 'Rule ID',
+                        },
+                        name: {
+                            type: 'string',
+                            description: 'Rule name',
+                        },
+                        description: {
+                            type: 'string',
+                            nullable: true,
+                            description: 'Rule description',
+                        },
+                        status: {
+                            type: 'string',
+                            enum: ['DRAFT', 'ACTIVE', 'PAUSED'],
+                            description: 'Rule status',
+                        },
+                        triggerType: {
+                            type: 'string',
+                            enum: ['SCHEDULED', 'EVENT', 'MANUAL'],
+                            description: 'How the rule is triggered',
                         },
                     },
                 },
@@ -329,6 +455,11 @@ const options: swaggerJsdoc.Options = {
                 description: 'User behavior analytics and insights',
             },
             {
+                name: 'Analytics Rules',
+                description:
+                    'Create and manage automated analytics rules and alerts',
+            },
+            {
                 name: 'Bans',
                 description: 'IP ban and whitelist management',
             },
@@ -346,7 +477,12 @@ const options: swaggerJsdoc.Options = {
             },
             {
                 name: 'Privacy',
-                description: 'User privacy and data management',
+                description: 'User privacy and data management (GDPR)',
+            },
+            {
+                name: 'Admin Privacy',
+                description:
+                    'Administrative privacy controls and audit logs',
             },
             {
                 name: 'Admin',
@@ -356,7 +492,19 @@ const options: swaggerJsdoc.Options = {
                 name: 'Monitoring',
                 description: 'System monitoring and metrics',
             },
+            {
+                name: 'Plugins',
+                description: 'Plugin management and configuration',
+            },
+            {
+                name: 'Public API',
+                description: 'Public API documentation and information',
+            },
         ],
+        externalDocs: {
+            description: 'Full API Documentation',
+            url: 'https://github.com/subculture-collective/discord-spywatcher/blob/main/docs/API_DOCUMENTATION.md',
+        },
     },
     apis: ['./src/routes/*.ts', './src/routes/**/*.ts'], // Path to the API routes
 };

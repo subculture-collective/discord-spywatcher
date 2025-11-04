@@ -22,8 +22,51 @@ const router = Router();
 router.use(requireAuth);
 
 /**
- * GET /api/metrics/summary
- * Get analytics summary for a date range
+ * @openapi
+ * /metrics/summary:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Get analytics summary
+ *     description: Retrieve analytics summary for a specified date range
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for analytics (default 7 days ago)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for analytics (default now)
+ *       - in: query
+ *         name: metric
+ *         schema:
+ *           type: string
+ *         description: Specific metric to filter by
+ *     responses:
+ *       200:
+ *         description: Analytics summary
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                 dateRange:
+ *                   type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  */
 router.get(
     '/summary',
@@ -65,8 +108,44 @@ router.get(
 );
 
 /**
- * GET /api/metrics/features
- * Get feature usage statistics
+ * @openapi
+ * /metrics/features:
+ *   get:
+ *     tags:
+ *       - Monitoring
+ *     summary: Get feature usage statistics
+ *     description: Retrieve statistics about feature usage across the platform
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date for statistics
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date for statistics
+ *     responses:
+ *       200:
+ *         description: Feature usage statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  */
 router.get(
     '/features',

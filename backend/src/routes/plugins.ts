@@ -6,8 +6,36 @@ import { requireAdmin } from '../middleware/auth';
 const router = Router();
 
 /**
- * Get all loaded plugins
- * GET /api/plugins
+ * @openapi
+ * /plugins:
+ *   get:
+ *     tags:
+ *       - Plugins
+ *     summary: Get all loaded plugins
+ *     description: Retrieve a list of all loaded plugins with their status and metadata
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of plugins
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: integer
+ *                   description: Number of loaded plugins
+ *                 plugins:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Plugin'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       503:
+ *         description: Plugin system not initialized
  */
 router.get('/', requireAdmin, (req, res) => {
     try {
@@ -40,8 +68,37 @@ router.get('/', requireAdmin, (req, res) => {
 });
 
 /**
- * Get plugin details by ID
- * GET /api/plugins/:id
+ * @openapi
+ * /plugins/{id}:
+ *   get:
+ *     tags:
+ *       - Plugins
+ *     summary: Get plugin details by ID
+ *     description: Retrieve detailed information about a specific plugin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Plugin ID
+ *     responses:
+ *       200:
+ *         description: Plugin details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Plugin'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       503:
+ *         description: Plugin system not initialized
  */
 router.get('/:id', requireAdmin, (req, res) => {
     try {
@@ -81,8 +138,43 @@ router.get('/:id', requireAdmin, (req, res) => {
 });
 
 /**
- * Get plugin health status
- * GET /api/plugins/:id/health
+ * @openapi
+ * /plugins/{id}/health:
+ *   get:
+ *     tags:
+ *       - Plugins
+ *     summary: Get plugin health status
+ *     description: Check the health status of a specific plugin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Plugin ID
+ *     responses:
+ *       200:
+ *         description: Plugin health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 healthy:
+ *                   type: boolean
+ *                 lastCheck:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       503:
+ *         description: Plugin system not initialized
  */
 router.get('/:id/health', requireAdmin, async (req, res) => {
     try {
@@ -105,8 +197,33 @@ router.get('/:id/health', requireAdmin, async (req, res) => {
 });
 
 /**
- * Start a plugin
- * POST /api/plugins/:id/start
+ * @openapi
+ * /plugins/{id}/start:
+ *   post:
+ *     tags:
+ *       - Plugins
+ *     summary: Start a plugin
+ *     description: Start a stopped or paused plugin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Plugin ID
+ *     responses:
+ *       200:
+ *         description: Plugin started successfully
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       503:
+ *         description: Plugin system not initialized
  */
 router.post('/:id/start', requireAdmin, async (req, res) => {
     try {
@@ -129,8 +246,33 @@ router.post('/:id/start', requireAdmin, async (req, res) => {
 });
 
 /**
- * Stop a plugin
- * POST /api/plugins/:id/stop
+ * @openapi
+ * /plugins/{id}/stop:
+ *   post:
+ *     tags:
+ *       - Plugins
+ *     summary: Stop a plugin
+ *     description: Stop a running plugin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Plugin ID
+ *     responses:
+ *       200:
+ *         description: Plugin stopped successfully
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       503:
+ *         description: Plugin system not initialized
  */
 router.post('/:id/stop', requireAdmin, async (req, res) => {
     try {
@@ -153,8 +295,33 @@ router.post('/:id/stop', requireAdmin, async (req, res) => {
 });
 
 /**
- * Unload a plugin
- * DELETE /api/plugins/:id
+ * @openapi
+ * /plugins/{id}:
+ *   delete:
+ *     tags:
+ *       - Plugins
+ *     summary: Unload a plugin
+ *     description: Unload and remove a plugin from the system
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Plugin ID
+ *     responses:
+ *       200:
+ *         description: Plugin unloaded successfully
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       503:
+ *         description: Plugin system not initialized
  */
 router.delete('/:id', requireAdmin, async (req, res) => {
     try {
