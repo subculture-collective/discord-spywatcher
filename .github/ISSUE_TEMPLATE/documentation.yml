@@ -1,0 +1,94 @@
+name: Documentation Improvement
+description: Suggest improvements to documentation
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation! Clear docs help everyone.
+        
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight Checklist
+      description: Please ensure you've completed these steps before submitting.
+      options:
+        - label: I have searched existing issues to ensure this hasn't been reported
+          required: true
+  
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation needs improvement?
+      options:
+        - README
+        - Contributing Guidelines
+        - API Documentation
+        - User Guide
+        - Developer Guide
+        - Setup Instructions
+        - Code Comments
+        - Configuration Examples
+        - Troubleshooting Guide
+        - Other
+    validations:
+      required: true
+  
+  - type: input
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is the documentation that needs improvement?
+      placeholder: e.g., README.md, docs/api/README.md, backend/src/auth.ts
+    validations:
+      required: true
+  
+  - type: textarea
+    id: issue
+    attributes:
+      label: Issue with Current Documentation
+      description: What's wrong, missing, or unclear in the current documentation?
+      placeholder: |
+        Examples:
+        - Information is outdated
+        - Missing explanation of X
+        - Instructions are unclear
+        - Broken links
+        - Missing code examples
+        - Typos or grammatical errors
+    validations:
+      required: true
+  
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: |
+        Provide specific suggestions for improvement:
+        - What information should be added?
+        - How should it be reorganized?
+        - What examples would help?
+    validations:
+      required: true
+  
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples
+      placeholder: Links to similar documentation, screenshots of errors, etc.
+    validations:
+      required: false
+  
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Would you like to work on improving this documentation?
+      options:
+        - label: I would be willing to submit a PR to improve this documentation
+          required: false

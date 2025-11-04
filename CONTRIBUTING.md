@@ -1,62 +1,287 @@
 # Contributing to Discord Spywatcher
 
-Thank you for your interest in contributing to Discord Spywatcher! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Discord Spywatcher! 🎉
+
+We're excited to have you here and grateful for your contributions, whether it's reporting bugs, proposing features, improving documentation, or writing code. This guide will help you get started.
 
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
+- [Ways to Contribute](#ways-to-contribute)
 - [Development Setup](#development-setup)
+- [Development Workflow](#development-workflow)
 - [Code Quality Standards](#code-quality-standards)
 - [Commit Guidelines](#commit-guidelines)
 - [Pull Request Process](#pull-request-process)
+- [Issue Guidelines](#issue-guidelines)
 
 ## Code of Conduct
 
-Please be respectful and professional in all interactions with other contributors.
+This project and everyone participating in it is governed by our [Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers through GitHub issues or direct contact.
 
 ## Getting Started
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/discord-spywatcher.git`
-3. Create a new branch: `git checkout -b feature/your-feature-name`
-4. Make your changes
-5. Push to your fork and submit a pull request
+### First Time Contributors
+
+If this is your first time contributing to open source, welcome! Here are some resources to help you get started:
+
+- [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
+- [First Contributions](https://github.com/firstcontributions/first-contributions)
+- [GitHub Flow](https://guides.github.com/introduction/flow/)
+
+### Quick Start Guide
+
+1. **Fork the repository** - Click the "Fork" button at the top right of the repository page
+2. **Clone your fork**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/discord-spywatcher.git
+   cd discord-spywatcher
+   ```
+3. **Add upstream remote**:
+   ```bash
+   git remote add upstream https://github.com/subculture-collective/discord-spywatcher.git
+   ```
+4. **Create a new branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/your-bug-fix
+   ```
+5. **Make your changes** - Follow the development setup and guidelines below
+6. **Push to your fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+7. **Submit a pull request** - Go to your fork on GitHub and click "New Pull Request"
+
+## Ways to Contribute
+
+There are many ways to contribute to Discord Spywatcher:
+
+### 🐛 Report Bugs
+
+Found a bug? Please [create a bug report](.github/ISSUE_TEMPLATE/bug_report.yml) with:
+- Clear description of the issue
+- Steps to reproduce
+- Expected vs. actual behavior
+- Your environment details
+
+### 💡 Suggest Features
+
+Have an idea for a new feature? [Submit a feature request](.github/ISSUE_TEMPLATE/feature_request.yml) with:
+- Description of the problem you're trying to solve
+- Your proposed solution
+- Any alternative approaches you've considered
+
+### 📝 Improve Documentation
+
+Documentation improvements are always welcome:
+- Fix typos or clarify existing docs
+- Add examples and tutorials
+- Improve code comments
+- Write guides for new features
+
+Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.yml) to suggest improvements.
+
+### 🔧 Write Code
+
+Ready to contribute code? Great!
+- Check the [issue tracker](https://github.com/subculture-collective/discord-spywatcher/issues) for open issues
+- Look for issues labeled `good first issue` or `help wanted`
+- Comment on an issue to let others know you're working on it
+- Follow the development workflow below
+
+### 🧪 Write Tests
+
+Help improve code coverage:
+- Add tests for existing features
+- Improve test quality and coverage
+- Add integration and end-to-end tests
+
+### 👀 Review Pull Requests
+
+Help review open pull requests:
+- Test the changes locally
+- Provide constructive feedback
+- Check for code quality and best practices
 
 ## Development Setup
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm or yarn
-- Git
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
+- **npm** (comes with Node.js) or **yarn**
+- **Git** - [Download](https://git-scm.com/)
+- **Docker** (optional but recommended) - [Download](https://www.docker.com/)
+- **PostgreSQL** (if not using Docker) - [Download](https://www.postgresql.org/)
 
 ### Installation
 
-1. Install dependencies for both backend and frontend:
+#### Option 1: Using Docker (Recommended)
+
+The easiest way to get started:
 
 ```bash
-# Install root dependencies (for git hooks)
-npm install
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your Discord credentials
 
-# Install backend dependencies
-cd backend
-npm install
+# Start development environment
+docker-compose -f docker-compose.dev.yml up
+```
 
-# Install frontend dependencies
-cd ../frontend
+Access:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3001
+- PostgreSQL: localhost:5432
+
+See [DOCKER.md](./DOCKER.md) for detailed Docker setup.
+
+#### Option 2: Manual Setup
+
+1. **Install root dependencies** (for git hooks and tooling):
+
+```bash
 npm install
 ```
 
-2. Set up environment variables:
+2. **Install backend dependencies**:
+
+```bash
+cd backend
+npm install
+```
+
+3. **Install frontend dependencies**:
+
+```bash
+cd frontend
+npm install
+```
+
+4. **Set up environment variables**:
 
 ```bash
 # Backend
-cp backend/backend.env.example backend/.env
+cp backend/.env.example backend/.env
+# Edit backend/.env with your configuration
 
 # Frontend
-cp frontend/frontend.env.example frontend/.env
+cp frontend/.env.example frontend/.env
+# Edit frontend/.env with your configuration
 ```
+
+5. **Set up the database**:
+
+```bash
+cd backend
+npx prisma migrate dev --name init
+npx prisma generate
+```
+
+6. **Start the development servers**:
+
+```bash
+# In terminal 1 (Backend API)
+cd backend
+npm run dev:api
+
+# In terminal 2 (Discord Bot)
+cd backend
+npm run dev
+
+# In terminal 3 (Frontend)
+cd frontend
+npm run dev
+```
+
+### Discord Application Setup
+
+To run Discord Spywatcher, you need to create a Discord application:
+
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
+2. Click "New Application" and give it a name
+3. Navigate to the "Bot" section and click "Add Bot"
+4. Under "Privileged Gateway Intents", enable:
+   - Presence Intent
+   - Server Members Intent
+   - Message Content Intent
+5. Copy the bot token and add it to your `.env` file as `DISCORD_BOT_TOKEN`
+6. Navigate to "OAuth2" → "General"
+7. Copy the Client ID and Client Secret to your `.env` file
+8. Add your redirect URI (e.g., `http://localhost:5173/auth/callback`)
+9. Navigate to "OAuth2" → "URL Generator"
+10. Select scopes: `bot`, `identify`, `guilds`
+11. Select bot permissions: `View Channels`, `Read Message History`, `Send Messages`
+12. Copy the generated URL and use it to invite the bot to your server
+
+## Development Workflow
+
+### Keeping Your Fork Updated
+
+Before starting work on a new feature or fix, sync your fork with the upstream repository:
+
+```bash
+# Fetch upstream changes
+git fetch upstream
+
+# Switch to your main branch
+git checkout main
+
+# Merge upstream changes
+git merge upstream/main
+
+# Push to your fork
+git push origin main
+```
+
+### Working on a Feature or Fix
+
+1. **Create a feature branch** from the latest `main`:
+   ```bash
+   git checkout main
+   git pull upstream main
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes** following the code standards
+
+3. **Test your changes**:
+   ```bash
+   # Run linting
+   npm run lint
+   
+   # Run type checking
+   npm run type-check
+   
+   # Run tests
+   cd backend && npm test
+   cd frontend && npm test
+   ```
+
+4. **Commit your changes** using conventional commits:
+   ```bash
+   git add .
+   git commit -m "feat(component): add new feature"
+   ```
+
+5. **Push to your fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+6. **Create a Pull Request** on GitHub
+
+### Development Tips
+
+- **Use the git hooks**: They're set up automatically and will catch issues before you push
+- **Run tests frequently**: Catch issues early
+- **Keep commits small and focused**: Easier to review and revert if needed
+- **Write clear commit messages**: Help others understand your changes
+- **Update documentation**: Keep docs in sync with code changes
 
 ## Code Quality Standards
 
@@ -282,12 +507,80 @@ refactor(dashboard): extract user list component
 - Explain the reasoning behind suggestions
 - Approve when satisfied with changes
 
+## Issue Guidelines
+
+### Creating Good Issues
+
+When creating an issue, please:
+
+- **Use a clear and descriptive title**
+- **Search for existing issues** to avoid duplicates
+- **Use the appropriate template** (bug report, feature request, or documentation)
+- **Provide complete information** - the more details, the better
+- **Stay on topic** - keep discussions focused on the issue at hand
+- **Be respectful** - follow our Code of Conduct
+
+### Issue Labels
+
+We use labels to categorize issues:
+
+- `bug` - Something isn't working
+- `enhancement` - New feature or request
+- `documentation` - Improvements or additions to documentation
+- `good first issue` - Good for newcomers
+- `help wanted` - Extra attention is needed
+- `needs-triage` - Needs to be reviewed by maintainers
+- `priority: high` - High priority issue
+- `priority: low` - Low priority issue
+- `wontfix` - This will not be worked on
+
+### Issue Lifecycle
+
+1. **New** - Issue is created using a template
+2. **Triage** - Maintainers review and label the issue
+3. **Accepted** - Issue is confirmed and ready for work
+4. **In Progress** - Someone is actively working on it
+5. **Review** - Pull request is under review
+6. **Done** - Issue is resolved and closed
+
+## Community Guidelines
+
+### Communication
+
+- **Be kind and courteous** - We're all here to learn and help each other
+- **Be patient** - Maintainers and contributors are often volunteers
+- **Be constructive** - Focus on the issue, not the person
+- **Be clear** - Explain your ideas thoroughly
+- **Be respectful of time** - Keep discussions focused and productive
+
+### Getting Help
+
+Need help with something? Here are the best ways to get support:
+
+- **Documentation** - Check the [README](./README.md) and [docs](./docs/) first
+- **Discussions** - Use [GitHub Discussions](https://github.com/subculture-collective/discord-spywatcher/discussions) for questions
+- **Issues** - Create an issue if you've found a bug or want to suggest a feature
+- **Pull Request Comments** - Ask questions directly on relevant PRs
+
+## Recognition
+
+We value all contributions! Contributors are recognized in:
+
+- GitHub's contributor graph
+- Release notes for significant contributions
+- The project's community
+
 ## Need Help?
 
-- Check existing issues and discussions
+- Check existing [issues](https://github.com/subculture-collective/discord-spywatcher/issues) and [discussions](https://github.com/subculture-collective/discord-spywatcher/discussions)
+- Read the [documentation](./README.md)
 - Ask questions in pull request comments
 - Reach out to maintainers
 
 ## License
 
 By contributing to Discord Spywatcher, you agree that your contributions will be licensed under the same license as the project.
+
+---
+
+Thank you for contributing to Discord Spywatcher! 🙏
