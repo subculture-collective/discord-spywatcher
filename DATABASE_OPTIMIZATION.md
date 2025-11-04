@@ -5,6 +5,7 @@ This document outlines the database optimization strategy for Discord Spywatcher
 ## 📊 Overview
 
 The database optimization implementation focuses on:
+
 - **Strategic indexing** for common query patterns
 - **Query optimization** to reduce database load
 - **Performance monitoring** to identify bottlenecks
@@ -17,28 +18,33 @@ The database optimization implementation focuses on:
 Composite indexes are created for common query patterns that filter by multiple columns:
 
 #### PresenceEvent
+
 - `(userId, createdAt DESC)` - User presence history queries
 - `(userId)` - Single user lookups
 - `(createdAt)` - Time-based queries
 
 #### MessageEvent
+
 - `(userId, createdAt DESC)` - User message history
 - `(guildId, channelId)` - Guild-channel message queries
 - `(guildId, createdAt DESC)` - Guild message history
 - Individual indexes on `userId`, `guildId`, `channelId`, `createdAt`
 
 #### TypingEvent
+
 - `(userId, channelId)` - User typing in specific channels
 - `(guildId, createdAt DESC)` - Guild typing activity over time
 - Individual indexes on `userId`, `guildId`, `channelId`, `createdAt`
 
 #### ReactionTime
+
 - `(observerId, createdAt DESC)` - Observer reaction history
 - `(guildId, createdAt DESC)` - Guild reaction history
 - `(deltaMs)` - Fast reaction queries
 - Individual indexes on `observerId`, `actorId`, `guildId`, `createdAt`
 
 #### User
+
 - `(role)` - Role-based queries
 - `(lastSeenAt DESC)` - Last seen queries
 - `(role, lastSeenAt DESC)` - Combined role and activity queries
@@ -65,6 +71,7 @@ GIN (Generalized Inverted Index) indexes for JSONB columns enable efficient JSON
 ### Ghost Detection
 
 **Before** (N+1 query pattern):
+
 ```typescript
 // Multiple separate queries - inefficient
 const typings = await db.typingEvent.groupBy(...);
@@ -73,6 +80,7 @@ const messages = await db.messageEvent.groupBy(...);
 ```
 
 **After** (Single optimized query):
+
 ```typescript
 // Single aggregation query using raw SQL
 const result = await db.$queryRaw`
@@ -91,6 +99,7 @@ const result = await db.$queryRaw`
 ### Lurker Detection
 
 Optimized from multiple `findMany` calls to a single query with subqueries:
+
 - Identifies users with presence but no activity
 - Uses LEFT JOIN to efficiently find users without matching activity records
 - Filters in database rather than application code
@@ -98,6 +107,7 @@ Optimized from multiple `findMany` calls to a single query with subqueries:
 ### Reaction Stats
 
 Changed from in-memory aggregation to database-level aggregation:
+
 - Uses SQL `AVG()` and `COUNT() FILTER` for efficient calculation
 - Reduces data transfer from database to application
 - Handles filtering at database level
@@ -110,11 +120,12 @@ The application includes a Prisma middleware that tracks slow queries:
 
 ```typescript
 // Configurable thresholds (env variables)
-SLOW_QUERY_THRESHOLD_MS=100      // Warn threshold
-CRITICAL_QUERY_THRESHOLD_MS=1000 // Critical threshold
+SLOW_QUERY_THRESHOLD_MS = 100; // Warn threshold
+CRITICAL_QUERY_THRESHOLD_MS = 1000; // Critical threshold
 ```
 
 Features:
+
 - Logs queries exceeding thresholds to console
 - Stores last 100 slow queries in memory
 - Provides statistics API for monitoring dashboards
@@ -146,17 +157,20 @@ The `databaseMaintenance.ts` utility provides:
 ### Initial Setup
 
 1. Apply Prisma migrations:
+
 ```bash
 cd backend
 npm run prisma:migrate
 ```
 
 2. Apply PostgreSQL-specific indexes:
+
 ```bash
 psql -d spywatcher -f ../scripts/add-performance-indexes.sql
 ```
 
 3. Initialize full-text search (if not already done):
+
 ```bash
 npm run db:fulltext
 ```
@@ -164,30 +178,36 @@ npm run db:fulltext
 ### Regular Maintenance
 
 #### Weekly
+
 - Review slow query logs via monitoring dashboard
 - Check index usage statistics
 - Review table growth trends
 
 #### Monthly
+
 - Run ANALYZE on all tables:
+
 ```bash
 curl -X POST http://localhost:3000/api/admin/monitoring/database/analyze \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 - Check for unused indexes:
+
 ```bash
 curl http://localhost:3000/api/admin/monitoring/database/indexes \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 - Review maintenance report:
+
 ```bash
 curl http://localhost:3000/api/admin/monitoring/database/report \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 #### Quarterly
+
 - Review and remove truly unused indexes
 - Consider table partitioning for very large tables
 - Review and adjust connection pool settings
@@ -197,7 +217,7 @@ curl http://localhost:3000/api/admin/monitoring/database/report \
 Check for index bloat periodically:
 
 ```sql
-SELECT 
+SELECT
   schemaname, tablename, indexname,
   pg_size_pretty(pg_relation_size(indexrelid)) as index_size
 FROM pg_stat_user_indexes
@@ -206,6 +226,7 @@ ORDER BY pg_relation_size(indexrelid) DESC;
 ```
 
 Rebuild bloated indexes:
+
 ```sql
 REINDEX INDEX CONCURRENTLY idx_name;
 ```
@@ -224,6 +245,7 @@ Based on the issue requirements:
 ## 🔍 Monitoring Best Practices
 
 1. **Enable pg_stat_statements** for PostgreSQL query tracking:
+
 ```sql
 -- Add to postgresql.conf
 shared_preload_libraries = 'pg_stat_statements'
@@ -231,34 +253,37 @@ pg_stat_statements.track = all
 ```
 
 2. **Set up alerts** for:
-   - Queries exceeding 1000ms
-   - Index usage below 50% on tables > 10k rows
-   - Connection pool saturation (> 80% usage)
-   - Table sizes growing abnormally
+    - Queries exceeding 1000ms
+    - Index usage below 50% on tables > 10k rows
+    - Connection pool saturation (> 80% usage)
+    - Table sizes growing abnormally
 
 3. **Regular reviews** of:
-   - Slow query patterns
-   - Index hit ratios
-   - Cache effectiveness
-   - Connection pool metrics
+    - Slow query patterns
+    - Index hit ratios
+    - Cache effectiveness
+    - Connection pool metrics
 
 ## 🛠️ Troubleshooting
 
 ### Query Performance Issues
 
 1. Check EXPLAIN ANALYZE output:
+
 ```sql
-EXPLAIN ANALYZE SELECT * FROM "MessageEvent" 
+EXPLAIN ANALYZE SELECT * FROM "MessageEvent"
 WHERE "guildId" = 'xxx' AND "createdAt" > NOW() - INTERVAL '7 days';
 ```
 
 2. Verify index usage:
+
 ```sql
-SELECT * FROM pg_stat_user_indexes 
+SELECT * FROM pg_stat_user_indexes
 WHERE tablename = 'MessageEvent';
 ```
 
 3. Check for sequential scans on large tables:
+
 ```sql
 SELECT schemaname, tablename, seq_scan, seq_tup_read, idx_scan
 FROM pg_stat_user_tables
@@ -276,6 +301,7 @@ ORDER BY seq_scan DESC;
 ### Index Not Being Used
 
 Common reasons:
+
 1. Statistics are outdated - Run ANALYZE
 2. Small table size - PostgreSQL may prefer sequential scan
 3. Poor selectivity - Index doesn't filter enough rows

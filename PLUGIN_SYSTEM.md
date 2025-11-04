@@ -46,18 +46,15 @@ The manifest file contains plugin metadata and configuration:
 
 ```json
 {
-  "id": "my-plugin",
-  "name": "My Plugin",
-  "version": "1.0.0",
-  "author": "Your Name",
-  "description": "A description of what your plugin does",
-  "spywatcherVersion": ">=1.0.0",
-  "dependencies": [],
-  "permissions": [
-    "discord:events",
-    "api:routes"
-  ],
-  "homepage": "https://github.com/yourname/my-plugin"
+    "id": "my-plugin",
+    "name": "My Plugin",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "description": "A description of what your plugin does",
+    "spywatcherVersion": ">=1.0.0",
+    "dependencies": [],
+    "permissions": ["discord:events", "api:routes"],
+    "homepage": "https://github.com/yourname/my-plugin"
 }
 ```
 
@@ -67,49 +64,51 @@ The index file exports a plugin object implementing the `Plugin` interface:
 
 ```javascript
 module.exports = {
-  manifest: require('./manifest.json'),
+    manifest: require('./manifest.json'),
 
-  // Initialize the plugin
-  async init(context) {
-    context.logger.info('Plugin initialized');
-  },
+    // Initialize the plugin
+    async init(context) {
+        context.logger.info('Plugin initialized');
+    },
 
-  // Start the plugin (optional)
-  async start() {
-    console.log('Plugin started');
-  },
+    // Start the plugin (optional)
+    async start() {
+        console.log('Plugin started');
+    },
 
-  // Stop the plugin (optional)
-  async stop() {
-    console.log('Plugin stopped');
-  },
+    // Stop the plugin (optional)
+    async stop() {
+        console.log('Plugin stopped');
+    },
 
-  // Clean up resources (optional)
-  async destroy() {
-    console.log('Plugin destroyed');
-  },
+    // Clean up resources (optional)
+    async destroy() {
+        console.log('Plugin destroyed');
+    },
 
-  // Register hooks (optional)
-  registerHooks(hooks) {
-    hooks.register('discord:messageCreate', async (message, context) => {
-      context.logger.info('Message received:', { content: message.content });
-    });
-  },
+    // Register hooks (optional)
+    registerHooks(hooks) {
+        hooks.register('discord:messageCreate', async (message, context) => {
+            context.logger.info('Message received:', {
+                content: message.content,
+            });
+        });
+    },
 
-  // Register API routes (optional)
-  registerRoutes(router) {
-    router.get('/hello', (req, res) => {
-      res.json({ message: 'Hello from plugin!' });
-    });
-  },
+    // Register API routes (optional)
+    registerRoutes(router) {
+        router.get('/hello', (req, res) => {
+            res.json({ message: 'Hello from plugin!' });
+        });
+    },
 
-  // Health check (optional)
-  async healthCheck() {
-    return {
-      healthy: true,
-      message: 'Plugin is running'
-    };
-  }
+    // Health check (optional)
+    async healthCheck() {
+        return {
+            healthy: true,
+            message: 'Plugin is running',
+        };
+    },
 };
 ```
 
@@ -119,14 +118,14 @@ module.exports = {
 
 ```typescript
 interface Plugin {
-  manifest: PluginManifest;
-  init(context: PluginContext): Promise<void> | void;
-  start?(): Promise<void> | void;
-  stop?(): Promise<void> | void;
-  destroy?(): Promise<void> | void;
-  registerHooks?(hooks: PluginHookRegistry): void;
-  registerRoutes?(router: Router): void;
-  healthCheck?(): Promise<PluginHealthStatus> | PluginHealthStatus;
+    manifest: PluginManifest;
+    init(context: PluginContext): Promise<void> | void;
+    start?(): Promise<void> | void;
+    stop?(): Promise<void> | void;
+    destroy?(): Promise<void> | void;
+    registerHooks?(hooks: PluginHookRegistry): void;
+    registerRoutes?(router: Router): void;
+    healthCheck?(): Promise<PluginHealthStatus> | PluginHealthStatus;
 }
 ```
 
@@ -136,35 +135,35 @@ The plugin context provides access to services and utilities:
 
 ```typescript
 interface PluginContext {
-  // Discord bot client (requires DISCORD_CLIENT permission)
-  discordClient?: Client;
-  
-  // Express app (requires API_ROUTES permission)
-  app?: Express;
-  
-  // Plugin configuration
-  config: Record<string, unknown>;
-  
-  // Plugin data directory (for storing plugin-specific files)
-  dataDir: string;
-  
-  // Logger for plugin messages
-  logger: {
-    info(message: string, meta?: Record<string, unknown>): void;
-    warn(message: string, meta?: Record<string, unknown>): void;
-    error(message: string, meta?: Record<string, unknown>): void;
-    debug(message: string, meta?: Record<string, unknown>): void;
-  };
-  
-  // Event emitter for plugin events
-  events: PluginEventEmitter;
-  
-  // Services (based on permissions)
-  services: {
-    database?: PrismaClient;      // Requires DATABASE permission
-    cache?: Redis;                 // Requires CACHE permission
-    websocket?: WebSocketService;  // Requires WEBSOCKET permission
-  };
+    // Discord bot client (requires DISCORD_CLIENT permission)
+    discordClient?: Client;
+
+    // Express app (requires API_ROUTES permission)
+    app?: Express;
+
+    // Plugin configuration
+    config: Record<string, unknown>;
+
+    // Plugin data directory (for storing plugin-specific files)
+    dataDir: string;
+
+    // Logger for plugin messages
+    logger: {
+        info(message: string, meta?: Record<string, unknown>): void;
+        warn(message: string, meta?: Record<string, unknown>): void;
+        error(message: string, meta?: Record<string, unknown>): void;
+        debug(message: string, meta?: Record<string, unknown>): void;
+    };
+
+    // Event emitter for plugin events
+    events: PluginEventEmitter;
+
+    // Services (based on permissions)
+    services: {
+        database?: PrismaClient; // Requires DATABASE permission
+        cache?: Redis; // Requires CACHE permission
+        websocket?: WebSocketService; // Requires WEBSOCKET permission
+    };
 }
 ```
 
@@ -198,13 +197,13 @@ Plugins must declare required permissions in their manifest. Available permissio
 
 ```json
 {
-  "permissions": [
-    "discord:client",
-    "discord:events",
-    "api:routes",
-    "database:access",
-    "cache:access"
-  ]
+    "permissions": [
+        "discord:client",
+        "discord:events",
+        "api:routes",
+        "database:access",
+        "cache:access"
+    ]
 }
 ```
 
@@ -244,16 +243,16 @@ registerHooks(hooks) {
   // Listen for presence updates
   hooks.register('discord:presenceUpdate', async (data, context) => {
     const { oldPresence, newPresence } = data;
-    
+
     context.logger.info('Presence updated', {
       userId: newPresence.userId,
       status: newPresence.status
     });
-    
+
     // You can modify and return data to affect downstream processing
     return data;
   });
-  
+
   // Listen for new messages
   hooks.register('discord:messageCreate', async (message, context) => {
     if (message.content.includes('!ping')) {
@@ -270,37 +269,39 @@ registerHooks(hooks) {
 A simple plugin that logs all Discord messages:
 
 **manifest.json:**
+
 ```json
 {
-  "id": "message-logger",
-  "name": "Message Logger",
-  "version": "1.0.0",
-  "author": "SpyWatcher Team",
-  "description": "Logs all Discord messages to a file",
-  "permissions": ["discord:events", "fs:access"]
+    "id": "message-logger",
+    "name": "Message Logger",
+    "version": "1.0.0",
+    "author": "SpyWatcher Team",
+    "description": "Logs all Discord messages to a file",
+    "permissions": ["discord:events", "fs:access"]
 }
 ```
 
 **index.js:**
+
 ```javascript
 const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  manifest: require('./manifest.json'),
-  
-  async init(context) {
-    this.context = context;
-    this.logFile = path.join(context.dataDir, 'messages.log');
-    context.logger.info('Message logger initialized');
-  },
-  
-  registerHooks(hooks) {
-    hooks.register('discord:messageCreate', async (message, context) => {
-      const logEntry = `${new Date().toISOString()} - ${message.author.username}: ${message.content}\n`;
-      fs.appendFileSync(this.logFile, logEntry);
-    });
-  }
+    manifest: require('./manifest.json'),
+
+    async init(context) {
+        this.context = context;
+        this.logFile = path.join(context.dataDir, 'messages.log');
+        context.logger.info('Message logger initialized');
+    },
+
+    registerHooks(hooks) {
+        hooks.register('discord:messageCreate', async (message, context) => {
+            const logEntry = `${new Date().toISOString()} - ${message.author.username}: ${message.content}\n`;
+            fs.appendFileSync(this.logFile, logEntry);
+        });
+    },
 };
 ```
 
@@ -309,53 +310,55 @@ module.exports = {
 A plugin that adds custom analytics endpoints:
 
 **manifest.json:**
+
 ```json
 {
-  "id": "custom-analytics",
-  "name": "Custom Analytics",
-  "version": "1.0.0",
-  "author": "SpyWatcher Team",
-  "description": "Provides custom analytics endpoints",
-  "permissions": ["api:routes", "database:access"]
+    "id": "custom-analytics",
+    "name": "Custom Analytics",
+    "version": "1.0.0",
+    "author": "SpyWatcher Team",
+    "description": "Provides custom analytics endpoints",
+    "permissions": ["api:routes", "database:access"]
 }
 ```
 
 **index.js:**
+
 ```javascript
 module.exports = {
-  manifest: require('./manifest.json'),
-  
-  async init(context) {
-    this.context = context;
-    this.db = context.services.database;
-    context.logger.info('Custom analytics initialized');
-  },
-  
-  registerRoutes(router) {
-    // GET /api/plugins/custom-analytics/stats
-    router.get('/stats', async (req, res) => {
-      const messageCount = await this.db.messageEvent.count();
-      const userCount = await this.db.user.count();
-      
-      res.json({
-        messages: messageCount,
-        users: userCount,
-        timestamp: new Date()
-      });
-    });
-    
-    // GET /api/plugins/custom-analytics/top-users
-    router.get('/top-users', async (req, res) => {
-      const topUsers = await this.db.messageEvent.groupBy({
-        by: ['userId'],
-        _count: { userId: true },
-        orderBy: { _count: { userId: 'desc' } },
-        take: 10
-      });
-      
-      res.json({ topUsers });
-    });
-  }
+    manifest: require('./manifest.json'),
+
+    async init(context) {
+        this.context = context;
+        this.db = context.services.database;
+        context.logger.info('Custom analytics initialized');
+    },
+
+    registerRoutes(router) {
+        // GET /api/plugins/custom-analytics/stats
+        router.get('/stats', async (req, res) => {
+            const messageCount = await this.db.messageEvent.count();
+            const userCount = await this.db.user.count();
+
+            res.json({
+                messages: messageCount,
+                users: userCount,
+                timestamp: new Date(),
+            });
+        });
+
+        // GET /api/plugins/custom-analytics/top-users
+        router.get('/top-users', async (req, res) => {
+            const topUsers = await this.db.messageEvent.groupBy({
+                by: ['userId'],
+                _count: { userId: true },
+                orderBy: { _count: { userId: 'desc' } },
+                take: 10,
+            });
+
+            res.json({ topUsers });
+        });
+    },
 };
 ```
 
@@ -364,59 +367,61 @@ module.exports = {
 A plugin that sends notifications for specific events:
 
 **manifest.json:**
+
 ```json
 {
-  "id": "notifications",
-  "name": "Notification Plugin",
-  "version": "1.0.0",
-  "author": "SpyWatcher Team",
-  "description": "Sends notifications via webhook",
-  "permissions": ["discord:events", "network:access", "websocket:access"]
+    "id": "notifications",
+    "name": "Notification Plugin",
+    "version": "1.0.0",
+    "author": "SpyWatcher Team",
+    "description": "Sends notifications via webhook",
+    "permissions": ["discord:events", "network:access", "websocket:access"]
 }
 ```
 
 **index.js:**
+
 ```javascript
 const axios = require('axios');
 
 module.exports = {
-  manifest: require('./manifest.json'),
-  
-  async init(context) {
-    this.context = context;
-    this.webhookUrl = process.env.NOTIFICATION_WEBHOOK_URL;
-    context.logger.info('Notification plugin initialized');
-  },
-  
-  registerHooks(hooks) {
-    // Notify on multi-client detection
-    hooks.register('discord:presenceUpdate', async (data, context) => {
-      const { newPresence } = data;
-      const platforms = Object.keys(newPresence.clientStatus || {});
-      
-      if (platforms.length > 1) {
-        await this.sendNotification({
-          type: 'multi-client',
-          user: newPresence.user.username,
-          platforms: platforms.join(', ')
+    manifest: require('./manifest.json'),
+
+    async init(context) {
+        this.context = context;
+        this.webhookUrl = process.env.NOTIFICATION_WEBHOOK_URL;
+        context.logger.info('Notification plugin initialized');
+    },
+
+    registerHooks(hooks) {
+        // Notify on multi-client detection
+        hooks.register('discord:presenceUpdate', async (data, context) => {
+            const { newPresence } = data;
+            const platforms = Object.keys(newPresence.clientStatus || {});
+
+            if (platforms.length > 1) {
+                await this.sendNotification({
+                    type: 'multi-client',
+                    user: newPresence.user.username,
+                    platforms: platforms.join(', '),
+                });
+            }
+
+            return data;
         });
-      }
-      
-      return data;
-    });
-  },
-  
-  async sendNotification(data) {
-    if (!this.webhookUrl) return;
-    
-    try {
-      await axios.post(this.webhookUrl, {
-        text: `🔔 ${data.type}: ${data.user} detected on ${data.platforms}`
-      });
-    } catch (error) {
-      this.context.logger.error('Failed to send notification', { error });
-    }
-  }
+    },
+
+    async sendNotification(data) {
+        if (!this.webhookUrl) return;
+
+        try {
+            await axios.post(this.webhookUrl, {
+                text: `🔔 ${data.type}: ${data.user} detected on ${data.platforms}`,
+            });
+        } catch (error) {
+            this.context.logger.error('Failed to send notification', { error });
+        }
+    },
 };
 ```
 
@@ -499,9 +504,9 @@ Request only the permissions you need:
 
 ```json
 {
-  "permissions": [
-    "discord:events"  // Only request what's necessary
-  ]
+    "permissions": [
+        "discord:events" // Only request what's necessary
+    ]
 }
 ```
 
@@ -513,11 +518,11 @@ Always validate external data:
 registerRoutes(router) {
   router.post('/data', (req, res) => {
     const { value } = req.body;
-    
+
     if (!value || typeof value !== 'string') {
       return res.status(400).json({ error: 'Invalid input' });
     }
-    
+
     // Process validated data
   });
 }
@@ -536,7 +541,7 @@ registerRoutes(router) {
     windowMs: 15 * 60 * 1000,
     max: 100
   });
-  
+
   router.use(limiter);
 }
 ```
@@ -567,11 +572,11 @@ UNINITIALIZED → INITIALIZING → INITIALIZED → STARTING → RUNNING
 const plugin = require('../index.js');
 
 describe('My Plugin', () => {
-  it('should initialize', async () => {
-    const context = createMockContext();
-    await plugin.init(context);
-    expect(context.logger.info).toHaveBeenCalledWith('Plugin initialized');
-  });
+    it('should initialize', async () => {
+        const context = createMockContext();
+        await plugin.init(context);
+        expect(context.logger.info).toHaveBeenCalledWith('Plugin initialized');
+    });
 });
 ```
 
@@ -608,6 +613,7 @@ npm test -- plugins/my-plugin
 ## API Reference
 
 For complete API reference, see:
+
 - [Plugin Types](./backend/src/plugins/types.ts)
 - [Plugin Loader](./backend/src/plugins/PluginLoader.ts)
 - [Plugin Manager](./backend/src/plugins/PluginManager.ts)
@@ -615,12 +621,14 @@ For complete API reference, see:
 ## Support
 
 For questions and support:
+
 - GitHub Issues: [discord-spywatcher/issues](https://github.com/subculture-collective/discord-spywatcher/issues)
 - Documentation: [README.md](./README.md)
 
 ## Contributing
 
 To contribute a plugin:
+
 1. Create your plugin following this guide
 2. Test thoroughly
 3. Document usage and configuration

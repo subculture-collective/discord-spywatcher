@@ -5,6 +5,7 @@ This document describes the monitoring and observability features implemented in
 ## Overview
 
 The application includes comprehensive monitoring with:
+
 - **Sentry** for error tracking and Application Performance Monitoring (APM)
 - **Prometheus** for metrics collection
 - **Winston** for structured logging
@@ -43,27 +44,31 @@ Prometheus metrics are exposed at the `/metrics` endpoint for scraping.
 #### Available Metrics
 
 **Default Metrics** (automatically collected):
+
 - `process_cpu_*` - CPU usage metrics
 - `process_resident_memory_bytes` - Memory usage
 - `nodejs_*` - Node.js-specific metrics
 - `nodejs_gc_*` - Garbage collection metrics
 
 **Custom HTTP Metrics**:
+
 - `http_request_duration_seconds` - HTTP request duration histogram
-  - Labels: `method`, `route`, `status_code`
-  - Buckets: 0.1s, 0.5s, 1s, 2s, 5s
+    - Labels: `method`, `route`, `status_code`
+    - Buckets: 0.1s, 0.5s, 1s, 2s, 5s
 - `http_requests_total` - Total HTTP requests counter
-  - Labels: `method`, `route`, `status_code`
+    - Labels: `method`, `route`, `status_code`
 - `http_requests_errors` - Total HTTP errors counter
-  - Labels: `method`, `route`, `status_code`
+    - Labels: `method`, `route`, `status_code`
 
 **WebSocket Metrics**:
+
 - `websocket_active_connections` - Current number of active WebSocket connections
 
 **Database Metrics**:
+
 - `db_query_duration_seconds` - Database query duration histogram
-  - Labels: `model`, `operation`
-  - Buckets: 0.01s, 0.05s, 0.1s, 0.5s, 1s
+    - Labels: `model`, `operation`
+    - Buckets: 0.01s, 0.05s, 0.1s, 0.5s, 1s
 
 #### Accessing Metrics
 
@@ -75,11 +80,11 @@ curl http://localhost:3001/metrics
 
 ```yaml
 scrape_configs:
-  - job_name: 'spywatcher'
-    static_configs:
-      - targets: ['localhost:3001']
-    metrics_path: '/metrics'
-    scrape_interval: 15s
+    - job_name: 'spywatcher'
+      static_configs:
+          - targets: ['localhost:3001']
+      metrics_path: '/metrics'
+      scrape_interval: 15s
 ```
 
 ### 3. Health Check Endpoints
@@ -93,10 +98,11 @@ Endpoint: `GET /health/live`
 Checks if the service is running.
 
 **Response (200 OK)**:
+
 ```json
 {
-  "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "status": "ok",
+    "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -105,33 +111,36 @@ Checks if the service is running.
 Endpoint: `GET /health/ready`
 
 Checks if the service is ready to handle requests by verifying:
+
 - Database connectivity
 - Redis connectivity (optional)
 - Discord API connectivity
 
 **Response (200 OK - all healthy)**:
+
 ```json
 {
-  "status": "healthy",
-  "checks": {
-    "database": true,
-    "redis": true,
-    "discord": true
-  },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "status": "healthy",
+    "checks": {
+        "database": true,
+        "redis": true,
+        "discord": true
+    },
+    "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
 **Response (503 Service Unavailable - unhealthy)**:
+
 ```json
 {
-  "status": "unhealthy",
-  "checks": {
-    "database": false,
-    "redis": true,
-    "discord": true
-  },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+    "status": "unhealthy",
+    "checks": {
+        "database": false,
+        "redis": true,
+        "discord": true
+    },
+    "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
 
@@ -139,18 +148,18 @@ Checks if the service is ready to handle requests by verifying:
 
 ```yaml
 livenessProbe:
-  httpGet:
-    path: /health/live
-    port: 3001
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  
+    httpGet:
+        path: /health/live
+        port: 3001
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
 readinessProbe:
-  httpGet:
-    path: /health/ready
-    port: 3001
-  initialDelaySeconds: 10
-  periodSeconds: 5
+    httpGet:
+        path: /health/ready
+        port: 3001
+    initialDelaySeconds: 10
+    periodSeconds: 5
 ```
 
 ### 4. Structured Logging with Winston
@@ -169,17 +178,19 @@ Set via `LOG_LEVEL` environment variable (default: `info`).
 #### Log Output
 
 **Console Output**: Human-readable format with colorization
+
 ```
 [2024-01-01T00:00:00.000Z] INFO: Server started on port 3001
 ```
 
 **File Output**: JSON format for log aggregation
+
 ```json
 {
-  "level": "info",
-  "message": "Server started on port 3001",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "service": "discord-spywatcher"
+    "level": "info",
+    "message": "Server started on port 3001",
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "service": "discord-spywatcher"
 }
 ```
 
@@ -197,8 +208,8 @@ Use the `logWithRequestId` helper to include request IDs in logs:
 import { logWithRequestId } from './middleware/winstonLogger';
 
 logWithRequestId('info', 'Processing request', req.id, {
-  userId: user.id,
-  action: 'fetch_data'
+    userId: user.id,
+    action: 'fetch_data',
 });
 ```
 
@@ -207,6 +218,7 @@ logWithRequestId('info', 'Processing request', req.id, {
 ### 1. Alerts Configuration
 
 Set up alerts for critical metrics:
+
 - Error rate > 5%
 - Response time p95 > 2s
 - Database query time > 1s
@@ -215,6 +227,7 @@ Set up alerts for critical metrics:
 ### 2. Dashboard Creation
 
 Create Grafana dashboards for:
+
 - API performance (request rate, duration, errors)
 - Database performance (query duration, connection pool)
 - WebSocket connections
@@ -223,6 +236,7 @@ Create Grafana dashboards for:
 ### 3. Log Aggregation
 
 Configure a log aggregator to collect and analyze logs:
+
 - ELK Stack (Elasticsearch, Logstash, Kibana)
 - Grafana Loki
 - Datadog Logs
@@ -231,6 +245,7 @@ Configure a log aggregator to collect and analyze logs:
 ### 4. Performance Monitoring
 
 Use Sentry's performance monitoring to:
+
 - Identify slow API endpoints
 - Track database query performance
 - Monitor external API calls
@@ -264,24 +279,25 @@ Use Sentry's performance monitoring to:
 ```yaml
 version: '3.8'
 services:
-  app:
-    build: .
-    ports:
-      - "3001:3001"
-    environment:
-      - SENTRY_DSN=${SENTRY_DSN}
-      
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    app:
+        build: .
+        ports:
+            - '3001:3001'
+        environment:
+            - SENTRY_DSN=${SENTRY_DSN}
+
+    prometheus:
+        image: prom/prometheus
+        ports:
+            - '9090:9090'
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
 ```
 
 ### Grafana Dashboard Import
 
 Use the provided Prometheus metrics to create dashboards. Key panels:
+
 - HTTP request rate (rate(http_requests_total[5m]))
 - HTTP request duration (histogram_quantile(0.95, http_request_duration_seconds))
 - Error rate (rate(http_requests_errors[5m]) / rate(http_requests_total[5m]))

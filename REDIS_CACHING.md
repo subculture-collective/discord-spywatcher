@@ -25,15 +25,20 @@ The `CacheService` provides a high-level API for caching with the following feat
 const value = await cache.get<T>(key);
 
 // Set value with TTL and tags
-await cache.set(key, value, { 
-  ttl: 300,  // 5 minutes
-  tags: ['guild:123', 'analytics:ghosts'] 
+await cache.set(key, value, {
+    ttl: 300, // 5 minutes
+    tags: ['guild:123', 'analytics:ghosts'],
 });
 
 // Remember pattern - cache or execute callback
-const result = await cache.remember(key, 300, async () => {
-  return await expensiveOperation();
-}, { tags: ['my-tag'] });
+const result = await cache.remember(
+    key,
+    300,
+    async () => {
+        return await expensiveOperation();
+    },
+    { tags: ['my-tag'] }
+);
 
 // Invalidate by tag
 await cache.invalidateByTag('guild:123');
@@ -52,7 +57,7 @@ await pubsub.publish('channel-name', { data: 'value' });
 
 // Subscribe to channel
 await pubsub.subscribe('channel-name', (message) => {
-  console.log('Received:', message);
+    console.log('Received:', message);
 });
 
 // Specialized helpers
@@ -78,16 +83,17 @@ await cacheInvalidation.onRoleChanged(guildId);
 
 All analytics endpoints use the cache-aside pattern with appropriate TTLs:
 
-| Endpoint | Function | TTL | Cache Key Pattern | Tags |
-|----------|----------|-----|-------------------|------|
-| Ghost Scores | `getGhostScores` | 5 min | `analytics:ghosts:{guildId}:{since}` | `guild:{guildId}`, `analytics:ghosts` |
-| Lurker Flags | `getLurkerFlags` | 5 min | `analytics:lurkers:{guildId}:{since}` | `guild:{guildId}`, `analytics:lurkers` |
-| Heatmap | `getChannelHeatmap` | 15 min | `analytics:heatmap:{guildId}:{since}` | `guild:{guildId}`, `analytics:heatmap` |
-| Role Drift | `getRoleDriftFlags` | 10 min | `analytics:roles:{guildId}:{since}` | `guild:{guildId}`, `analytics:roles` |
-| Client Drift | `getClientDriftFlags` | 2 min | `analytics:clients:{guildId}:{since}` | `guild:{guildId}`, `analytics:clients` |
-| Behavior Shifts | `getBehaviorShiftFlags` | 5 min | `analytics:shifts:{guildId}:{since}` | `guild:{guildId}`, `analytics:shifts` |
+| Endpoint        | Function                | TTL    | Cache Key Pattern                     | Tags                                   |
+| --------------- | ----------------------- | ------ | ------------------------------------- | -------------------------------------- |
+| Ghost Scores    | `getGhostScores`        | 5 min  | `analytics:ghosts:{guildId}:{since}`  | `guild:{guildId}`, `analytics:ghosts`  |
+| Lurker Flags    | `getLurkerFlags`        | 5 min  | `analytics:lurkers:{guildId}:{since}` | `guild:{guildId}`, `analytics:lurkers` |
+| Heatmap         | `getChannelHeatmap`     | 15 min | `analytics:heatmap:{guildId}:{since}` | `guild:{guildId}`, `analytics:heatmap` |
+| Role Drift      | `getRoleDriftFlags`     | 10 min | `analytics:roles:{guildId}:{since}`   | `guild:{guildId}`, `analytics:roles`   |
+| Client Drift    | `getClientDriftFlags`   | 2 min  | `analytics:clients:{guildId}:{since}` | `guild:{guildId}`, `analytics:clients` |
+| Behavior Shifts | `getBehaviorShiftFlags` | 5 min  | `analytics:shifts:{guildId}:{since}`  | `guild:{guildId}`, `analytics:shifts`  |
 
 **Rationale:**
+
 - **Ghost/Lurker/Shifts**: 5 minutes - Moderate volatility, balance freshness with DB load
 - **Heatmap**: 15 minutes - Slower-changing aggregate data
 - **Roles**: 10 minutes - Role changes are infrequent
@@ -162,16 +168,19 @@ For high availability in production, use Redis Cluster:
 
 ```typescript
 // backend/src/utils/redis.ts
-const redisCluster = new Redis.Cluster([
-  { host: 'redis-node-1', port: 6379 },
-  { host: 'redis-node-2', port: 6379 },
-  { host: 'redis-node-3', port: 6379 },
-], {
-  redisOptions: {
-    password: process.env.REDIS_PASSWORD,
-    tls: process.env.NODE_ENV === 'production' ? {} : undefined,
-  },
-});
+const redisCluster = new Redis.Cluster(
+    [
+        { host: 'redis-node-1', port: 6379 },
+        { host: 'redis-node-2', port: 6379 },
+        { host: 'redis-node-3', port: 6379 },
+    ],
+    {
+        redisOptions: {
+            password: process.env.REDIS_PASSWORD,
+            tls: process.env.NODE_ENV === 'production' ? {} : undefined,
+        },
+    }
+);
 ```
 
 ### Memory Management
@@ -191,18 +200,19 @@ maxmemory-policy allkeys-lru
 `GET /api/admin/monitoring/cache/stats`
 
 Returns:
+
 ```json
 {
-  "stats": {
-    "hits": 1000,
-    "misses": 200,
-    "hitRate": 83.33,
-    "memoryUsed": "2.5M",
-    "evictedKeys": 5,
-    "keyCount": 150
-  },
-  "status": "healthy",
-  "timestamp": "2025-10-29T19:00:00.000Z"
+    "stats": {
+        "hits": 1000,
+        "misses": 200,
+        "hitRate": 83.33,
+        "memoryUsed": "2.5M",
+        "evictedKeys": 5,
+        "keyCount": 150
+    },
+    "status": "healthy",
+    "timestamp": "2025-10-29T19:00:00.000Z"
 }
 ```
 
@@ -227,6 +237,7 @@ console.log(`Cache get error for key ${key}:`, error);
 ### 1. Use Appropriate TTLs
 
 Choose TTLs based on:
+
 - Data volatility
 - Query cost
 - Freshness requirements
@@ -237,8 +248,8 @@ Always include tags for efficient invalidation:
 
 ```typescript
 await cache.set(key, value, {
-  ttl: 300,
-  tags: [`guild:${guildId}`, `analytics:${type}`]
+    ttl: 300,
+    tags: [`guild:${guildId}`, `analytics:${type}`],
 });
 ```
 
@@ -272,8 +283,8 @@ const data = await cache.remember(key, ttl, () => fetchData());
 // Verbose ❌
 let data = await cache.get(key);
 if (!data) {
-  data = await fetchData();
-  await cache.set(key, data, { ttl });
+    data = await fetchData();
+    await cache.set(key, data, { ttl });
 }
 ```
 
@@ -286,8 +297,8 @@ The PubSub service is ready for WebSocket integration:
 ```typescript
 // Subscribe to analytics updates
 pubsub.subscribe(`analytics:ghosts:${guildId}`, (data) => {
-  // Broadcast to WebSocket clients
-  io.to(guildId).emit('analytics:update', data);
+    // Broadcast to WebSocket clients
+    io.to(guildId).emit('analytics:update', data);
 });
 
 // Publish updates when cache is invalidated
@@ -299,19 +310,21 @@ await pubsub.publishAnalyticsUpdate(guildId, 'ghosts', freshData);
 ### Cache Not Working
 
 1. **Check Redis Connection**
-   ```bash
-   redis-cli ping  # Should return PONG
-   ```
+
+    ```bash
+    redis-cli ping  # Should return PONG
+    ```
 
 2. **Verify Environment Variables**
-   ```bash
-   echo $REDIS_URL
-   echo $ENABLE_REDIS_RATE_LIMITING
-   ```
+
+    ```bash
+    echo $REDIS_URL
+    echo $ENABLE_REDIS_RATE_LIMITING
+    ```
 
 3. **Check Logs**
-   - Look for "Redis connected successfully"
-   - Look for "Redis connection error"
+    - Look for "Redis connected successfully"
+    - Look for "Redis connection error"
 
 ### Low Hit Rate
 
@@ -393,12 +406,12 @@ import { cache } from './services/cache';
 
 // Warm cache with initial data
 await cache.warm([
-  { 
-    key: 'analytics:ghosts:123:all', 
-    value: await fetchGhostData('123'), 
-    options: { ttl: 300, tags: ['guild:123'] }
-  },
-  // ... more entries
+    {
+        key: 'analytics:ghosts:123:all',
+        value: await fetchGhostData('123'),
+        options: { ttl: 300, tags: ['guild:123'] },
+    },
+    // ... more entries
 ]);
 ```
 

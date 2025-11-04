@@ -48,19 +48,19 @@ Configuration is handled by the scheduled tasks system in `src/utils/scheduledTa
 ### Backup Types
 
 1. **Full Backup** (`BACKUP_TYPE=FULL`)
-   - Complete database dump
-   - Compressed with gzip
-   - Optionally encrypted with GPG
-   - Stored in S3 and locally
+    - Complete database dump
+    - Compressed with gzip
+    - Optionally encrypted with GPG
+    - Stored in S3 and locally
 
 2. **Incremental Backup** (`BACKUP_TYPE=INCREMENTAL`)
-   - WAL (Write-Ahead Log) segments
-   - Enables point-in-time recovery
-   - Automatically archived every hour
+    - WAL (Write-Ahead Log) segments
+    - Enables point-in-time recovery
+    - Automatically archived every hour
 
 3. **WAL Archive** (`BACKUP_TYPE=WAL_ARCHIVE`)
-   - Continuous archiving of transaction logs
-   - Required for point-in-time recovery
+    - Continuous archiving of transaction logs
+    - Required for point-in-time recovery
 
 ## Recovery Operations
 
@@ -98,6 +98,7 @@ cd scripts
 ```
 
 Example:
+
 ```bash
 ./restore.sh s3://spywatcher-backups/postgres/full/backup.dump.gz "2024-01-25 14:30:00"
 ```
@@ -112,6 +113,7 @@ npm run backup:health-check
 ```
 
 Returns:
+
 - Last successful backup time
 - Any issues detected
 - Overall health status
@@ -124,6 +126,7 @@ npm run backup:stats
 ```
 
 Returns:
+
 - Total backups
 - Success rate
 - Average size and duration
@@ -143,8 +146,8 @@ Lists the 10 most recent backups with their status.
 All backup operations are logged to the database in the `BackupLog` table:
 
 ```sql
-SELECT * FROM "BackupLog" 
-ORDER BY "startedAt" DESC 
+SELECT * FROM "BackupLog"
+ORDER BY "startedAt" DESC
 LIMIT 10;
 ```
 
@@ -188,6 +191,7 @@ sudo ./setup-wal-archiving.sh
 ```
 
 This will:
+
 1. Configure PostgreSQL for WAL archiving
 2. Set up archive command
 3. Enable point-in-time recovery
@@ -201,6 +205,7 @@ sudo -u postgres psql -c "SELECT * FROM pg_stat_archiver;"
 ```
 
 Check for:
+
 - `archived_count` increasing over time
 - `failed_count` should be 0
 - `last_archived_time` should be recent
@@ -210,52 +215,57 @@ Check for:
 ### Backup Fails
 
 **Check logs:**
+
 ```bash
 tail -f /var/log/postgresql/postgresql-15-main.log
 ```
 
 **Common issues:**
+
 1. **Disk space full**
-   ```bash
-   df -h /var/backups/spywatcher
-   ```
+
+    ```bash
+    df -h /var/backups/spywatcher
+    ```
 
 2. **Database connection issues**
-   ```bash
-   psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "SELECT 1;"
-   ```
+
+    ```bash
+    psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "SELECT 1;"
+    ```
 
 3. **S3 permissions**
-   ```bash
-   aws s3 ls s3://$S3_BUCKET/
-   ```
+    ```bash
+    aws s3 ls s3://$S3_BUCKET/
+    ```
 
 ### Restore Fails
 
 **Common issues:**
 
 1. **File not found**
-   - Check backup file path
-   - Verify S3 bucket and key
-   - Ensure AWS credentials are configured
+    - Check backup file path
+    - Verify S3 bucket and key
+    - Ensure AWS credentials are configured
 
 2. **Decryption fails**
-   - Verify GPG key is available
-   - Check GPG recipient matches
+    - Verify GPG key is available
+    - Check GPG recipient matches
 
 3. **Database locked**
-   - Stop the application first
-   - Kill existing connections:
-     ```sql
-     SELECT pg_terminate_backend(pg_stat_activity.pid)
-     FROM pg_stat_activity
-     WHERE pg_stat_activity.datname = 'spywatcher'
-       AND pid <> pg_backend_pid();
-     ```
+    - Stop the application first
+    - Kill existing connections:
+        ```sql
+        SELECT pg_terminate_backend(pg_stat_activity.pid)
+        FROM pg_stat_activity
+        WHERE pg_stat_activity.datname = 'spywatcher'
+          AND pid <> pg_backend_pid();
+        ```
 
 ### No Recent Backups
 
 **Check scheduled tasks:**
+
 ```bash
 # Check if scheduled tasks are running
 ps aux | grep node | grep scheduledTasks
@@ -265,6 +275,7 @@ tail -f logs/app.log
 ```
 
 **Manual trigger:**
+
 ```bash
 cd backend
 npm run db:backup
@@ -273,13 +284,15 @@ npm run db:backup
 ### Backup Size Abnormal
 
 **Check database size:**
+
 ```sql
 SELECT pg_size_pretty(pg_database_size('spywatcher'));
 ```
 
 **Check for data growth:**
+
 ```sql
-SELECT 
+SELECT
   schemaname,
   tablename,
   pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
@@ -291,16 +304,19 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ### WAL Archiving Not Working
 
 **Check archive status:**
+
 ```sql
 SELECT * FROM pg_stat_archiver;
 ```
 
 **Check PostgreSQL config:**
+
 ```bash
 grep -E "wal_level|archive_mode|archive_command" /etc/postgresql/15/main/postgresql.conf
 ```
 
 **Check archive directory permissions:**
+
 ```bash
 ls -la /var/lib/postgresql/wal_archive/
 # or for S3
@@ -310,31 +326,31 @@ aws s3 ls s3://$S3_BUCKET/wal/
 ## Best Practices
 
 1. **Test Restores Regularly**
-   - Monthly restore to test database
-   - Quarterly disaster recovery drills
-   - Document restore times
+    - Monthly restore to test database
+    - Quarterly disaster recovery drills
+    - Document restore times
 
 2. **Monitor Backup Health**
-   - Review backup health check daily
-   - Set up alerts for failures
-   - Monitor backup size trends
+    - Review backup health check daily
+    - Set up alerts for failures
+    - Monitor backup size trends
 
 3. **Keep Multiple Copies**
-   - Local backups (7 days)
-   - Primary S3 bucket (30 days)
-   - Secondary S3 bucket in different region
+    - Local backups (7 days)
+    - Primary S3 bucket (30 days)
+    - Secondary S3 bucket in different region
 
 4. **Secure Your Backups**
-   - Enable encryption for sensitive data
-   - Use strong GPG keys
-   - Rotate keys regularly
-   - Restrict S3 bucket access
+    - Enable encryption for sensitive data
+    - Use strong GPG keys
+    - Rotate keys regularly
+    - Restrict S3 bucket access
 
 5. **Document Everything**
-   - Keep this guide updated
-   - Document any custom procedures
-   - Maintain contact lists
-   - Record drill results
+    - Keep this guide updated
+    - Document any custom procedures
+    - Maintain contact lists
+    - Record drill results
 
 ## Emergency Contacts
 

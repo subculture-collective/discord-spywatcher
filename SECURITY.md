@@ -81,7 +81,10 @@ Strict CORS policy:
 
 ## 🚨 Reporting a Vulnerability
 
-If you discover a security vulnerability, please email security@example.com (or create a private security advisory on GitHub).
+If you discover a security vulnerability, please report it responsibly:
+
+1. **Preferred Method**: Create a [private security advisory](https://github.com/subculture-collective/discord-spywatcher/security/advisories/new) on GitHub
+2. **Alternative**: Contact the maintainers directly through GitHub
 
 **Please do NOT create public issues for security vulnerabilities.**
 
@@ -104,9 +107,9 @@ If you discover a security vulnerability, please email security@example.com (or 
 
 1. Never commit `.env` files to version control
 2. Use strong, randomly generated secrets for JWT keys:
-   ```bash
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   ```
+    ```bash
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+    ```
 3. Rotate secrets regularly (quarterly recommended)
 4. Use different secrets for each environment (dev, staging, production)
 

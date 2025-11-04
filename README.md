@@ -54,6 +54,7 @@ Explore and test the API using our interactive documentation portals:
 - **[OpenAPI Spec](http://localhost:3001/api/openapi.json)** - Raw OpenAPI 3.0 specification
 
 **Quick Links:**
+
 - 📖 [Interactive API Guide](./docs/api/INTERACTIVE_API_GUIDE.md) - Code examples in 6+ languages
 - 🔐 [Authentication Guide](./docs/api/AUTHENTICATION_GUIDE.md) - OAuth2 setup and JWT management
 - ⚡ [Rate Limiting Guide](./docs/api/RATE_LIMITING_GUIDE.md) - Best practices and optimization
@@ -72,6 +73,7 @@ npm run docs:preview
 ```
 
 Documentation is built with [VitePress](https://vitepress.dev/) and includes:
+
 - Interactive search
 - Dark mode support
 - Mobile-responsive design
@@ -106,6 +108,7 @@ docker-compose -f docker-compose.dev.yml up
 ```
 
 Access the application:
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
 - PostgreSQL: localhost:5432
@@ -175,37 +178,38 @@ Copy `backend/.env.example` to `backend/.env` and configure the following variab
 
 #### Required Variables
 
-| Variable | Description | Example | Validation |
-|----------|-------------|---------|------------|
-| `DISCORD_BOT_TOKEN` | Discord bot token from Developer Portal | `MTk...` | Min 50 characters |
-| `DISCORD_CLIENT_ID` | OAuth2 client ID | `123456789` | Min 10 characters |
-| `DISCORD_CLIENT_SECRET` | OAuth2 client secret | `abc123...` | Min 20 characters |
-| `DISCORD_REDIRECT_URI` | OAuth2 redirect URI | `http://localhost:5173/auth/callback` | Valid URL |
-| `JWT_SECRET` | Secret for signing access tokens | `random-32-char-string` | Min 32 characters |
-| `JWT_REFRESH_SECRET` | Secret for signing refresh tokens | `another-32-char-string` | Min 32 characters |
+| Variable                | Description                             | Example                               | Validation        |
+| ----------------------- | --------------------------------------- | ------------------------------------- | ----------------- |
+| `DISCORD_BOT_TOKEN`     | Discord bot token from Developer Portal | `MTk...`                              | Min 50 characters |
+| `DISCORD_CLIENT_ID`     | OAuth2 client ID                        | `123456789`                           | Min 10 characters |
+| `DISCORD_CLIENT_SECRET` | OAuth2 client secret                    | `abc123...`                           | Min 20 characters |
+| `DISCORD_REDIRECT_URI`  | OAuth2 redirect URI                     | `http://localhost:5173/auth/callback` | Valid URL         |
+| `JWT_SECRET`            | Secret for signing access tokens        | `random-32-char-string`               | Min 32 characters |
+| `JWT_REFRESH_SECRET`    | Secret for signing refresh tokens       | `another-32-char-string`              | Min 32 characters |
 
 #### Optional Variables
 
-| Variable | Description | Default | Validation |
-|----------|-------------|---------|------------|
-| `NODE_ENV` | Environment mode | `development` | `development`, `staging`, `production`, `test` |
-| `PORT` | Server port | `3001` | Positive integer |
-| `DATABASE_URL` | PostgreSQL connection string | - | Valid URL |
-| `DISCORD_GUILD_ID` | Optional specific guild ID | - | String |
-| `BOT_GUILD_IDS` | Comma-separated guild IDs to monitor | - | Comma-separated list |
-| `ADMIN_DISCORD_IDS` | Comma-separated admin user IDs | - | Comma-separated list |
-| `CORS_ORIGINS` | Comma-separated allowed origins | `http://localhost:5173` | Comma-separated URLs |
-| `JWT_ACCESS_EXPIRES_IN` | Access token expiration | `15m` | Time string |
-| `JWT_REFRESH_EXPIRES_IN` | Refresh token expiration | `7d` | Time string |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379` | Valid URL |
-| `ENABLE_RATE_LIMITING` | Enable rate limiting | `true` | `true` or `false` |
-| `ENABLE_REDIS_RATE_LIMITING` | Enable Redis-backed rate limiting | `true` | `true` or `false` |
-| `ENABLE_IP_BLOCKING` | Enable IP blocking | `true` | `true` or `false` |
-| `ENABLE_LOAD_SHEDDING` | Enable load shedding under high load | `true` | `true` or `false` |
-| `LOG_LEVEL` | Logging level | `info` | `error`, `warn`, `info`, `debug` |
-| `FRONTEND_URL` | Frontend URL for redirects | - | Valid URL |
+| Variable                     | Description                          | Default                  | Validation                                     |
+| ---------------------------- | ------------------------------------ | ------------------------ | ---------------------------------------------- |
+| `NODE_ENV`                   | Environment mode                     | `development`            | `development`, `staging`, `production`, `test` |
+| `PORT`                       | Server port                          | `3001`                   | Positive integer                               |
+| `DATABASE_URL`               | PostgreSQL connection string         | -                        | Valid URL                                      |
+| `DISCORD_GUILD_ID`           | Optional specific guild ID           | -                        | String                                         |
+| `BOT_GUILD_IDS`              | Comma-separated guild IDs to monitor | -                        | Comma-separated list                           |
+| `ADMIN_DISCORD_IDS`          | Comma-separated admin user IDs       | -                        | Comma-separated list                           |
+| `CORS_ORIGINS`               | Comma-separated allowed origins      | `http://localhost:5173`  | Comma-separated URLs                           |
+| `JWT_ACCESS_EXPIRES_IN`      | Access token expiration              | `15m`                    | Time string                                    |
+| `JWT_REFRESH_EXPIRES_IN`     | Refresh token expiration             | `7d`                     | Time string                                    |
+| `REDIS_URL`                  | Redis connection string              | `redis://localhost:6379` | Valid URL                                      |
+| `ENABLE_RATE_LIMITING`       | Enable rate limiting                 | `true`                   | `true` or `false`                              |
+| `ENABLE_REDIS_RATE_LIMITING` | Enable Redis-backed rate limiting    | `true`                   | `true` or `false`                              |
+| `ENABLE_IP_BLOCKING`         | Enable IP blocking                   | `true`                   | `true` or `false`                              |
+| `ENABLE_LOAD_SHEDDING`       | Enable load shedding under high load | `true`                   | `true` or `false`                              |
+| `LOG_LEVEL`                  | Logging level                        | `info`                   | `error`, `warn`, `info`, `debug`               |
+| `FRONTEND_URL`               | Frontend URL for redirects           | -                        | Valid URL                                      |
 
 **Generate secure secrets:**
+
 ```bash
 # Generate JWT secrets
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -215,15 +219,16 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 Copy `frontend/.env.example` to `frontend/.env` and configure:
 
-| Variable | Description | Example | Required |
-|----------|-------------|---------|----------|
-| `VITE_API_URL` | Backend API base URL | `http://localhost:3001/api` | Yes |
-| `VITE_DISCORD_CLIENT_ID` | Discord OAuth2 client ID | `123456789` | Yes |
-| `VITE_ENVIRONMENT` | Environment mode | `development` | No (default: `development`) |
-| `VITE_ENABLE_ANALYTICS` | Enable analytics tracking | `false` | No (default: `false`) |
-| `VITE_ANALYTICS_TRACKING_ID` | Analytics tracking ID | - | No |
+| Variable                     | Description               | Example                     | Required                    |
+| ---------------------------- | ------------------------- | --------------------------- | --------------------------- |
+| `VITE_API_URL`               | Backend API base URL      | `http://localhost:3001/api` | Yes                         |
+| `VITE_DISCORD_CLIENT_ID`     | Discord OAuth2 client ID  | `123456789`                 | Yes                         |
+| `VITE_ENVIRONMENT`           | Environment mode          | `development`               | No (default: `development`) |
+| `VITE_ENABLE_ANALYTICS`      | Enable analytics tracking | `false`                     | No (default: `false`)       |
+| `VITE_ANALYTICS_TRACKING_ID` | Analytics tracking ID     | -                           | No                          |
 
 **Important Notes:**
+
 - All frontend variables must be prefixed with `VITE_` to be exposed to the browser
 - Never include secrets in frontend environment variables
 - Frontend variables are embedded in the build and publicly accessible
@@ -232,12 +237,14 @@ Copy `frontend/.env.example` to `frontend/.env` and configure:
 ### Environment Validation
 
 The backend uses [Zod](https://zod.dev/) for runtime environment validation:
+
 - All required variables are validated on startup
 - Type safety is enforced (strings, numbers, URLs, enums)
 - Clear error messages for missing or invalid configuration
 - Application exits with code 1 if validation fails
 
 Example validation error:
+
 ```
 ❌ Invalid environment configuration:
 
@@ -258,6 +265,7 @@ Spywatcher implements comprehensive security measures to protect against abuse a
 - **Load management** with circuit breakers and load shedding under high load
 
 See [RATE_LIMITING.md](./RATE_LIMITING.md) for detailed documentation on:
+
 - Rate limiting configuration
 - Endpoint-specific limits
 - DDoS protection mechanisms
@@ -274,6 +282,7 @@ Spywatcher uses PostgreSQL with PgBouncer for efficient connection pooling and r
 - **Graceful shutdown** - Proper connection cleanup on application shutdown
 
 See [CONNECTION_POOLING.md](./CONNECTION_POOLING.md) for detailed documentation on:
+
 - PgBouncer setup and configuration
 - Connection pool monitoring and metrics
 - Database health checks and alerting
@@ -281,6 +290,7 @@ See [CONNECTION_POOLING.md](./CONNECTION_POOLING.md) for detailed documentation 
 - Troubleshooting connection issues
 
 Additional database documentation:
+
 - [POSTGRESQL.md](./POSTGRESQL.md) - PostgreSQL setup and management
 - [DATABASE_OPTIMIZATION.md](./DATABASE_OPTIMIZATION.md) - Query optimization and indexing
 - [docs/PGBOUNCER_SETUP.md](./docs/PGBOUNCER_SETUP.md) - Quick reference guide
@@ -297,10 +307,12 @@ Spywatcher implements comprehensive backup and disaster recovery procedures to e
 - **Recovery Procedures** - Documented runbooks for various disaster scenarios
 
 **Recovery Objectives:**
+
 - **RTO** (Recovery Time Objective): < 4 hours
 - **RPO** (Recovery Point Objective): < 1 hour
 
 See [DISASTER_RECOVERY.md](./DISASTER_RECOVERY.md) for detailed documentation on:
+
 - Backup strategy and configuration
 - Automated backup scripts and schedules
 - WAL archiving setup for PITR
@@ -309,6 +321,7 @@ See [DISASTER_RECOVERY.md](./DISASTER_RECOVERY.md) for detailed documentation on
 - Monitoring and alerting setup
 
 **Quick Commands:**
+
 ```bash
 # Manual database backup
 cd backend && npm run db:backup
@@ -336,6 +349,7 @@ Spywatcher includes comprehensive monitoring and observability features:
 - **Grafana** - Unified dashboards for logs and metrics
 
 See [MONITORING.md](./MONITORING.md) for detailed documentation on:
+
 - Sentry configuration and error tracking
 - Prometheus metrics and custom instrumentation
 - Health check endpoints
@@ -344,6 +358,7 @@ See [MONITORING.md](./MONITORING.md) for detailed documentation on:
 - Grafana dashboard creation
 
 See [LOGGING.md](./LOGGING.md) for centralized logging documentation:
+
 - Log aggregation with Grafana Loki
 - Log search and filtering with LogQL
 - Log retention policies (30-day default)
@@ -400,8 +415,8 @@ npm install @spywatcher/sdk
 import { Spywatcher } from '@spywatcher/sdk';
 
 const client = new Spywatcher({
-  baseUrl: 'https://api.spywatcher.com/api',
-  apiKey: 'spy_live_your_api_key_here'
+    baseUrl: 'https://api.spywatcher.com/api',
+    apiKey: 'spy_live_your_api_key_here',
 });
 
 // Get ghost users
@@ -414,9 +429,9 @@ const suspicions = await client.getSuspicionData();
 ### API Documentation
 
 - **[Interactive API Documentation](./docs/API_DOCUMENTATION.md)** - OpenAPI/Swagger docs with screenshots
-  - **Swagger UI**: `/api/docs` - Interactive testing interface
-  - **ReDoc**: `/api/redoc` - Clean, professional documentation view
-  - **OpenAPI Spec**: `/api/openapi.json` - Raw OpenAPI 3.0 specification
+    - **Swagger UI**: `/api/docs` - Interactive testing interface
+    - **ReDoc**: `/api/redoc` - Clean, professional documentation view
+    - **OpenAPI Spec**: `/api/openapi.json` - Raw OpenAPI 3.0 specification
 - **[Public API Reference](./docs/PUBLIC_API.md)** - Complete API documentation with examples
 - **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Step-by-step guide for building integrations
 - **[SDK Documentation](./sdk/README.md)** - TypeScript/JavaScript SDK usage guide
@@ -473,16 +488,16 @@ npm run dev:api
 The repository includes three example plugins:
 
 1. **Message Logger** (`backend/plugins/examples/message-logger/`)
-   - Logs all Discord messages to a file
-   - Demonstrates basic plugin structure and Discord event hooks
+    - Logs all Discord messages to a file
+    - Demonstrates basic plugin structure and Discord event hooks
 
 2. **Analytics Extension** (`backend/plugins/examples/analytics-extension/`)
-   - Adds custom analytics API endpoints
-   - Shows database access and Redis caching
+    - Adds custom analytics API endpoints
+    - Shows database access and Redis caching
 
 3. **Webhook Notifier** (`backend/plugins/examples/webhook-notifier/`)
-   - Sends notifications to external webhooks
-   - Demonstrates network access and event monitoring
+    - Sends notifications to external webhooks
+    - Demonstrates network access and event monitoring
 
 ### Plugin Management API
 
@@ -583,15 +598,15 @@ Spywatcher includes comprehensive production deployment infrastructure with Kube
 ### Infrastructure as Code
 
 - **Terraform**: Complete AWS infrastructure modules
-  - VPC with multi-AZ setup
-  - EKS Kubernetes cluster
-  - RDS PostgreSQL (Multi-AZ, encrypted)
-  - ElastiCache Redis (encrypted, failover)
-  - Application Load Balancer with WAF
+    - VPC with multi-AZ setup
+    - EKS Kubernetes cluster
+    - RDS PostgreSQL (Multi-AZ, encrypted)
+    - ElastiCache Redis (encrypted, failover)
+    - Application Load Balancer with WAF
 - **Kubernetes**: Production-ready manifests
-  - Auto-scaling with HorizontalPodAutoscaler
-  - Health checks and pod disruption budgets
-  - Security contexts and network policies
+    - Auto-scaling with HorizontalPodAutoscaler
+    - Health checks and pod disruption budgets
+    - Security contexts and network policies
 - **Helm Charts**: Simplified deployment and configuration
 
 ### Quick Deployment
@@ -625,6 +640,7 @@ helm install spywatcher ./helm/spywatcher -n spywatcher
 ### CI/CD Pipeline
 
 GitHub Actions workflows for automated deployment:
+
 - Docker image building and pushing to GHCR
 - Database migrations
 - Multiple deployment strategy support
@@ -635,7 +651,9 @@ See [.github/workflows/deploy-production.yml](./.github/workflows/deploy-product
 
 ## 👥 Contributions
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on contributing to this project.
+We welcome contributions from everyone! Please read our [Contributing Guidelines](./CONTRIBUTING.md) to get started.
+
+This project follows a [Code of Conduct](./CODE_OF_CONDUCT.md) to ensure a welcoming environment for all contributors.
 
 ---
 

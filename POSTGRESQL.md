@@ -3,6 +3,7 @@
 This guide covers the PostgreSQL configuration, features, and management for Discord SpyWatcher.
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [PostgreSQL-Specific Features](#postgresql-specific-features)
 - [Connection Configuration](#connection-configuration)
@@ -15,6 +16,7 @@ This guide covers the PostgreSQL configuration, features, and management for Dis
 ## Overview
 
 Discord SpyWatcher uses PostgreSQL 15+ as its production database, providing:
+
 - Advanced data types (JSONB, arrays, UUIDs, timestamps with timezone)
 - Full-text search capabilities
 - Better concurrency and performance
@@ -26,54 +28,58 @@ Discord SpyWatcher uses PostgreSQL 15+ as its production database, providing:
 ### Advanced Data Types
 
 #### JSONB Fields
+
 All event models include a `metadata` field using JSONB for flexible, queryable JSON storage:
 
 ```typescript
 // Store flexible metadata
 await db.presenceEvent.create({
-  data: {
-    userId: "123",
-    username: "user",
-    clients: ["desktop", "mobile"],
-    metadata: {
-      status: "online",
-      activities: ["gaming"],
-      customField: "value"
-    }
-  }
+    data: {
+        userId: '123',
+        username: 'user',
+        clients: ['desktop', 'mobile'],
+        metadata: {
+            status: 'online',
+            activities: ['gaming'],
+            customField: 'value',
+        },
+    },
 });
 
 // Query JSONB data
 const events = await db.presenceEvent.findMany({
-  where: {
-    metadata: {
-      path: ['status'],
-      equals: 'online'
-    }
-  }
+    where: {
+        metadata: {
+            path: ['status'],
+            equals: 'online',
+        },
+    },
 });
 ```
 
 #### Array Fields
+
 Comma-separated strings have been converted to native PostgreSQL arrays:
 
 ```typescript
 // PresenceEvent.clients - array of client types
-clients: ["desktop", "web", "mobile"]
+clients: ['desktop', 'web', 'mobile'];
 
 // RoleChangeEvent.addedRoles - array of role IDs
-addedRoles: ["123456789", "987654321"]
+addedRoles: ['123456789', '987654321'];
 ```
 
 #### UUID Primary Keys
+
 Event models use UUIDs for better distribution and security:
 
 ```typescript
 // Auto-generated UUID
-id: "550e8400-e29b-41d4-a716-446655440000"
+id: '550e8400-e29b-41d4-a716-446655440000';
 ```
 
 #### Timezone-Aware Timestamps
+
 All timestamp fields use `TIMESTAMPTZ` for proper timezone handling:
 
 ```typescript
@@ -93,6 +99,7 @@ DB_PASSWORD=yourpassword ./scripts/setup-fulltext-search.sh
 ```
 
 This creates:
+
 - A generated `content_search` tsvector column
 - A GIN index for efficient text searches
 
@@ -122,6 +129,7 @@ const results = await db.$queryRaw`
 ```
 
 #### Search Operators
+
 - `&` - AND (both terms must be present)
 - `|` - OR (either term can be present)
 - `!` - NOT (term must not be present)
@@ -132,6 +140,7 @@ Example: `'cat & dog'` finds messages with both "cat" and "dog"
 ### Performance Features
 
 #### Optimized Indexes
+
 The schema includes strategic indexes for common queries:
 
 ```prisma
@@ -152,6 +161,7 @@ The schema includes strategic indexes for common queries:
 ```
 
 #### Composite Indexes
+
 Some models use composite indexes for complex queries:
 
 ```prisma
@@ -169,26 +179,29 @@ DATABASE_URL="postgresql://username:password@host:port/database?schema=public&co
 
 ### Connection Pooling Parameters
 
-| Parameter | Recommended Value | Description |
-|-----------|-------------------|-------------|
-| `connection_limit` | 10-50 | Maximum number of connections in the pool |
-| `pool_timeout` | 20 | Seconds to wait for an available connection |
-| `connect_timeout` | 10 | Seconds to wait for initial connection |
-| `sslmode` | require (prod) | SSL/TLS encryption mode |
+| Parameter          | Recommended Value | Description                                 |
+| ------------------ | ----------------- | ------------------------------------------- |
+| `connection_limit` | 10-50             | Maximum number of connections in the pool   |
+| `pool_timeout`     | 20                | Seconds to wait for an available connection |
+| `connect_timeout`  | 10                | Seconds to wait for initial connection      |
+| `sslmode`          | require (prod)    | SSL/TLS encryption mode                     |
 
 ### Example Configurations
 
 #### Development
+
 ```bash
 DATABASE_URL="postgresql://spywatcher:password@localhost:5432/spywatcher?connection_limit=10&pool_timeout=20"
 ```
 
 #### Production
+
 ```bash
 DATABASE_URL="postgresql://spywatcher:securepassword@db.example.com:5432/spywatcher?sslmode=require&connection_limit=50&pool_timeout=20&connect_timeout=10"
 ```
 
 #### Docker
+
 ```bash
 DATABASE_URL="postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher?connection_limit=20&pool_timeout=20"
 ```
@@ -198,17 +211,20 @@ DATABASE_URL="postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher?co
 ### Migrations
 
 #### Create a Migration
+
 ```bash
 cd backend
 npx prisma migrate dev --name add_new_feature
 ```
 
 #### Apply Migrations (Production)
+
 ```bash
 npx prisma migrate deploy
 ```
 
 #### Reset Database (Development Only)
+
 ```bash
 npx prisma migrate reset
 ```
@@ -264,36 +280,39 @@ command:
 ### Query Optimization
 
 #### Use Indexes Effectively
+
 ```typescript
 // Good - uses index
 const events = await db.presenceEvent.findMany({
-  where: { userId: "123" },
-  orderBy: { createdAt: 'desc' }
+    where: { userId: '123' },
+    orderBy: { createdAt: 'desc' },
 });
 
 // Bad - no index on username alone
 const events = await db.presenceEvent.findMany({
-  where: { username: "john" }
+    where: { username: 'john' },
 });
 ```
 
 #### Batch Operations
+
 ```typescript
 // Use createMany for bulk inserts
 await db.presenceEvent.createMany({
-  data: events,
-  skipDuplicates: true
+    data: events,
+    skipDuplicates: true,
 });
 ```
 
 #### Pagination
+
 ```typescript
 // Efficient pagination with cursor
 const events = await db.presenceEvent.findMany({
-  take: 20,
-  skip: 1,
-  cursor: { id: lastId },
-  orderBy: { createdAt: 'desc' }
+    take: 20,
+    skip: 1,
+    cursor: { id: lastId },
+    orderBy: { createdAt: 'desc' },
 });
 ```
 
@@ -303,7 +322,7 @@ Enable query logging in development:
 
 ```typescript
 const db = new PrismaClient({
-  log: ['query', 'error', 'warn'],
+    log: ['query', 'error', 'warn'],
 });
 ```
 
@@ -322,6 +341,7 @@ DB_PASSWORD=yourpassword npm run db:backup
 ```
 
 ### Backup Features
+
 - Compressed backups (gzip)
 - 30-day retention by default
 - Optional S3 upload
@@ -349,6 +369,7 @@ ALTER SYSTEM SET archive_command = 'cp %p /path/to/archive/%f';
 ### Database Metrics
 
 #### Connection Count
+
 ```sql
 SELECT count(*), state
 FROM pg_stat_activity
@@ -357,11 +378,13 @@ GROUP BY state;
 ```
 
 #### Database Size
+
 ```sql
 SELECT pg_size_pretty(pg_database_size('spywatcher'));
 ```
 
 #### Table Sizes
+
 ```sql
 SELECT
   schemaname,
@@ -373,6 +396,7 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
 
 #### Index Usage
+
 ```sql
 SELECT
   schemaname || '.' || tablename AS table,
@@ -385,6 +409,7 @@ ORDER BY idx_scan DESC;
 ```
 
 #### Slow Queries
+
 ```sql
 SELECT
   pid,
@@ -407,6 +432,7 @@ DB_PASSWORD=yourpassword npm run db:maintenance
 ```
 
 This performs:
+
 - VACUUM ANALYZE (cleanup and optimization)
 - Statistics updates
 - Bloat detection
@@ -417,6 +443,7 @@ This performs:
 ### Performance Monitoring Tools
 
 #### pg_stat_statements
+
 Enable query statistics:
 
 ```sql
@@ -439,22 +466,26 @@ LIMIT 10;
 ### Connection Issues
 
 #### Problem: Cannot connect to database
+
 ```
 Error: P1001: Can't reach database server at `postgres:5432`
 ```
 
 **Solutions:**
+
 - Check if PostgreSQL is running: `docker-compose ps`
 - Verify DATABASE_URL is correct
 - Check network connectivity
 - Ensure PostgreSQL container is healthy
 
 #### Problem: Too many connections
+
 ```
 Error: FATAL: remaining connection slots are reserved
 ```
 
 **Solutions:**
+
 - Increase `max_connections` in PostgreSQL configuration
 - Reduce `connection_limit` in DATABASE_URL
 - Check for connection leaks in application code
@@ -465,6 +496,7 @@ Error: FATAL: remaining connection slots are reserved
 #### Problem: Slow queries
 
 **Solutions:**
+
 - Enable query logging to identify slow queries
 - Add indexes for commonly queried fields
 - Use EXPLAIN ANALYZE to understand query plans
@@ -474,6 +506,7 @@ Error: FATAL: remaining connection slots are reserved
 #### Problem: High memory usage
 
 **Solutions:**
+
 - Reduce `shared_buffers` if too high
 - Adjust `work_mem` for complex queries
 - Run VACUUM to reclaim space
@@ -484,6 +517,7 @@ Error: FATAL: remaining connection slots are reserved
 #### Problem: Migration fails with schema mismatch
 
 **Solutions:**
+
 ```bash
 # Check migration status
 npx prisma migrate status
@@ -498,6 +532,7 @@ npx prisma migrate reset
 #### Problem: Type errors after migration
 
 **Solutions:**
+
 ```bash
 # Regenerate Prisma Client
 npx prisma generate
@@ -511,6 +546,7 @@ npm run build
 #### Problem: UUID vs Integer ID conflicts
 
 **Solution:** Use the migration script to handle ID conversion:
+
 ```bash
 npm run db:migrate
 ```
@@ -518,6 +554,7 @@ npm run db:migrate
 #### Problem: Array field errors
 
 **Solution:** Ensure comma-separated strings are converted to arrays:
+
 ```typescript
 // Old: clients: "desktop,mobile"
 // New: clients: ["desktop", "mobile"]
@@ -526,39 +563,39 @@ npm run db:migrate
 ## Best Practices
 
 1. **Connection Management**
-   - Always use connection pooling
-   - Close connections when done
-   - Set appropriate pool limits
+    - Always use connection pooling
+    - Close connections when done
+    - Set appropriate pool limits
 
 2. **Indexing**
-   - Index foreign keys
-   - Index frequently queried fields
-   - Monitor index usage
-   - Remove unused indexes
+    - Index foreign keys
+    - Index frequently queried fields
+    - Monitor index usage
+    - Remove unused indexes
 
 3. **Query Optimization**
-   - Use prepared statements
-   - Avoid N+1 queries
-   - Use batch operations
-   - Implement pagination
+    - Use prepared statements
+    - Avoid N+1 queries
+    - Use batch operations
+    - Implement pagination
 
 4. **Security**
-   - Use SSL/TLS in production
-   - Rotate credentials regularly
-   - Limit user permissions
-   - Enable audit logging
+    - Use SSL/TLS in production
+    - Rotate credentials regularly
+    - Limit user permissions
+    - Enable audit logging
 
 5. **Backup and Recovery**
-   - Automate backups
-   - Test restore procedures
-   - Store backups securely
-   - Document recovery process
+    - Automate backups
+    - Test restore procedures
+    - Store backups securely
+    - Document recovery process
 
 6. **Monitoring**
-   - Track query performance
-   - Monitor connection usage
-   - Watch for slow queries
-   - Set up alerts
+    - Track query performance
+    - Monitor connection usage
+    - Watch for slow queries
+    - Set up alerts
 
 ## Additional Resources
 
@@ -570,6 +607,7 @@ npm run db:migrate
 ## Support
 
 For issues or questions:
+
 - Check the [main README](../README.md)
 - Review [MIGRATION.md](../MIGRATION.md)
 - Review [scripts/README.md](../scripts/README.md)

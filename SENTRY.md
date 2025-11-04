@@ -20,8 +20,8 @@ Sentry is integrated into both the frontend (React) and backend (Node.js/Express
 
 1. Sign up at [sentry.io](https://sentry.io) or use your organization's Sentry instance
 2. Create two projects:
-   - **Backend Project**: Node.js/Express platform
-   - **Frontend Project**: React platform
+    - **Backend Project**: Node.js/Express platform
+    - **Frontend Project**: React platform
 3. Note the DSN (Data Source Name) for each project
 
 ### 2. Configure Environment Variables
@@ -66,9 +66,9 @@ For source map uploads:
 
 1. Go to Sentry Settings > Auth Tokens
 2. Create a new token with these scopes:
-   - `project:read`
-   - `project:releases`
-   - `org:read`
+    - `project:read`
+    - `project:releases`
+    - `org:read`
 3. Copy the token to `VITE_SENTRY_AUTH_TOKEN`
 
 ## 📊 Features
@@ -357,13 +357,13 @@ export SENTRY_RELEASE="backend@1.0.0"
 ```yaml
 - name: Deploy with Sentry
   env:
-    SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-    SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-    SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-    SENTRY_RELEASE: ${{ github.sha }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+      SENTRY_RELEASE: ${{ github.sha }}
   run: |
-    npm run build
-    # Source maps are automatically uploaded by the build
+      npm run build
+      # Source maps are automatically uploaded by the build
 ```
 
 ## 🧪 Testing

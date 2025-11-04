@@ -34,25 +34,25 @@ If this is your first time contributing to open source, welcome! Here are some r
 
 1. **Fork the repository** - Click the "Fork" button at the top right of the repository page
 2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/discord-spywatcher.git
-   cd discord-spywatcher
-   ```
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/discord-spywatcher.git
+    cd discord-spywatcher
+    ```
 3. **Add upstream remote**:
-   ```bash
-   git remote add upstream https://github.com/subculture-collective/discord-spywatcher.git
-   ```
+    ```bash
+    git remote add upstream https://github.com/subculture-collective/discord-spywatcher.git
+    ```
 4. **Create a new branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/your-bug-fix
-   ```
+    ```bash
+    git checkout -b feature/your-feature-name
+    # or
+    git checkout -b fix/your-bug-fix
+    ```
 5. **Make your changes** - Follow the development setup and guidelines below
 6. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+    ```bash
+    git push origin feature/your-feature-name
+    ```
 7. **Submit a pull request** - Go to your fork on GitHub and click "New Pull Request"
 
 ## Ways to Contribute
@@ -62,6 +62,7 @@ There are many ways to contribute to Discord Spywatcher:
 ### 🐛 Report Bugs
 
 Found a bug? Please [create a bug report](.github/ISSUE_TEMPLATE/bug_report.yml) with:
+
 - Clear description of the issue
 - Steps to reproduce
 - Expected vs. actual behavior
@@ -70,6 +71,7 @@ Found a bug? Please [create a bug report](.github/ISSUE_TEMPLATE/bug_report.yml)
 ### 💡 Suggest Features
 
 Have an idea for a new feature? [Submit a feature request](.github/ISSUE_TEMPLATE/feature_request.yml) with:
+
 - Description of the problem you're trying to solve
 - Your proposed solution
 - Any alternative approaches you've considered
@@ -77,6 +79,7 @@ Have an idea for a new feature? [Submit a feature request](.github/ISSUE_TEMPLAT
 ### 📝 Improve Documentation
 
 Documentation improvements are always welcome:
+
 - Fix typos or clarify existing docs
 - Add examples and tutorials
 - Improve code comments
@@ -87,6 +90,7 @@ Use the [documentation template](.github/ISSUE_TEMPLATE/documentation.yml) to su
 ### 🔧 Write Code
 
 Ready to contribute code? Great!
+
 - Check the [issue tracker](https://github.com/subculture-collective/discord-spywatcher/issues) for open issues
 - Look for issues labeled `good first issue` or `help wanted`
 - Comment on an issue to let others know you're working on it
@@ -95,6 +99,7 @@ Ready to contribute code? Great!
 ### 🧪 Write Tests
 
 Help improve code coverage:
+
 - Add tests for existing features
 - Improve test quality and coverage
 - Add integration and end-to-end tests
@@ -102,6 +107,7 @@ Help improve code coverage:
 ### 👀 Review Pull Requests
 
 Help review open pull requests:
+
 - Test the changes locally
 - Provide constructive feedback
 - Check for code quality and best practices
@@ -134,6 +140,7 @@ docker-compose -f docker-compose.dev.yml up
 ```
 
 Access:
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
 - PostgreSQL: localhost:5432
@@ -206,9 +213,9 @@ To run Discord Spywatcher, you need to create a Discord application:
 2. Click "New Application" and give it a name
 3. Navigate to the "Bot" section and click "Add Bot"
 4. Under "Privileged Gateway Intents", enable:
-   - Presence Intent
-   - Server Members Intent
-   - Message Content Intent
+    - Presence Intent
+    - Server Members Intent
+    - Message Content Intent
 5. Copy the bot token and add it to your `.env` file as `DISCORD_BOT_TOKEN`
 6. Navigate to "OAuth2" → "General"
 7. Copy the Client ID and Client Secret to your `.env` file
@@ -241,37 +248,41 @@ git push origin main
 ### Working on a Feature or Fix
 
 1. **Create a feature branch** from the latest `main`:
-   ```bash
-   git checkout main
-   git pull upstream main
-   git checkout -b feature/your-feature-name
-   ```
+
+    ```bash
+    git checkout main
+    git pull upstream main
+    git checkout -b feature/your-feature-name
+    ```
 
 2. **Make your changes** following the code standards
 
 3. **Test your changes**:
-   ```bash
-   # Run linting
-   npm run lint
-   
-   # Run type checking
-   npm run type-check
-   
-   # Run tests
-   cd backend && npm test
-   cd frontend && npm test
-   ```
+
+    ```bash
+    # Run linting
+    npm run lint
+
+    # Run type checking
+    npm run type-check
+
+    # Run tests
+    cd backend && npm test
+    cd frontend && npm test
+    ```
 
 4. **Commit your changes** using conventional commits:
-   ```bash
-   git add .
-   git commit -m "feat(component): add new feature"
-   ```
+
+    ```bash
+    git add .
+    git commit -m "feat(component): add new feature"
+    ```
 
 5. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+
+    ```bash
+    git push origin feature/your-feature-name
+    ```
 
 6. **Create a Pull Request** on GitHub
 
