@@ -26,6 +26,7 @@ export interface TimelineQuery {
     eventTypes?: string[];
     startDate?: Date;
     endDate?: Date;
+    search?: string; // Search query for content/channel names
 }
 
 export interface TimelineResult {
@@ -57,6 +58,7 @@ export async function getUserTimeline(
         ],
         startDate,
         endDate,
+        search,
     } = query;
 
     // Parse cursor (ISO timestamp) or use current time
@@ -82,6 +84,26 @@ export async function getUserTimeline(
         ...dateFilter,
     };
 
+    // Add search filtering if provided
+    const searchFilter = search
+        ? {
+              OR: [
+                  { username: { contains: search, mode: 'insensitive' as const } },
+                  { channel: { contains: search, mode: 'insensitive' as const } },
+              ],
+          }
+        : {};
+
+    const messageSearchFilter = search
+        ? {
+              OR: [
+                  { username: { contains: search, mode: 'insensitive' as const } },
+                  { channel: { contains: search, mode: 'insensitive' as const } },
+                  { content: { contains: search, mode: 'insensitive' as const } },
+              ],
+          }
+        : {};
+
     // Fetch events in parallel (fetch limit + 1 to detect if there are more results)
     const fetchLimit = limit + 1;
     const [
@@ -94,42 +116,60 @@ export async function getUserTimeline(
     ] = await Promise.all([
         eventTypes.includes('presence')
             ? prisma.presenceEvent.findMany({
-                  where: baseFilter,
+                  where: {
+                      ...baseFilter,
+                      ...(search && { username: { contains: search, mode: 'insensitive' } }),
+                  },
                   orderBy: { createdAt: 'desc' },
                   take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('message')
             ? prisma.messageEvent.findMany({
-                  where: guildFilter,
+                  where: {
+                      ...guildFilter,
+                      ...messageSearchFilter,
+                  },
                   orderBy: { createdAt: 'desc' },
                   take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('typing')
             ? prisma.typingEvent.findMany({
-                  where: guildFilter,
+                  where: {
+                      ...guildFilter,
+                      ...searchFilter,
+                  },
                   orderBy: { createdAt: 'desc' },
                   take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('role')
             ? prisma.roleChangeEvent.findMany({
-                  where: guildFilter,
+                  where: {
+                      ...guildFilter,
+                      ...(search && { username: { contains: search, mode: 'insensitive' } }),
+                  },
                   orderBy: { createdAt: 'desc' },
                   take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('join')
             ? prisma.joinEvent.findMany({
-                  where: guildFilter,
+                  where: {
+                      ...guildFilter,
+                      ...(search && { username: { contains: search, mode: 'insensitive' } }),
+                  },
                   orderBy: { createdAt: 'desc' },
                   take: fetchLimit,
               })
             : Promise.resolve([]),
         eventTypes.includes('deleted_message')
             ? prisma.deletedMessageEvent.findMany({
-                  where: guildFilter,
+                  where: {
+                      ...guildFilter,
+                      ...searchFilter,
+                  },
                   orderBy: { createdAt: 'desc' },
                   take: fetchLimit,
               })

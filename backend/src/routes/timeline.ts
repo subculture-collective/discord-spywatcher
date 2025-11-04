@@ -28,6 +28,7 @@ const timelineQuerySchema = z.object({
         .string()
         .optional()
         .transform((val) => (val ? new Date(val) : undefined)),
+    search: z.string().optional(),
 });
 
 /**
@@ -75,6 +76,11 @@ const timelineQuerySchema = z.object({
  *           type: string
  *           format: date-time
  *         description: End date for timeline
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search query for filtering events by username, channel, or content
  *     responses:
  *       200:
  *         description: User timeline events
@@ -97,7 +103,7 @@ const timelineQuerySchema = z.object({
  *       429:
  *         $ref: '#/components/responses/TooManyRequests'
  */
-router.get('/timeline/:userId', requireAuth, async (req, res) => {
+router.get('/timeline/:userId', requireAuth, async (req, res): Promise<void> => {
     try {
         const { userId } = req.params;
         const guildId = req.guildId as string;
@@ -106,13 +112,14 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
         const queryResult = timelineQuerySchema.safeParse(req.query);
 
         if (!queryResult.success) {
-            return res.status(400).json({
+            res.status(400).json({
                 error: 'Invalid query parameters',
                 details: queryResult.error.issues,
             });
+            return;
         }
 
-        const { limit, cursor, eventTypes, startDate, endDate } =
+        const { limit, cursor, eventTypes, startDate, endDate, search } =
             queryResult.data;
 
         // Fetch timeline
@@ -124,6 +131,7 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
             eventTypes,
             startDate,
             endDate,
+            search,
         });
 
         res.json(timeline);
