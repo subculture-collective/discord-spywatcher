@@ -53,6 +53,7 @@ async function getChannelHeatmapUncached({
                 channelId: 'desc',
             },
         },
+        take: 500, // Limit to top 500 results to prevent unbounded queries
     });
 
     const data = rawData as GroupedTypingEvent[];
