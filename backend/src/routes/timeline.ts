@@ -28,6 +28,7 @@ const timelineQuerySchema = z.object({
         .string()
         .optional()
         .transform((val) => (val ? new Date(val) : undefined)),
+    search: z.string().optional(),
 });
 
 /**
@@ -75,6 +76,11 @@ const timelineQuerySchema = z.object({
  *           type: string
  *           format: date-time
  *         description: End date for timeline
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search query for filtering events by username, channel, or content
  *     responses:
  *       200:
  *         description: User timeline events
@@ -112,7 +118,7 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
             });
         }
 
-        const { limit, cursor, eventTypes, startDate, endDate } =
+        const { limit, cursor, eventTypes, startDate, endDate, search } =
             queryResult.data;
 
         // Fetch timeline
@@ -124,6 +130,7 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
             eventTypes,
             startDate,
             endDate,
+            search,
         });
 
         res.json(timeline);

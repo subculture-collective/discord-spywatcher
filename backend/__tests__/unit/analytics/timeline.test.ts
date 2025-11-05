@@ -296,5 +296,90 @@ describe('Analytics - User Timeline', () => {
             expect(result.hasMore).toBe(false);
             expect(result.nextCursor).toBeNull();
         });
+
+        it('should filter events by search query', async () => {
+            const mockMessageEvents = [
+                {
+                    id: 'message1',
+                    userId: 'user1',
+                    username: 'Test User',
+                    channelId: 'channel1',
+                    channel: 'general',
+                    guildId: 'guild1',
+                    content: 'Hello world',
+                    metadata: null,
+                    createdAt: new Date(),
+                },
+            ];
+
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue(mockMessageEvents);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.roleChangeEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.joinEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.deletedMessageEvent.findMany as jest.Mock).mockResolvedValue([]);
+
+            (db.messageEvent.count as jest.Mock).mockResolvedValue(1);
+
+            await getUserTimeline({
+                userId: 'user1',
+                guildId: 'guild1',
+                search: 'hello',
+            });
+
+            // Verify search filter was applied
+            expect(db.messageEvent.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: expect.objectContaining({
+                        OR: expect.arrayContaining([
+                            expect.objectContaining({
+                                username: expect.objectContaining({
+                                    contains: 'hello',
+                                    mode: 'insensitive',
+                                }),
+                            }),
+                        ]),
+                    }),
+                })
+            );
+        });
+
+        it('should filter events by date range', async () => {
+            const startDate = new Date('2024-01-01T00:00:00Z');
+            const endDate = new Date('2024-01-31T23:59:59Z');
+            
+            (db.presenceEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.messageEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.typingEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.roleChangeEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.joinEvent.findMany as jest.Mock).mockResolvedValue([]);
+            (db.deletedMessageEvent.findMany as jest.Mock).mockResolvedValue([]);
+
+            (db.presenceEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.messageEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.typingEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.roleChangeEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.joinEvent.count as jest.Mock).mockResolvedValue(0);
+            (db.deletedMessageEvent.count as jest.Mock).mockResolvedValue(0);
+
+            await getUserTimeline({
+                userId: 'user1',
+                guildId: 'guild1',
+                startDate,
+                endDate,
+            });
+
+            // Verify date range filter was applied
+            expect(db.presenceEvent.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: expect.objectContaining({
+                        createdAt: expect.objectContaining({
+                            gte: startDate,
+                            lte: endDate,
+                        }),
+                    }),
+                })
+            );
+        });
     });
 });

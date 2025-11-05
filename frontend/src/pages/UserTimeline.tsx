@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams, useNavigate } from 'react-router-dom';
 
+import DateRangeFilter from '../components/timeline/DateRangeFilter';
 import EventTypeFilter from '../components/timeline/EventTypeFilter';
+import ExportButton from '../components/timeline/ExportButton';
+import SearchBar from '../components/timeline/SearchBar';
 import TimelineEvent from '../components/timeline/TimelineEvent';
 import api from '../lib/api';
 
@@ -54,6 +57,9 @@ function UserTimeline() {
         'join',
         'deleted_message',
     ]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // Infinite scroll
     const observerTarget = useRef<HTMLDivElement>(null);
@@ -75,6 +81,24 @@ function UserTimeline() {
 
                 if (cursor) {
                     params.cursor = cursor;
+                }
+
+                if (searchQuery) {
+                    params.search = searchQuery;
+                }
+
+                if (startDate) {
+                    const startDateObj = new Date(startDate);
+                    if (!isNaN(startDateObj.getTime())) {
+                        params.startDate = startDateObj.toISOString();
+                    }
+                }
+
+                if (endDate) {
+                    const endDateObj = new Date(endDate);
+                    if (!isNaN(endDateObj.getTime())) {
+                        params.endDate = endDateObj.toISOString();
+                    }
                 }
 
                 const response = await api.get<TimelineResponse>(
@@ -106,7 +130,7 @@ function UserTimeline() {
                 setLoadingMore(false);
             }
         },
-        [userId, selectedEventTypes, username]
+        [userId, selectedEventTypes, searchQuery, startDate, endDate, username]
     );
 
     // Initial fetch
@@ -172,7 +196,7 @@ function UserTimeline() {
                         </svg>
                         Back
                     </button>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900">
                                 Activity Timeline
@@ -181,22 +205,49 @@ function UserTimeline() {
                                 {username || userId}
                             </p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-sm text-gray-500">Total Events</p>
-                            <p className="text-2xl font-bold text-gray-900">
-                                {totalCount.toLocaleString()}
-                            </p>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right">
+                                <p className="text-sm text-gray-500">Total Events</p>
+                                <p className="text-2xl font-bold text-gray-900">
+                                    {totalCount.toLocaleString()}
+                                </p>
+                            </div>
+                            <ExportButton
+                                events={events}
+                                username={username || userId || 'user'}
+                                disabled={loading}
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+                {/* Search Bar */}
+                <SearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Search by username, channel, or message content..."
+                />
+
+                {/* Event Type Filter */}
                 <EventTypeFilter
                     options={EVENT_TYPE_OPTIONS}
                     selected={selectedEventTypes}
                     onChange={setSelectedEventTypes}
+                />
+
+                {/* Date Range Filter */}
+                <DateRangeFilter
+                    startDate={startDate}
+                    endDate={endDate}
+                    onStartDateChange={setStartDate}
+                    onEndDateChange={setEndDate}
+                    onClear={() => {
+                        setStartDate('');
+                        setEndDate('');
+                    }}
                 />
             </div>
 
