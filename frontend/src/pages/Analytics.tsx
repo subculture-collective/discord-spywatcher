@@ -62,7 +62,7 @@ function Analytics() {
     const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
     
     // Get guildId from URL params or environment
-    const searchParams = new URLSearchParams(window.location.search);
+    const [searchParams] = useState(() => new URLSearchParams(window.location.search));
     const guildId = searchParams.get('guildId') || import.meta.env.VITE_DISCORD_GUILD_ID;
 
     // State for different data types
@@ -108,7 +108,45 @@ function Analytics() {
         }
         
         let socket: ReturnType<typeof socketService.connect> | undefined;
-        let handleAnalyticsUpdate: ((data: AnalyticsUpdateData) => void) | null = null;
+        let cleanup: (() => void) | undefined;
+        
+        // Define analytics update handler
+        const handleAnalyticsUpdate = (data: AnalyticsUpdateData) => {
+            // Update ghost data from real-time updates
+            if (data.data.ghosts) {
+                setGhostData(prev => {
+                    const newGhosts = data.data.ghosts.map(g => ({
+                        userId: g.userId,
+                        username: g.username,
+                        ghostScore: g.ghostScore,
+                        typingCount: 0,
+                        messageCount: 0,
+                    }));
+                    
+                    // Merge with existing data
+                    const merged = [...newGhosts];
+                    prev.forEach(existing => {
+                        if (!merged.find(g => g.userId === existing.userId)) {
+                            merged.push(existing);
+                        }
+                    });
+                    
+                    return merged.slice(0, 50); // Keep top 50
+                });
+            }
+            
+            // Update lurker data from real-time updates
+            if (data.data.lurkers) {
+                setLurkerData(data.data.lurkers.map(l => ({
+                    userId: l.userId,
+                    username: l.username,
+                    channelCount: l.channelCount,
+                    messageCount: 0,
+                })));
+            }
+            
+            setLastUpdated(new Date(data.timestamp));
+        };
         
         try {
             socket = socketService.connect();
@@ -121,54 +159,19 @@ function Analytics() {
                 setIsLiveConnected(false);
             });
             
-            // Subscribe to analytics updates
-            handleAnalyticsUpdate = (data: AnalyticsUpdateData) => {
-                // Update ghost data from real-time updates
-                if (data.data.ghosts) {
-                    setGhostData(prev => {
-                        const newGhosts = data.data.ghosts.map(g => ({
-                            userId: g.userId,
-                            username: g.username,
-                            ghostScore: g.ghostScore,
-                            typingCount: 0,
-                            messageCount: 0,
-                        }));
-                        
-                        // Merge with existing data
-                        const merged = [...newGhosts];
-                        prev.forEach(existing => {
-                            if (!merged.find(g => g.userId === existing.userId)) {
-                                merged.push(existing);
-                            }
-                        });
-                        
-                        return merged.slice(0, 50); // Keep top 50
-                    });
-                }
-                
-                // Update lurker data from real-time updates
-                if (data.data.lurkers) {
-                    setLurkerData(data.data.lurkers.map(l => ({
-                        userId: l.userId,
-                        username: l.username,
-                        channelCount: l.channelCount,
-                        messageCount: 0,
-                    })));
-                }
-                
-                setLastUpdated(new Date(data.timestamp));
-            };
-            
             socketService.subscribeToAnalytics(guildId, handleAnalyticsUpdate);
+            
+            // Set up cleanup function
+            cleanup = () => {
+                if (guildId) {
+                    socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
+                }
+            };
         } catch (error) {
             console.error('Failed to connect to WebSocket:', error);
         }
         
-        return () => {
-            if (socket && handleAnalyticsUpdate && guildId) {
-                socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
-            }
-        };
+        return cleanup;
     }, [fetchData, accessToken, guildId]);
 
     // Calculate key metrics with useMemo for performance optimization

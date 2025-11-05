@@ -39,9 +39,14 @@ function VolumeChart({ data, onUserClick }: VolumeChartProps) {
     }));
     
     const handleAreaClick = (data: unknown) => {
-        if (onUserClick && data && typeof data === 'object' && 'userId' in data && 'fullName' in data) {
-            const entry = data as { userId: string; fullName: string };
-            onUserClick(entry.userId, entry.fullName);
+        if (!onUserClick || !data || typeof data !== 'object') {
+            return;
+        }
+        
+        // Type guard for chart data
+        if ('userId' in data && 'fullName' in data &&
+            typeof data.userId === 'string' && typeof data.fullName === 'string') {
+            onUserClick(data.userId, data.fullName);
         }
     };
 

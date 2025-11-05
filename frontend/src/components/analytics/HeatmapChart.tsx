@@ -50,9 +50,14 @@ function HeatmapChart({ data, onChannelClick }: HeatmapChartProps) {
         .slice(0, 10); // Top 10 channels
     
     const handleBarClick = (data: unknown) => {
-        if (onChannelClick && data && typeof data === 'object' && 'channelId' in data && 'fullName' in data) {
-            const entry = data as { channelId: string; fullName: string };
-            onChannelClick(entry.channelId, entry.fullName);
+        if (!onChannelClick || !data || typeof data !== 'object') {
+            return;
+        }
+        
+        // Type guard for chart data
+        if ('channelId' in data && 'fullName' in data &&
+            typeof data.channelId === 'string' && typeof data.fullName === 'string') {
+            onChannelClick(data.channelId, data.fullName);
         }
     };
 
