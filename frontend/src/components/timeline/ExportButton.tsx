@@ -17,6 +17,11 @@ interface ExportButtonProps {
     disabled?: boolean;
 }
 
+// Helper function to validate string arrays
+const isStringArray = (arr: unknown): arr is string[] => {
+    return Array.isArray(arr) && arr.every((item): item is string => typeof item === 'string');
+};
+
 function ExportButton({ events, username, disabled = false }: ExportButtonProps) {
     const [isExporting, setIsExporting] = useState(false);
 
@@ -48,7 +53,11 @@ function ExportButton({ events, username, disabled = false }: ExportButtonProps)
                 let description = '';
                 switch (event.type) {
                     case 'presence':
-                        description = `Clients: ${Array.isArray(event.metadata.clients) && event.metadata.clients.every((c): c is string => typeof c === 'string') ? event.metadata.clients.join(', ') : 'Unknown'}`;
+                        description = `Clients: ${
+                            isStringArray(event.metadata.clients)
+                                ? event.metadata.clients.join(', ')
+                                : 'Unknown'
+                        }`;
                         break;
                     case 'message':
                         description = `#${event.metadata.channel || 'unknown'}: ${event.metadata.content || ''}`;
@@ -57,7 +66,11 @@ function ExportButton({ events, username, disabled = false }: ExportButtonProps)
                         description = `in #${event.metadata.channel || 'unknown'}`;
                         break;
                     case 'role':
-                        description = `Added roles: ${Array.isArray(event.metadata.addedRoles) && event.metadata.addedRoles.every((r): r is string => typeof r === 'string') ? event.metadata.addedRoles.join(', ') : 'Unknown'}`;
+                        description = `Added roles: ${
+                            isStringArray(event.metadata.addedRoles)
+                                ? event.metadata.addedRoles.join(', ')
+                                : 'Unknown'
+                        }`;
                         break;
                     case 'join':
                         description = `Account age: ${event.metadata.accountAgeDays || 'Unknown'} days`;

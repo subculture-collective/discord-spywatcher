@@ -112,11 +112,10 @@ router.get('/timeline/:userId', requireAuth, async (req, res) => {
         const queryResult = timelineQuerySchema.safeParse(req.query);
 
         if (!queryResult.success) {
-            res.status(400).json({
+            return res.status(400).json({
                 error: 'Invalid query parameters',
                 details: queryResult.error.issues,
             });
-            return;
         }
 
         const { limit, cursor, eventTypes, startDate, endDate, search } =

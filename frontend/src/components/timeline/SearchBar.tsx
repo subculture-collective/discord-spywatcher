@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
@@ -9,15 +9,21 @@ interface SearchBarProps {
 
 function SearchBar({ value, onChange, placeholder = 'Search events...' }: SearchBarProps) {
     const [localValue, setLocalValue] = useState(value);
+    const onChangeRef = useRef(onChange);
+
+    // Keep ref up to date
+    useEffect(() => {
+        onChangeRef.current = onChange;
+    }, [onChange]);
 
     // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
-            onChange(localValue);
+            onChangeRef.current(localValue);
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [localValue, onChange]);
+    }, [localValue]);
 
     const handleClear = () => {
         setLocalValue('');
