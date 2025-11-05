@@ -3,56 +3,12 @@
  */
 
 import {
+    parseExplainOutput,
+    generateRecommendations,
     meetsPerformanceThreshold,
     usesIndex,
     formatQueryAnalysis,
 } from '../../../src/utils/queryAnalyzer';
-
-// Helper functions for testing (duplicated from source for unit testing)
-function parseExplainOutput(output: string) {
-    const warnings: string[] = [];
-    let hasSeqScan = false;
-    let hasIndexScan = false;
-    let executionTime = 0;
-    let planningTime = 0;
-
-    const lines = output.split('\n');
-    for (const line of lines) {
-        if (line.includes('Seq Scan')) {
-            hasSeqScan = true;
-            warnings.push('Sequential scan detected - consider adding an index');
-        }
-        if (line.includes('Index Scan') || line.includes('Index Only Scan')) {
-            hasIndexScan = true;
-        }
-        const execMatch = line.match(/Execution Time: ([\d.]+) ms/);
-        if (execMatch) {
-            executionTime = parseFloat(execMatch[1]);
-        }
-        const planMatch = line.match(/Planning Time: ([\d.]+) ms/);
-        if (planMatch) {
-            planningTime = parseFloat(planMatch[1]);
-        }
-    }
-
-    const totalTime = executionTime + planningTime;
-
-    if (executionTime > 100) {
-        warnings.push(
-            `Slow query: execution time ${executionTime.toFixed(2)}ms exceeds 100ms threshold`
-        );
-    }
-
-    return {
-        plan: output,
-        executionTime,
-        planningTime,
-        totalTime,
-        hasSeqScan,
-        hasIndexScan,
-        warnings,
-    };
-}
 
 describe('Query Analyzer', () => {
     describe('parseExplainOutput', () => {
@@ -360,51 +316,3 @@ Execution Time: 8.2 ms
         });
     });
 });
-
-function generateRecommendations(plan: {
-    executionTime: number;
-    planningTime: number;
-    hasSeqScan: boolean;
-    hasIndexScan: boolean;
-    warnings: string[];
-}): string[] {
-    const recommendations: string[] = [];
-
-    if (plan.hasSeqScan && !plan.hasIndexScan) {
-        recommendations.push(
-            'Add indexes on columns used in WHERE, JOIN, and ORDER BY clauses'
-        );
-    }
-
-    if (plan.executionTime > 100) {
-        recommendations.push(
-            'Consider optimizing query logic or adding caching'
-        );
-    }
-
-    if (plan.executionTime > 50 && plan.executionTime <= 100) {
-        recommendations.push(
-            'Query performance is acceptable but could be improved'
-        );
-    }
-
-    if (plan.planningTime > plan.executionTime) {
-        recommendations.push(
-            'Planning time is high - consider using prepared statements'
-        );
-    }
-
-    if (plan.warnings.some((w) => w.includes('work_mem'))) {
-        recommendations.push(
-            'Increase work_mem configuration parameter for this session or globally'
-        );
-    }
-
-    if (recommendations.length === 0 && plan.executionTime < 50) {
-        recommendations.push(
-            'Query performance is excellent - no optimization needed'
-        );
-    }
-
-    return recommendations;
-}

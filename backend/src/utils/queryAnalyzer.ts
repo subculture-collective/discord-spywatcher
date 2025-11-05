@@ -26,8 +26,9 @@ export interface QueryAnalysis {
 
 /**
  * Parse EXPLAIN ANALYZE output to extract key metrics
+ * Exported for testing purposes
  */
-function parseExplainOutput(output: string): QueryPlan {
+export function parseExplainOutput(output: string): QueryPlan {
     const lines = output.split('\n');
     const warnings: string[] = [];
     let hasSeqScan = false;
@@ -92,8 +93,9 @@ function parseExplainOutput(output: string): QueryPlan {
 
 /**
  * Generate recommendations based on query analysis
+ * Exported for testing purposes
  */
-function generateRecommendations(plan: QueryPlan): string[] {
+export function generateRecommendations(plan: QueryPlan): string[] {
     const recommendations: string[] = [];
 
     if (plan.hasSeqScan && !plan.hasIndexScan) {

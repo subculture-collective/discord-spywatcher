@@ -51,15 +51,16 @@ async function checkAnalyticsPagination(): Promise<EndpointCheck[]> {
         notes: 'Implicitly limited by presence count filter',
     });
 
-    // Channel Heatmap - Uses groupBy without explicit limit
+    // Channel Heatmap - Uses groupBy with explicit limit
     checks.push({
         endpoint: 'GET /api/analytics/heatmap',
         model: 'TypingEvent',
         method: 'getChannelHeatmap',
-        hasPagination: false,
-        hasLimit: false,
+        hasPagination: true,
+        hasLimit: true,
+        maxLimit: 500,
         paginationType: 'none',
-        notes: 'WARNING: No explicit limit on groupBy',
+        notes: 'Uses take: 500 to limit results',
     });
 
     // Role Drift - Uses LIMIT in query

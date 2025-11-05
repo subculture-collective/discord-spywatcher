@@ -633,9 +633,7 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
         // to prevent unintended key matching
         if (
             !tag ||
-            !/^[a-zA-Z0-9:_-]+$/.test(tag) ||
-            /^[*?[\]{}()|\\]/.test(tag) ||
-            /[*?[\]{}()|\\]/.test(tag)
+            !/^[a-zA-Z0-9:_-]+$/.test(tag)
         ) {
             res.status(400).json({
                 error: 'Invalid tag format',
@@ -664,6 +662,8 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
 /**
  * POST /api/admin/monitoring/database/explain
  * Analyze a SQL query using EXPLAIN ANALYZE
+ * 
+ * Security: Only SELECT statements are allowed to prevent data modification
  */
 router.post('/database/explain', async (req: Request, res: Response) => {
     try {
@@ -674,6 +674,28 @@ router.post('/database/explain', async (req: Request, res: Response) => {
                 error: 'Query is required and must be a string',
             });
             return;
+        }
+
+        // Security: Only allow SELECT statements
+        const trimmedQuery = query.trim().toUpperCase();
+        if (!trimmedQuery.startsWith('SELECT')) {
+            res.status(400).json({
+                error: 'Only SELECT queries are allowed for analysis',
+                message: 'For security reasons, only read-only queries can be analyzed',
+            });
+            return;
+        }
+
+        // Additional security: block dangerous keywords
+        const dangerousKeywords = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'TRUNCATE', 'ALTER', 'CREATE'];
+        for (const keyword of dangerousKeywords) {
+            if (trimmedQuery.includes(keyword)) {
+                res.status(400).json({
+                    error: 'Query contains forbidden keywords',
+                    message: `Query cannot contain ${keyword} statements`,
+                });
+                return;
+            }
         }
 
         // Import here to avoid circular dependencies
