@@ -1,7 +1,7 @@
 import { Users, Activity, AlertTriangle, TrendingUp, Network, Wifi, WifiOff } from 'lucide-react';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import DateRangeSelector from '../components/analytics/DateRangeSelector';
 import DrillDownPanel, { type DrillDownData } from '../components/analytics/DrillDownPanel';
@@ -61,8 +61,8 @@ function Analytics() {
     const [isLiveConnected, setIsLiveConnected] = useState(false);
     const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
     
-    // Get guildId from URL params or environment
-    const [searchParams] = useState(() => new URLSearchParams(window.location.search));
+    // Get guildId from URL params or environment - will react to URL changes
+    const [searchParams] = useSearchParams();
     const guildId = searchParams.get('guildId') || import.meta.env.VITE_DISCORD_GUILD_ID;
 
     // State for different data types
@@ -107,9 +107,6 @@ function Analytics() {
             return undefined;
         }
         
-        let socket: ReturnType<typeof socketService.connect> | undefined;
-        let cleanup: (() => void) | undefined;
-        
         // Define analytics update handler
         const handleAnalyticsUpdate = (data: AnalyticsUpdateData) => {
             // Update ghost data from real-time updates
@@ -149,7 +146,7 @@ function Analytics() {
         };
         
         try {
-            socket = socketService.connect();
+            const socket = socketService.connect();
             
             socket.on('connect', () => {
                 setIsLiveConnected(true);
@@ -161,17 +158,14 @@ function Analytics() {
             
             socketService.subscribeToAnalytics(guildId, handleAnalyticsUpdate);
             
-            // Set up cleanup function
-            cleanup = () => {
-                if (guildId) {
-                    socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
-                }
+            // Cleanup function to unsubscribe and disconnect
+            return () => {
+                socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
             };
         } catch (error) {
             console.error('Failed to connect to WebSocket:', error);
+            return undefined;
         }
-        
-        return cleanup;
     }, [fetchData, accessToken, guildId]);
 
     // Calculate key metrics with useMemo for performance optimization
