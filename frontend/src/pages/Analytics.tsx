@@ -1,9 +1,10 @@
-import { Users, Activity, AlertTriangle, TrendingUp, Network } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { Users, Activity, AlertTriangle, TrendingUp, Network, Wifi, WifiOff } from 'lucide-react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import DateRangeSelector from '../components/analytics/DateRangeSelector';
+import DrillDownPanel, { type DrillDownData } from '../components/analytics/DrillDownPanel';
 import ExportButton from '../components/analytics/ExportButton';
 import HeatmapChart from '../components/analytics/HeatmapChart';
 import TimelineChart from '../components/analytics/TimelineChart';
@@ -15,6 +16,8 @@ import { StatCard } from '../components/ui/StatCard';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { useAnalytics } from '../hooks/useAnalytics';
 import api from '../lib/api';
+import { socketService, type AnalyticsUpdateData } from '../lib/socket';
+import { useAuth } from '../store/auth';
 
 interface HeatmapData {
     userId: string;
@@ -54,6 +57,13 @@ function Analytics() {
     const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(null);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
     const { trackFeatureUsage } = useAnalytics();
+    const { accessToken } = useAuth();
+    const [isLiveConnected, setIsLiveConnected] = useState(false);
+    const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
+    
+    // Get guildId from URL params or environment - will react to URL changes
+    const [searchParams] = useSearchParams();
+    const guildId = searchParams.get('guildId') || import.meta.env.VITE_DISCORD_GUILD_ID;
 
     // State for different data types
     const [heatmapData, setHeatmapData] = useState<HeatmapData[]>([]);
@@ -91,22 +101,130 @@ function Analytics() {
 
     useEffect(() => {
         fetchData();
-        // Set up auto-refresh every 30 seconds
-        const interval = setInterval(fetchData, 30000);
-        return () => clearInterval(interval);
-    }, [fetchData]);
+        
+        // Set up WebSocket for real-time updates if authenticated and guildId is available
+        if (!accessToken || !guildId) {
+            return undefined;
+        }
+        
+        // Define analytics update handler
+        const handleAnalyticsUpdate = (data: AnalyticsUpdateData) => {
+            // Update ghost data from real-time updates
+            if (data.data.ghosts) {
+                setGhostData(prev => {
+                    const newGhosts = data.data.ghosts.map(g => ({
+                        userId: g.userId,
+                        username: g.username,
+                        ghostScore: g.ghostScore,
+                        typingCount: 0,
+                        messageCount: 0,
+                    }));
+                    
+                    // Merge with existing data
+                    const merged = [...newGhosts];
+                    prev.forEach(existing => {
+                        if (!merged.find(g => g.userId === existing.userId)) {
+                            merged.push(existing);
+                        }
+                    });
+                    
+                    return merged.slice(0, 50); // Keep top 50
+                });
+            }
+            
+            // Update lurker data from real-time updates
+            if (data.data.lurkers) {
+                setLurkerData(data.data.lurkers.map(l => ({
+                    userId: l.userId,
+                    username: l.username,
+                    channelCount: l.channelCount,
+                    messageCount: 0,
+                })));
+            }
+            
+            setLastUpdated(new Date(data.timestamp));
+        };
+        
+        try {
+            const socket = socketService.connect();
+            
+            socket.on('connect', () => {
+                setIsLiveConnected(true);
+            });
+            
+            socket.on('disconnect', () => {
+                setIsLiveConnected(false);
+            });
+            
+            socketService.subscribeToAnalytics(guildId, handleAnalyticsUpdate);
+            
+            // Cleanup function to unsubscribe and disconnect
+            return () => {
+                socketService.unsubscribeFromAnalytics(guildId, handleAnalyticsUpdate);
+            };
+        } catch (error) {
+            console.error('Failed to connect to WebSocket:', error);
+            return undefined;
+        }
+    }, [fetchData, accessToken, guildId]);
 
-    // Calculate key metrics
-    const totalUsers = new Set([
+    // Calculate key metrics with useMemo for performance optimization
+    const totalUsers = useMemo(() => new Set([
         ...heatmapData.map(d => d.userId),
         ...ghostData.map(d => d.userId),
         ...suspicionData.map(d => d.userId),
-    ]).size;
+    ]).size, [heatmapData, ghostData, suspicionData]);
 
-    const totalActivity = heatmapData.reduce((sum, item) => sum + item.count, 0);
-    const highSuspicionUsers = suspicionData.filter(d => d.suspicionScore > 50).length;
-    const totalGhosts = ghostData.filter(d => d.ghostScore > 5).length;
-    const activeLurkers = lurkerData.length;
+    const totalActivity = useMemo(() => 
+        heatmapData.reduce((sum, item) => sum + item.count, 0), 
+        [heatmapData]
+    );
+    
+    const highSuspicionUsers = useMemo(() => 
+        suspicionData.filter(d => d.suspicionScore > 50).length,
+        [suspicionData]
+    );
+    
+    const totalGhosts = useMemo(() => 
+        ghostData.filter(d => d.ghostScore > 5).length,
+        [ghostData]
+    );
+    
+    const activeLurkers = useMemo(() => lurkerData.length, [lurkerData]);
+    
+    const avgGhostScore = useMemo(() => 
+        ghostData.length > 0
+            ? (ghostData.reduce((sum, d) => sum + d.ghostScore, 0) / ghostData.length).toFixed(2)
+            : '0',
+        [ghostData]
+    );
+    
+    const avgSuspicionScore = useMemo(() => 
+        suspicionData.length > 0
+            ? (suspicionData.reduce((sum, d) => sum + d.suspicionScore, 0) / suspicionData.length).toFixed(2)
+            : '0',
+        [suspicionData]
+    );
+    
+    // Drill-down handler
+    const handleDrillDown = useCallback((type: 'user' | 'channel', id: string, name: string) => {
+        // Find data for this item
+        const userData = suspicionData.find(d => d.userId === id);
+        const heatmapItems = heatmapData.filter(d => 
+            type === 'user' ? d.userId === id : d.channelId === id
+        );
+        
+        const details: DrillDownData['details'] = {
+            suspicionScore: userData?.suspicionScore,
+            ghostScore: userData?.ghostScore,
+            channelCount: userData?.channelCount,
+            messageCount: heatmapItems.reduce((sum, item) => sum + item.count, 0),
+            interactions: heatmapItems.reduce((sum, item) => sum + item.count, 0),
+        };
+        
+        setDrillDownData({ type, id, name, details });
+        trackFeatureUsage('analytics_drilldown');
+    }, [suspicionData, heatmapData, trackFeatureUsage]);
 
     return (
         <div className="min-h-screen bg-ctp-base p-6">
@@ -117,9 +235,22 @@ function Analytics() {
                             <h1 className="text-3xl font-bold text-ctp-text">
                                 Analytics Dashboard
                             </h1>
-                            <p className="text-sm text-ctp-subtext0 mt-1">
-                                Last updated: {lastUpdated.toLocaleTimeString()}
-                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-sm text-ctp-subtext0">
+                                    Last updated: {lastUpdated.toLocaleTimeString()}
+                                </p>
+                                {isLiveConnected ? (
+                                    <span className="flex items-center gap-1 text-xs text-ctp-green">
+                                        <Wifi className="w-3 h-3" />
+                                        Live
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1 text-xs text-ctp-subtext0">
+                                        <WifiOff className="w-3 h-3" />
+                                        Polling
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="flex gap-2 items-center">
                             <Link to="/advanced-analytics">
@@ -207,7 +338,12 @@ function Analytics() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <HeatmapChart data={heatmapData} />
+                                <HeatmapChart 
+                                    data={heatmapData}
+                                    onChannelClick={(channelId, channelName) => 
+                                        handleDrillDown('channel', channelId, channelName)
+                                    }
+                                />
                             </CardContent>
                         </Card>
 
@@ -224,7 +360,12 @@ function Analytics() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <VolumeChart data={ghostData} />
+                                <VolumeChart 
+                                    data={ghostData}
+                                    onUserClick={(userId, username) => 
+                                        handleDrillDown('user', userId, username)
+                                    }
+                                />
                             </CardContent>
                         </Card>
                     </div>
@@ -242,7 +383,12 @@ function Analytics() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <TimelineChart data={suspicionData} />
+                            <TimelineChart 
+                                data={suspicionData}
+                                onUserClick={(userId, username) => 
+                                    handleDrillDown('user', userId, username)
+                                }
+                            />
                         </CardContent>
                     </Card>
 
@@ -256,27 +402,25 @@ function Analytics() {
                         />
                         <StatCard
                             title="Avg Ghost Score"
-                            value={
-                                ghostData.length > 0
-                                    ? (ghostData.reduce((sum, d) => sum + d.ghostScore, 0) / ghostData.length).toFixed(2)
-                                    : '0'
-                            }
+                            value={avgGhostScore}
                             subtitle="Mean ghost behavior score"
                             icon={AlertTriangle}
                         />
                         <StatCard
                             title="Avg Suspicion Score"
-                            value={
-                                suspicionData.length > 0
-                                    ? (suspicionData.reduce((sum, d) => sum + d.suspicionScore, 0) / suspicionData.length).toFixed(2)
-                                    : '0'
-                            }
+                            value={avgSuspicionScore}
                             subtitle="Mean suspicion score"
                             icon={TrendingUp}
                         />
                     </div>
                 </>
             )}
+            
+            {/* Drill-down Panel */}
+            <DrillDownPanel
+                data={drillDownData}
+                onClose={() => setDrillDownData(null)}
+            />
             </div>
         </div>
     );
