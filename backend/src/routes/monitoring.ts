@@ -676,33 +676,12 @@ router.post('/database/explain', async (req: Request, res: Response) => {
             return;
         }
 
-        // Security: Only allow SELECT statements
-        const trimmedQuery = query.trim().toUpperCase();
-        if (!trimmedQuery.startsWith('SELECT')) {
-            res.status(400).json({
-                error: 'Only SELECT queries are allowed for analysis',
-                message: 'For security reasons, only read-only queries can be analyzed',
-            });
-            return;
-        }
-
-        // Additional security: block dangerous keywords
-        const dangerousKeywords = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'TRUNCATE', 'ALTER', 'CREATE'];
-        for (const keyword of dangerousKeywords) {
-            if (trimmedQuery.includes(keyword)) {
-                res.status(400).json({
-                    error: 'Query contains forbidden keywords',
-                    message: `Query cannot contain ${keyword} statements`,
-                });
-                return;
-            }
-        }
-
         // Import here to avoid circular dependencies
         const { analyzeQuery, formatQueryAnalysis } = await import(
             '../utils/queryAnalyzer'
         );
 
+        // Query validation is now handled by analyzeQuery which has comprehensive security checks
         const analysis = await analyzeQuery(query, params);
 
         res.json({
@@ -728,6 +707,15 @@ router.get(
     async (req: Request, res: Response) => {
         try {
             const { tableName } = req.params;
+
+            // Validate tableName: only allow alphanumeric and underscores
+            if (!/^[A-Za-z0-9_]+$/.test(tableName)) {
+                res.status(400).json({
+                    error: 'Invalid table name',
+                    message: 'Table name must only contain letters, numbers, and underscores',
+                });
+                return;
+            }
 
             // Import here to avoid circular dependencies
             const { getTableStatistics } = await import(

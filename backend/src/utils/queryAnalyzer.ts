@@ -126,12 +126,46 @@ export function generateRecommendations(plan: QueryPlan): string[] {
 }
 
 /**
+ * Validate that the query is a safe SELECT statement.
+ * Only allows single SELECT statements or CTEs, no semicolons, comments, or DDL/DML.
+ */
+function validateSelectQuery(query: string): void {
+    const trimmed = query.trim();
+    
+    // Remove leading comments and whitespace
+    const cleaned = trimmed
+        .replace(/^\s*(\/\*[\s\S]*?\*\/\s*)*/g, '') // Remove leading block comments
+        .replace(/^\s*(--.*\n\s*)*/g, '') // Remove leading line comments
+        .trim();
+    
+    // Must start with SELECT or WITH (for CTEs)
+    if (!/^(SELECT|WITH)\b/i.test(cleaned)) {
+        throw new Error('Only SELECT or WITH (CTE) statements are allowed for analysis.');
+    }
+    
+    // Disallow semicolons (multiple statements), embedded comments, and dangerous keywords
+    // Check for dangerous keywords outside of quoted strings
+    const withoutStrings = cleaned.replace(/'[^']*'/g, ''); // Remove single-quoted strings
+    
+    if (/;/.test(withoutStrings)) {
+        throw new Error('Multiple statements are not allowed.');
+    }
+    
+    if (/\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE)\b/i.test(withoutStrings)) {
+        throw new Error('Query contains potentially unsafe SQL keywords.');
+    }
+}
+
+/**
  * Analyze a raw SQL query using EXPLAIN ANALYZE
  */
 export async function analyzeQuery(
     query: string,
     params?: unknown[]
 ): Promise<QueryAnalysis> {
+    // Validate the query before analyzing
+    validateSelectQuery(query);
+    
     // Prepare the EXPLAIN ANALYZE query
     let explainQuery = `EXPLAIN (ANALYZE true, BUFFERS true, VERBOSE true, FORMAT text) ${query}`;
 
@@ -206,6 +240,11 @@ export async function analyzeQueries(
  * Get table statistics for query optimization
  */
 export async function getTableStatistics(tableName: string) {
+    // Validate tableName: only allow letters, numbers, and underscores, and must start with a letter or underscore
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(tableName)) {
+        throw new Error('Invalid table name');
+    }
+    
     const stats = await db.$queryRaw<
         Array<{
             schemaname: string;

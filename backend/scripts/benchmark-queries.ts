@@ -272,12 +272,16 @@ async function main() {
         ));
 
         // Benchmark Multi-Client Logins
-        results.push(await benchmark(
-            'Multi-Client Logins',
-            () => getMultiClientLogins(),
-            options.iterations,
-            options.warmup
-        ));
+        if (typeof getMultiClientLogins === 'function') {
+            results.push(await benchmark(
+                'Multi-Client Logins',
+                () => getMultiClientLogins(),
+                options.iterations,
+                options.warmup
+            ));
+        } else {
+            console.warn('⚠️  getMultiClientLogins is not defined or not a function. Skipping Multi-Client Logins benchmark.');
+        }
 
         // Benchmark User Timeline (get a user ID first)
         const user = await db.messageEvent.findFirst({
