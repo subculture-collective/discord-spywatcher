@@ -19,28 +19,42 @@ interface HeatmapData {
 
 interface HeatmapChartProps {
     data: HeatmapData[];
+    onChannelClick?: (channelId: string, channelName: string) => void;
 }
 
-function HeatmapChart({ data }: HeatmapChartProps) {
-    // Aggregate data by channel
+function HeatmapChart({ data, onChannelClick }: HeatmapChartProps) {
+    // Aggregate data by channel with channelId
     const channelActivity = data.reduce(
         (acc, item) => {
             if (!acc[item.channel]) {
-                acc[item.channel] = 0;
+                acc[item.channel] = {
+                    count: 0,
+                    channelId: item.channelId,
+                    fullName: item.channel,
+                };
             }
-            acc[item.channel] += item.count;
+            acc[item.channel].count += item.count;
             return acc;
         },
-        {} as Record<string, number>
+        {} as Record<string, { count: number; channelId: string; fullName: string }>
     );
 
     const chartData = Object.entries(channelActivity)
-        .map(([channel, count]) => ({
+        .map(([channel, info]) => ({
             channel: channel.length > 20 ? channel.substring(0, 20) + '...' : channel,
-            activity: count,
+            fullName: info.fullName,
+            channelId: info.channelId,
+            activity: info.count,
         }))
         .sort((a, b) => b.activity - a.activity)
         .slice(0, 10); // Top 10 channels
+    
+    const handleBarClick = (data: unknown) => {
+        if (onChannelClick && data && typeof data === 'object' && 'channelId' in data && 'fullName' in data) {
+            const entry = data as { channelId: string; fullName: string };
+            onChannelClick(entry.channelId, entry.fullName);
+        }
+    };
 
     if (chartData.length === 0) {
         return (
@@ -77,7 +91,13 @@ function HeatmapChart({ data }: HeatmapChartProps) {
                 <Legend 
                     wrapperStyle={{ color: '#cdd6f4' }}
                 />
-                <Bar dataKey="activity" fill="#89b4fa" name="Activity Count" />
+                <Bar 
+                    dataKey="activity" 
+                    fill="#89b4fa" 
+                    name="Activity Count"
+                    onClick={handleBarClick}
+                    cursor={onChannelClick ? 'pointer' : 'default'}
+                />
             </BarChart>
         </ResponsiveContainer>
     );

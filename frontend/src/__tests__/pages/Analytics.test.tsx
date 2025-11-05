@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { BrowserRouter } from 'react-router-dom';
 
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import api from '../../lib/api';
@@ -8,9 +9,20 @@ import Analytics from '../../pages/Analytics';
 // Mock the API
 vi.mock('../../lib/api');
 vi.mock('react-hot-toast');
+vi.mock('../../lib/socket', () => ({
+    socketService: {
+        connect: vi.fn(),
+        subscribeToAnalytics: vi.fn(),
+        unsubscribeFromAnalytics: vi.fn(),
+    },
+}));
 
 const renderWithTheme = (component: React.ReactElement) => {
-    return render(<ThemeProvider>{component}</ThemeProvider>);
+    return render(
+        <BrowserRouter>
+            <ThemeProvider>{component}</ThemeProvider>
+        </BrowserRouter>
+    );
 };
 
 describe('Analytics Page', () => {

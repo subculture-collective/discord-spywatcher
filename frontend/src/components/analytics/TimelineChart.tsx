@@ -18,9 +18,10 @@ interface TimelineData {
 
 interface TimelineChartProps {
     data: TimelineData[];
+    onUserClick?: (userId: string, username: string) => void;
 }
 
-function TimelineChart({ data }: TimelineChartProps) {
+function TimelineChart({ data, onUserClick }: TimelineChartProps) {
     // Sort by suspicion score and take top 10 for clarity
     const topUsers = [...data]
         .sort((a, b) => b.suspicionScore - a.suspicionScore)
@@ -28,10 +29,19 @@ function TimelineChart({ data }: TimelineChartProps) {
 
     const chartData = topUsers.map((user, index) => ({
         name: user.username.length > 15 ? user.username.substring(0, 15) + '...' : user.username,
+        fullName: user.username,
+        userId: user.userId,
         suspicion: user.suspicionScore,
         ghost: user.ghostScore,
         rank: index + 1,
     }));
+    
+    const handleLineClick = (data: unknown) => {
+        if (onUserClick && data && typeof data === 'object' && 'userId' in data && 'fullName' in data) {
+            const entry = data as { userId: string; fullName: string };
+            onUserClick(entry.userId, entry.fullName);
+        }
+    };
 
     if (chartData.length === 0) {
         return (
@@ -57,6 +67,8 @@ function TimelineChart({ data }: TimelineChartProps) {
                             stroke="#ef4444"
                             name="Suspicion Score"
                             strokeWidth={2}
+                            onClick={handleLineClick}
+                            cursor={onUserClick ? 'pointer' : 'default'}
                         />
                         <Line
                             type="monotone"
@@ -64,6 +76,8 @@ function TimelineChart({ data }: TimelineChartProps) {
                             stroke="#8b5cf6"
                             name="Ghost Score"
                             strokeWidth={2}
+                            onClick={handleLineClick}
+                            cursor={onUserClick ? 'pointer' : 'default'}
                         />
                     </LineChart>
                 </ResponsiveContainer>

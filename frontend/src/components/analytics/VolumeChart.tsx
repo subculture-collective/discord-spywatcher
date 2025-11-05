@@ -17,9 +17,10 @@ interface VolumeData {
 
 interface VolumeChartProps {
     data: VolumeData[];
+    onUserClick?: (userId: string, username: string) => void;
 }
 
-function VolumeChart({ data }: VolumeChartProps) {
+function VolumeChart({ data, onUserClick }: VolumeChartProps) {
     // Aggregate total typing and message counts
     const totalTyping = data.reduce((sum, item) => sum + item.typingCount, 0);
     const totalMessages = data.reduce((sum, item) => sum + item.messageCount, 0);
@@ -31,9 +32,18 @@ function VolumeChart({ data }: VolumeChartProps) {
 
     const chartData = topUsers.map((user) => ({
         name: user.username.length > 15 ? user.username.substring(0, 15) + '...' : user.username,
+        fullName: user.username,
+        userId: user.userId,
         typing: user.typingCount,
         messages: user.messageCount,
     }));
+    
+    const handleAreaClick = (data: unknown) => {
+        if (onUserClick && data && typeof data === 'object' && 'userId' in data && 'fullName' in data) {
+            const entry = data as { userId: string; fullName: string };
+            onUserClick(entry.userId, entry.fullName);
+        }
+    };
 
     if (chartData.length === 0) {
         return (
@@ -69,6 +79,8 @@ function VolumeChart({ data }: VolumeChartProps) {
                             stroke="#f59e0b"
                             fill="#fbbf24"
                             name="Typing Events"
+                            onClick={handleAreaClick}
+                            cursor={onUserClick ? 'pointer' : 'default'}
                         />
                         <Area
                             type="monotone"
@@ -77,6 +89,8 @@ function VolumeChart({ data }: VolumeChartProps) {
                             stroke="#10b981"
                             fill="#34d399"
                             name="Messages"
+                            onClick={handleAreaClick}
+                            cursor={onUserClick ? 'pointer' : 'default'}
                         />
                     </AreaChart>
                 </ResponsiveContainer>
