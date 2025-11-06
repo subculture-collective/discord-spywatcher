@@ -276,6 +276,8 @@ const allowedOrigins =
             });
 
         // Start connection pool monitoring
+        // Note: Dynamic import used to avoid circular dependencies and follow
+        // the same pattern as other service initialization in this file
         import('./utils/connectionPoolMonitor')
             .then(({ startConnectionPoolMonitoring }) => {
                 startConnectionPoolMonitoring(60000); // Monitor every 60 seconds
