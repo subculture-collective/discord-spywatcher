@@ -100,7 +100,9 @@ services:
     volumes:
       - logs-backend:/app/logs
     environment:
-      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@pgbouncer:6432/spywatcher?pgbouncer=true
+      # Connection pool settings optimized for PgBouncer
+      DATABASE_URL: postgresql://spywatcher:${DB_PASSWORD}@pgbouncer:6432/spywatcher?pgbouncer=true&connection_limit=5&pool_timeout=20
+      DATABASE_URL_DIRECT: postgresql://spywatcher:${DB_PASSWORD}@postgres:5432/spywatcher
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
       PORT: 3001
