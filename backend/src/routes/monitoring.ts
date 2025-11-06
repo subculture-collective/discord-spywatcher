@@ -633,9 +633,7 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
         // to prevent unintended key matching
         if (
             !tag ||
-            !/^[a-zA-Z0-9:_-]+$/.test(tag) ||
-            /^[*?[\]{}()|\\]/.test(tag) ||
-            /[*?[\]{}()|\\]/.test(tag)
+            !/^[a-zA-Z0-9:_-]+$/.test(tag)
         ) {
             res.status(400).json({
                 error: 'Invalid tag format',
@@ -660,5 +658,101 @@ router.delete('/cache/invalidate/:tag', async (req: Request, res: Response) => {
         });
     }
 });
+
+/**
+ * POST /api/admin/monitoring/database/explain
+ * Analyze a SQL query using EXPLAIN ANALYZE
+ * 
+ * Security: Only SELECT statements are allowed to prevent data modification
+ */
+router.post('/database/explain', async (req: Request, res: Response) => {
+    try {
+        const { query, params } = req.body;
+
+        if (!query || typeof query !== 'string') {
+            res.status(400).json({
+                error: 'Query is required and must be a string',
+            });
+            return;
+        }
+
+        // Import here to avoid circular dependencies
+        const { analyzeQuery, formatQueryAnalysis } = await import(
+            '../utils/queryAnalyzer'
+        );
+
+        // Query validation is now handled by analyzeQuery which has comprehensive security checks
+        const analysis = await analyzeQuery(query, params);
+
+        res.json({
+            analysis,
+            formatted: formatQueryAnalysis(analysis),
+            timestamp: new Date().toISOString(),
+        });
+    } catch (error) {
+        console.error('Failed to analyze query:', error);
+        res.status(500).json({
+            error: 'Failed to analyze query',
+            message: error instanceof Error ? error.message : 'Unknown error',
+        });
+    }
+});
+
+/**
+ * GET /api/admin/monitoring/database/table-stats/:tableName
+ * Get detailed statistics for a specific table
+ */
+router.get(
+    '/database/table-stats/:tableName',
+    async (req: Request, res: Response) => {
+        try {
+            const { tableName } = req.params;
+
+            // Validate tableName: only allow alphanumeric and underscores
+            if (!/^[A-Za-z0-9_]+$/.test(tableName)) {
+                res.status(400).json({
+                    error: 'Invalid table name',
+                    message: 'Table name must only contain letters, numbers, and underscores',
+                });
+                return;
+            }
+
+            // Import here to avoid circular dependencies
+            const { getTableStatistics } = await import(
+                '../utils/queryAnalyzer'
+            );
+
+            const stats = await getTableStatistics(tableName);
+
+            if (!stats) {
+                res.status(404).json({
+                    error: 'Table not found',
+                    tableName,
+                });
+                return;
+            }
+
+            res.json({
+                tableName,
+                stats: {
+                    liveRows: Number(stats.n_live_tup),
+                    deadRows: Number(stats.n_dead_tup),
+                    lastVacuum: stats.last_vacuum,
+                    lastAutovacuum: stats.last_autovacuum,
+                    lastAnalyze: stats.last_analyze,
+                    lastAutoanalyze: stats.last_autoanalyze,
+                },
+                timestamp: new Date().toISOString(),
+            });
+        } catch (error) {
+            console.error('Failed to get table statistics:', error);
+            res.status(500).json({
+                error: 'Failed to get table statistics',
+                message:
+                    error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    }
+);
 
 export default router;
