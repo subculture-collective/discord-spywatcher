@@ -16,7 +16,7 @@ jobs:
         working-directory: ./backend
     
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     
     - name: Setup Node.js
       uses: actions/setup-node@v6
@@ -71,7 +71,7 @@ jobs:
         working-directory: ./frontend
     
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     
     - name: Setup Node.js
       uses: actions/setup-node@v6
@@ -106,7 +106,7 @@ jobs:
         working-directory: ./frontend
     
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     
     - name: Setup Node.js
       uses: actions/setup-node@v6
